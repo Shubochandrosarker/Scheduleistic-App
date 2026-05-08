@@ -1,0 +1,229 @@
+{
+  "name": "Wpistic — 02 Approval Gate (ClickUp HITL)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wpistic-approval-create",
+        "options": {}
+      },
+      "id": "trigger-w2",
+      "name": "Webhook from Workflow 1",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 400],
+      "webhookId": "wpistic-approval-create"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the parent task description containing all 8 variants for quick scan.\nconst d = $json;\nconst variants = d.variants || [];\n\nconst preview = variants.map(v => {\n  const v_data = v.variant || {};\n  const lines = [\n    '═══ ' + v.platform.toUpperCase() + ' ═══',\n    typeof v_data === 'object' ? JSON.stringify(v_data, null, 2) : String(v_data),\n    ''\n  ];\n  return lines.join('\\n');\n}).join('\\n');\n\nconst parentDesc = `# Approval Required: ${d.source_title}\\n\\n` +\n  `**Source:** ${d.source_url || '(manual topic)'}\\n` +\n  `**Run ID:** \\`${d.run_id}\\`\\n` +\n  `**Variants generated:** ${variants.length}\\n\\n` +\n  `---\\n\\n## Preview\\n\\n${preview}\\n\\n---\\n\\n` +\n  `**Action:** Review the 8 platform subtasks below. Set parent task status to **Approved** to schedule all, or edit each subtask individually before approving.`;\n\nreturn [{\n  json: {\n    run_id: d.run_id,\n    source_title: d.source_title,\n    source_url: d.source_url,\n    source_image: d.source_image,\n    variants: variants,\n    parent_description: parentDesc\n  }\n}];"
+      },
+      "id": "build-parent-payload",
+      "name": "Build Parent Task Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.clickup.com/api/v2/list/{{ $env.CLICKUP_APPROVAL_LIST_ID }}/task",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"[Approval] \" + $json.source_title,\n  \"description\": $json.parent_description,\n  \"priority\": 2,\n  \"tags\": [\"automation\", \"approval-pending\"],\n  \"custom_fields\": []\n}",
+        "options": {
+          "retry": { "maxTries": 3, "waitBetweenTries": 5000 }
+        }
+      },
+      "id": "create-parent-task",
+      "name": "Create ClickUp Parent Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 400],
+      "credentials": {
+        "httpHeaderAuth": { "id": "clickup-api", "name": "ClickUp API Token" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build 8 subtask payloads.\nconst parent = $('Build Parent Task Payload').item.json;\nconst parentTaskId = $json.id;\nconst variants = parent.variants || [];\n\nreturn variants.map(v => {\n  const v_data = v.variant || {};\n  const content = typeof v_data === 'object' ? JSON.stringify(v_data, null, 2) : String(v_data);\n  return {\n    json: {\n      run_id: parent.run_id,\n      parent_task_id: parentTaskId,\n      platform: v.platform,\n      source_title: parent.source_title,\n      source_url: parent.source_url,\n      source_image: parent.source_image,\n      variant_data: v_data,\n      task_payload: {\n        name: `[${v.platform.toUpperCase()}] ${parent.source_title}`,\n        description: `**Platform:** ${v.platform}\\n**Run:** \\`${parent.run_id}\\`\\n\\n---\\n\\n\\`\\`\\`json\\n${content}\\n\\`\\`\\``,\n        parent: parentTaskId,\n        priority: 3,\n        tags: ['automation', v.platform]\n      }\n    }\n  };\n});"
+      },
+      "id": "build-subtasks",
+      "name": "Build 8 Subtask Payloads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.clickup.com/api/v2/list/{{ $env.CLICKUP_APPROVAL_LIST_ID }}/task",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.task_payload) }}",
+        "options": {
+          "retry": { "maxTries": 3, "waitBetweenTries": 3000 },
+          "batching": { "batch": { "batchSize": 2, "batchInterval": 1000 } }
+        }
+      },
+      "id": "create-subtasks",
+      "name": "Create 8 ClickUp Subtasks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1120, 400],
+      "credentials": {
+        "httpHeaderAuth": { "id": "clickup-api", "name": "ClickUp API Token" }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "aggregate-subtasks",
+      "name": "Aggregate Subtask IDs",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.WPISTIC_APPROVER_EMAIL }}",
+        "subject": "=[Wpistic] Approval needed — {{ $('Build Parent Task Payload').item.json.source_title }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:-apple-system,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#f8fafc;border-radius:12px\">\n  <h2 style=\"color:#0d6efd;margin:0 0 12px\">Content awaiting approval</h2>\n  <p style=\"font-size:16px;line-height:1.5;color:#1e293b\"><strong>{{ $('Build Parent Task Payload').item.json.source_title }}</strong></p>\n  <p style=\"color:#475569\">8 platform variants generated. Review and approve in ClickUp.</p>\n  <table style=\"width:100%;border-collapse:collapse;margin:16px 0;background:white;border-radius:8px;overflow:hidden\">\n    <tr><td style=\"padding:12px;border-bottom:1px solid #e2e8f0\"><strong>Run ID</strong></td><td style=\"padding:12px;border-bottom:1px solid #e2e8f0\"><code>{{ $('Build Parent Task Payload').item.json.run_id }}</code></td></tr>\n    <tr><td style=\"padding:12px;border-bottom:1px solid #e2e8f0\"><strong>Platforms</strong></td><td style=\"padding:12px;border-bottom:1px solid #e2e8f0\">LinkedIn · X · Facebook · Instagram · Pinterest · GBP · Medium · Threads</td></tr>\n    <tr><td style=\"padding:12px\"><strong>Source</strong></td><td style=\"padding:12px\">{{ $('Build Parent Task Payload').item.json.source_url || '(manual topic)' }}</td></tr>\n  </table>\n  <a href=\"https://app.clickup.com/t/{{ $('Create ClickUp Parent Task').item.json.id }}\" style=\"display:inline-block;background:#0d6efd;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;margin:8px 0\">Review in ClickUp</a>\n  <p style=\"color:#64748b;font-size:13px;margin-top:24px\">Set the parent task to <strong>Approved</strong> to schedule all 8 platforms. SLA: 48hr — auto-escalation after.</p>\n</div>"
+      },
+      "id": "send-digest-email",
+      "name": "Send Approval Email Digest",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1560, 400],
+      "credentials": {
+        "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 48,
+        "unit": "hours"
+      },
+      "id": "wait-48h",
+      "name": "Wait 48 Hours (SLA)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1780, 400],
+      "webhookId": "wpistic-sla-timer"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.clickup.com/api/v2/task/{{ $('Create ClickUp Parent Task').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "check-status",
+      "name": "Check Task Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2000, 400],
+      "credentials": {
+        "httpHeaderAuth": { "id": "clickup-api", "name": "ClickUp API Token" }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.status?.status?.toLowerCase() }}",
+              "rightValue": "approved",
+              "operator": { "type": "string", "operation": "notEquals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-still-pending",
+      "name": "Still Pending After 48h?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2220, 400]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.WPISTIC_APPROVER_EMAIL }}",
+        "subject": "=[ESCALATION] Approval still pending — {{ $('Build Parent Task Payload').item.json.source_title }}",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:-apple-system,sans-serif;max-width:640px;margin:0 auto;padding:24px;background:#fef3c7;border-radius:12px;border-left:4px solid #f59e0b\">\n  <h2 style=\"color:#92400e;margin:0 0 12px\">⚠️ Approval still pending after 48h</h2>\n  <p>Run <code>{{ $('Build Parent Task Payload').item.json.run_id }}</code> has been waiting since generation. Content stops scheduling until approved.</p>\n  <a href=\"https://app.clickup.com/t/{{ $('Create ClickUp Parent Task').item.json.id }}\" style=\"display:inline-block;background:#f59e0b;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600\">Review now</a>\n</div>"
+      },
+      "id": "escalation-email",
+      "name": "Send Escalation Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2440, 400],
+      "credentials": {
+        "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'approval_queued', parent_task_id: $('Create ClickUp Parent Task').item.json.id }) }}"
+      },
+      "id": "respond-w2",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [680, 220]
+    }
+  ],
+  "connections": {
+    "Webhook from Workflow 1": {
+      "main": [[
+        { "node": "Build Parent Task Payload", "type": "main", "index": 0 },
+        { "node": "Respond", "type": "main", "index": 0 }
+      ]]
+    },
+    "Build Parent Task Payload": {
+      "main": [[{ "node": "Create ClickUp Parent Task", "type": "main", "index": 0 }]]
+    },
+    "Create ClickUp Parent Task": {
+      "main": [[{ "node": "Build 8 Subtask Payloads", "type": "main", "index": 0 }]]
+    },
+    "Build 8 Subtask Payloads": {
+      "main": [[{ "node": "Create 8 ClickUp Subtasks", "type": "main", "index": 0 }]]
+    },
+    "Create 8 ClickUp Subtasks": {
+      "main": [[{ "node": "Aggregate Subtask IDs", "type": "main", "index": 0 }]]
+    },
+    "Aggregate Subtask IDs": {
+      "main": [[{ "node": "Send Approval Email Digest", "type": "main", "index": 0 }]]
+    },
+    "Send Approval Email Digest": {
+      "main": [[{ "node": "Wait 48 Hours (SLA)", "type": "main", "index": 0 }]]
+    },
+    "Wait 48 Hours (SLA)": {
+      "main": [[{ "node": "Check Task Status", "type": "main", "index": 0 }]]
+    },
+    "Check Task Status": {
+      "main": [[{ "node": "Still Pending After 48h?", "type": "main", "index": 0 }]]
+    },
+    "Still Pending After 48h?": {
+      "main": [
+        [{ "node": "Send Escalation Email", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false
+}

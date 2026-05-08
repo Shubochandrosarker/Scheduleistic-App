@@ -1,0 +1,152 @@
+{
+  "name": "Wpistic — 04 Monitoring & Weekly Digest",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 9 * * 1" }
+          ]
+        }
+      },
+      "id": "weekly-cron",
+      "name": "Weekly Cron (Mon 9am UTC)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "0 8 * * *" }
+          ]
+        }
+      },
+      "id": "daily-cron",
+      "name": "Daily Cron (8am UTC)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 500]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "documentId": { "__rl": true, "value": "={{ $env.WPISTIC_LOG_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Posts", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-posts-log",
+      "name": "Read Posts Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [460, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "google-sheets", "name": "Google Sheets OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate weekly stats per platform.\nconst rows = $input.all().map(i => i.json);\nconst now = Date.now();\nconst sevenDays = 7 * 24 * 60 * 60 * 1000;\nconst recent = rows.filter(r => {\n  const t = new Date(r.scheduled_at || r.logged_at).getTime();\n  return t > now - sevenDays;\n});\n\nconst byPlatform = {};\nfor (const r of recent) {\n  const p = r.platform || 'unknown';\n  byPlatform[p] = byPlatform[p] || { scheduled: 0, failed: 0 };\n  if (String(r.status).toLowerCase() === 'scheduled') byPlatform[p].scheduled++;\n  else byPlatform[p].failed++;\n}\n\nconst total = recent.length;\nconst totalFailed = recent.filter(r => String(r.status).toLowerCase() !== 'scheduled').length;\nconst successRate = total > 0 ? Math.round(((total - totalFailed) / total) * 100) : 100;\n\nreturn [{\n  json: {\n    period: 'last_7_days',\n    total_posts: total,\n    total_failed: totalFailed,\n    success_rate_pct: successRate,\n    breakdown: byPlatform,\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "compute-weekly-stats",
+      "name": "Compute Weekly Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Daily check: any posts in 'failed' state from yesterday?\nconst rows = $input.all().map(i => i.json);\nconst now = Date.now();\nconst yesterday = 24 * 60 * 60 * 1000;\nconst recentFails = rows.filter(r => {\n  const t = new Date(r.logged_at || r.scheduled_at).getTime();\n  return t > now - yesterday && String(r.status).toLowerCase() !== 'scheduled';\n});\nreturn [{ json: { fail_count: recentFails.length, fails: recentFails } }];"
+      },
+      "id": "compute-daily-fails",
+      "name": "Compute Yesterday's Failures",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.fail_count }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-fails-exist",
+      "name": "Any Failures?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.WPISTIC_APPROVER_EMAIL }}",
+        "subject": "=[Wpistic Daily] ⚠️ {{ $json.fail_count }} post failure(s) yesterday",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:-apple-system,sans-serif;padding:24px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:8px;max-width:640px\">\n  <h2 style=\"color:#991b1b;margin:0 0 12px\">{{ $json.fail_count }} post(s) failed in the last 24h</h2>\n  <p>Check the <strong>Failed Posts Recovery</strong> list in ClickUp for details. Each failure has a recovery task with the error message.</p>\n  <p style=\"font-size:13px;color:#64748b\">Sent by Wpistic Monitoring · {{ new Date().toISOString() }}</p>\n</div>"
+      },
+      "id": "send-daily-alert",
+      "name": "Send Daily Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1120, 500],
+      "credentials": {
+        "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.WPISTIC_APPROVER_EMAIL }}",
+        "subject": "=[Wpistic Weekly] {{ $json.total_posts }} posts published · {{ $json.success_rate_pct }}% success",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:-apple-system,sans-serif;max-width:680px;margin:0 auto;padding:24px;background:#f8fafc;border-radius:12px\">\n  <h1 style=\"color:#0d6efd;margin:0 0 8px\">Weekly Content Automation Report</h1>\n  <p style=\"color:#64748b;margin:0 0 24px\">{{ $json.period }}</p>\n  <div style=\"display:flex;gap:12px;margin-bottom:24px\">\n    <div style=\"flex:1;background:white;padding:16px;border-radius:8px;border:1px solid #e2e8f0\">\n      <div style=\"font-size:32px;font-weight:700;color:#0d6efd\">{{ $json.total_posts }}</div>\n      <div style=\"color:#64748b;font-size:13px\">Total scheduled</div>\n    </div>\n    <div style=\"flex:1;background:white;padding:16px;border-radius:8px;border:1px solid #e2e8f0\">\n      <div style=\"font-size:32px;font-weight:700;color:#16a34a\">{{ $json.success_rate_pct }}%</div>\n      <div style=\"color:#64748b;font-size:13px\">Success rate</div>\n    </div>\n    <div style=\"flex:1;background:white;padding:16px;border-radius:8px;border:1px solid #e2e8f0\">\n      <div style=\"font-size:32px;font-weight:700;color:#dc2626\">{{ $json.total_failed }}</div>\n      <div style=\"color:#64748b;font-size:13px\">Failed</div>\n    </div>\n  </div>\n  <h3 style=\"color:#1e293b\">Per-platform breakdown</h3>\n  <pre style=\"background:white;padding:16px;border-radius:8px;border:1px solid #e2e8f0;overflow-x:auto\">{{ JSON.stringify($json.breakdown, null, 2) }}</pre>\n  <p style=\"color:#64748b;font-size:13px;margin-top:24px\">Wpistic Content Automation · {{ $json.generated_at }}</p>\n</div>"
+      },
+      "id": "send-weekly-digest",
+      "name": "Send Weekly Digest",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [900, 300],
+      "credentials": {
+        "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail OAuth" }
+      }
+    }
+  ],
+  "connections": {
+    "Weekly Cron (Mon 9am UTC)": {
+      "main": [[{ "node": "Read Posts Log", "type": "main", "index": 0 }]]
+    },
+    "Daily Cron (8am UTC)": {
+      "main": [[{ "node": "Read Posts Log", "type": "main", "index": 0 }]]
+    },
+    "Read Posts Log": {
+      "main": [[
+        { "node": "Compute Weekly Stats", "type": "main", "index": 0 },
+        { "node": "Compute Yesterday's Failures", "type": "main", "index": 0 }
+      ]]
+    },
+    "Compute Weekly Stats": {
+      "main": [[{ "node": "Send Weekly Digest", "type": "main", "index": 0 }]]
+    },
+    "Compute Yesterday's Failures": {
+      "main": [[{ "node": "Any Failures?", "type": "main", "index": 0 }]]
+    },
+    "Any Failures?": {
+      "main": [
+        [{ "node": "Send Daily Alert", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false
+}
