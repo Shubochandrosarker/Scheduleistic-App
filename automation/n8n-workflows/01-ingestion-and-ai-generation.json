@@ -1,0 +1,379 @@
+{
+  "name": "Wpistic — 01 Ingestion & AI Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wpistic-ingest",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "trigger-webhook",
+      "name": "Webhook (3 entry points)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 400],
+      "webhookId": "wpistic-ingest"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verify HMAC signature from WP plugin (skip for manual ClickUp triggers).\nconst crypto = require('crypto');\nconst secret = $env.WPISTIC_HMAC_SECRET;\nconst headers = $input.first().json.headers || {};\nconst rawBody = $input.first().json.body;\nconst signature = headers['x-wpistic-signature'] || headers['X-Wpistic-Signature'];\n\n// Manual triggers from ClickUp form skip HMAC (use API key instead).\nif (!signature) {\n  // Pass through; downstream auth check on ClickUp side.\n  return $input.all();\n}\n\nconst expected = crypto\n  .createHmac('sha256', secret)\n  .update(typeof rawBody === 'string' ? rawBody : JSON.stringify(rawBody))\n  .digest('hex');\n\nif (signature !== expected) {\n  throw new Error('Invalid HMAC signature — request rejected.');\n}\n\nreturn $input.all();"
+      },
+      "id": "verify-hmac",
+      "name": "Verify HMAC Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Idempotency guard — prevents duplicate runs.\n// Uses workflow static data as a simple in-memory cache (24hr TTL).\n// For production, swap to Redis via the Redis node.\nconst staticData = $getWorkflowStaticData('global');\nstaticData.seenRuns = staticData.seenRuns || {};\n\nconst body = $input.first().json.body || $input.first().json;\nconst runId = body.run_id;\nconst now = Date.now();\nconst TTL_MS = 24 * 60 * 60 * 1000;\n\n// Clean expired entries\nfor (const k of Object.keys(staticData.seenRuns)) {\n  if (now - staticData.seenRuns[k] > TTL_MS) delete staticData.seenRuns[k];\n}\n\nif (!runId) {\n  throw new Error('Missing run_id — cannot dedupe.');\n}\n\nif (staticData.seenRuns[runId]) {\n  // Already processed; return early signal\n  return [{ json: { __skip: true, reason: 'duplicate run_id', run_id: runId } }];\n}\n\nstaticData.seenRuns[runId] = now;\nreturn [{ json: { ...body, __skip: false } }];"
+      },
+      "id": "idempotency-check",
+      "name": "Idempotency Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.__skip }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "true" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "skip-check",
+      "name": "Skip if Duplicate",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.trigger }}",
+                    "rightValue": "wp_post_published",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "wp_post"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.trigger }}",
+                    "rightValue": "manual_topic",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "manual"
+            },
+            {
+              "conditions": {
+                "options": { "caseSensitive": true, "typeValidation": "strict" },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.trigger }}",
+                    "rightValue": "rss_feed",
+                    "operator": { "type": "string", "operation": "equals" }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "outputKey": "rss"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "trigger-router",
+      "name": "Route by Trigger Type",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [1120, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// WP post path: payload already contains full post data.\nconst d = $json;\nreturn [{\n  json: {\n    run_id: d.run_id,\n    source_type: 'wp_post',\n    title: d.post.title,\n    url: d.post.url,\n    excerpt: d.post.excerpt,\n    content_plain: d.post.content_plain,\n    categories: d.post.categories || [],\n    tags: d.post.tags || [],\n    featured_image: d.post.featured_image || '',\n    author: d.post.author?.display_name || 'Wordpressistic',\n    site_url: d.site_url\n  }\n}];"
+      },
+      "id": "normalize-wp",
+      "name": "Normalize: WP Post",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1360, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "HTTP-Referer", "value": "https://wordpressistic.com" },
+            { "name": "X-Title", "value": "Wpistic Content Automation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/llama-3.1-8b-instruct:free\",\n  \"models\": [\n    \"meta-llama/llama-3.1-8b-instruct:free\",\n    \"google/gemma-2-9b-it:free\",\n    \"mistralai/mistral-7b-instruct:free\"\n  ],\n  \"route\": \"fallback\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": \"You are a senior content strategist for Wordpressistic, a premium AI Business Automation agency for WordPress. Voice: confident, strategic, outcome-focused, zero hype, no AI tells. You write a full blog post for a given topic. Output ONLY valid JSON: {\\\"title\\\":\\\"...\\\",\\\"excerpt\\\":\\\"...\\\",\\\"content_plain\\\":\\\"...full 800-1200 word article...\\\",\\\"tags\\\":[\\\"\\\"]}\" },\n    { \"role\": \"user\", \"content\": $json.topic + (($json.angle) ? ' | Angle: ' + $json.angle : '') + (($json.audience) ? ' | Audience: ' + $json.audience : '') }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.7\n}",
+        "options": {
+          "timeout": 60000,
+          "retry": { "maxTries": 3, "waitBetweenTries": 5000 }
+        }
+      },
+      "id": "ai-generate-blog",
+      "name": "AI: Generate Blog from Topic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 500],
+      "credentials": {
+        "httpHeaderAuth": { "id": "openrouter-api", "name": "OpenRouter API Key" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI response and normalize to common shape\nconst d = $json;\nconst aiContent = d.choices?.[0]?.message?.content || '';\nlet parsed;\ntry {\n  parsed = typeof aiContent === 'string' ? JSON.parse(aiContent) : aiContent;\n} catch (e) {\n  throw new Error('AI did not return valid JSON: ' + aiContent.slice(0, 200));\n}\n\nconst input = $('Route by Trigger Type').item.json;\nreturn [{\n  json: {\n    run_id: input.run_id,\n    source_type: 'manual_topic',\n    title: parsed.title,\n    url: '',\n    excerpt: parsed.excerpt || '',\n    content_plain: parsed.content_plain || '',\n    categories: [],\n    tags: parsed.tags || [],\n    featured_image: '',\n    author: input.submitted_by || 'Wordpressistic',\n    site_url: $env.WP_SITE_URL || 'https://wordpressistic.com'\n  }\n}];"
+      },
+      "id": "normalize-manual",
+      "name": "Normalize: Manual Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 500]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.feed_url }}",
+        "options": {}
+      },
+      "id": "rss-fetch",
+      "name": "Fetch RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [1360, 700]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Take latest RSS item; mark source for attribution.\nconst input = $('Route by Trigger Type').item.json;\nconst items = $input.all();\nif (!items.length) return [{ json: { __skip: true } }];\nconst latest = items[0].json;\nreturn [{\n  json: {\n    run_id: input.run_id,\n    source_type: 'rss_feed',\n    title: latest.title,\n    url: latest.link,\n    excerpt: (latest.contentSnippet || '').slice(0, 280),\n    content_plain: latest.content || latest.contentSnippet || '',\n    categories: latest.categories || [],\n    tags: [],\n    featured_image: latest.enclosure?.url || '',\n    author: latest.creator || 'Curated',\n    site_url: input.feed_url,\n    rss_attribution: latest.link\n  }\n}];"
+      },
+      "id": "normalize-rss",
+      "name": "Normalize: RSS Item",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, 700]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "merge-sources",
+      "name": "Merge Normalized Sources",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [1800, 500]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fan out: emit 8 items, one per platform, each carrying the full source content + the platform key.\nconst src = $json;\nconst platforms = ['linkedin', 'x', 'facebook', 'instagram', 'pinterest', 'gbp', 'medium', 'threads'];\nreturn platforms.map(p => ({\n  json: { ...src, platform: p }\n}));"
+      },
+      "id": "fanout-platforms",
+      "name": "Fan Out: 8 Platforms",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "HTTP-Referer", "value": "https://wordpressistic.com" },
+            { "name": "X-Title", "value": "Wpistic Content Automation" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"meta-llama/llama-3.1-8b-instruct:free\",\n  \"models\": [\n    \"meta-llama/llama-3.1-8b-instruct:free\",\n    \"google/gemma-2-9b-it:free\",\n    \"mistralai/mistral-7b-instruct:free\"\n  ],\n  \"route\": \"fallback\",\n  \"messages\": [\n    { \"role\": \"system\", \"content\": $env['WPISTIC_PROMPT_' + $json.platform.toUpperCase()] },\n    { \"role\": \"user\", \"content\": 'TITLE: ' + $json.title + '\\n\\nEXCERPT: ' + $json.excerpt + '\\n\\nFULL CONTENT:\\n' + ($json.content_plain || '').slice(0, 6000) + '\\n\\nCANONICAL URL: ' + $json.url + '\\n\\nTAGS: ' + ($json.tags || []).join(', ') }\n  ],\n  \"response_format\": { \"type\": \"json_object\" },\n  \"temperature\": 0.75,\n  \"max_tokens\": 1500\n}",
+        "options": {
+          "timeout": 90000,
+          "retry": { "maxTries": 3, "waitBetweenTries": 8000 }
+        }
+      },
+      "id": "ai-generate-variant",
+      "name": "AI: Generate Platform Variant",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2240, 500],
+      "credentials": {
+        "httpHeaderAuth": { "id": "openrouter-api", "name": "OpenRouter API Key" }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the AI response for this platform; attach metadata.\nconst d = $json;\nconst raw = d.choices?.[0]?.message?.content || '{}';\nlet parsed;\ntry {\n  parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;\n} catch (e) {\n  parsed = { error: 'parse_failed', raw: raw.slice(0, 500) };\n}\n\nconst src = $('Fan Out: 8 Platforms').item.json;\nreturn [{\n  json: {\n    run_id: src.run_id,\n    platform: src.platform,\n    source_title: src.title,\n    source_url: src.url,\n    source_image: src.featured_image,\n    variant: parsed,\n    generated_at: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "parse-variant",
+      "name": "Parse AI Variant",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2460, 500]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "aggregate-variants",
+      "name": "Aggregate All 8 Variants",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [2680, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.N8N_WORKFLOW_2_WEBHOOK }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ run_id: $json.data[0].run_id, source_title: $json.data[0].source_title, source_url: $json.data[0].source_url, source_image: $json.data[0].source_image, variants: $json.data }) }}",
+        "options": {
+          "retry": { "maxTries": 3, "waitBetweenTries": 5000 }
+        }
+      },
+      "id": "handoff-workflow-2",
+      "name": "Hand Off → Workflow 2 (Approval)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2900, 500]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "value": "={{ $env.WPISTIC_LOG_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Runs", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.data[0].run_id }}",
+            "step": "ai_generation_complete",
+            "status": "ok",
+            "platform_count": "={{ $json.data.length }}",
+            "timestamp_utc": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["run_id"]
+        }
+      },
+      "id": "log-run",
+      "name": "Log Run to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2900, 700],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "google-sheets", "name": "Google Sheets OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'queued', run_id: $('Idempotency Check').item.json.run_id }) }}"
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 220]
+    }
+  ],
+  "connections": {
+    "Webhook (3 entry points)": {
+      "main": [[{ "node": "Verify HMAC Signature", "type": "main", "index": 0 }, { "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    },
+    "Verify HMAC Signature": {
+      "main": [[{ "node": "Idempotency Check", "type": "main", "index": 0 }]]
+    },
+    "Idempotency Check": {
+      "main": [[{ "node": "Skip if Duplicate", "type": "main", "index": 0 }]]
+    },
+    "Skip if Duplicate": {
+      "main": [
+        [],
+        [{ "node": "Route by Trigger Type", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route by Trigger Type": {
+      "main": [
+        [{ "node": "Normalize: WP Post", "type": "main", "index": 0 }],
+        [{ "node": "AI: Generate Blog from Topic", "type": "main", "index": 0 }],
+        [{ "node": "Fetch RSS Feed", "type": "main", "index": 0 }]
+      ]
+    },
+    "Normalize: WP Post": {
+      "main": [[{ "node": "Merge Normalized Sources", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Blog from Topic": {
+      "main": [[{ "node": "Normalize: Manual Topic", "type": "main", "index": 0 }]]
+    },
+    "Normalize: Manual Topic": {
+      "main": [[{ "node": "Merge Normalized Sources", "type": "main", "index": 1 }]]
+    },
+    "Fetch RSS Feed": {
+      "main": [[{ "node": "Normalize: RSS Item", "type": "main", "index": 0 }]]
+    },
+    "Normalize: RSS Item": {
+      "main": [[{ "node": "Merge Normalized Sources", "type": "main", "index": 2 }]]
+    },
+    "Merge Normalized Sources": {
+      "main": [[{ "node": "Fan Out: 8 Platforms", "type": "main", "index": 0 }]]
+    },
+    "Fan Out: 8 Platforms": {
+      "main": [[{ "node": "AI: Generate Platform Variant", "type": "main", "index": 0 }]]
+    },
+    "AI: Generate Platform Variant": {
+      "main": [[{ "node": "Parse AI Variant", "type": "main", "index": 0 }]]
+    },
+    "Parse AI Variant": {
+      "main": [[{ "node": "Aggregate All 8 Variants", "type": "main", "index": 0 }]]
+    },
+    "Aggregate All 8 Variants": {
+      "main": [[
+        { "node": "Hand Off → Workflow 2 (Approval)", "type": "main", "index": 0 },
+        { "node": "Log Run to Sheet", "type": "main", "index": 0 }
+      ]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false
+}

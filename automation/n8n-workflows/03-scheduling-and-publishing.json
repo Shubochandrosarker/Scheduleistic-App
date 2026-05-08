@@ -1,0 +1,282 @@
+{
+  "name": "Wpistic — 03 Scheduling & Postiz Publishing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wpistic-clickup-status",
+        "options": {}
+      },
+      "id": "trigger-clickup",
+      "name": "ClickUp Status Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 400],
+      "webhookId": "wpistic-clickup-status"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            {
+              "leftValue": "={{ ($json.body?.history_items || [])[0]?.after?.status?.toLowerCase() || $json.body?.task_status?.toLowerCase() }}",
+              "rightValue": "approved",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "filter-approved",
+      "name": "Only Process 'Approved'",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://api.clickup.com/api/v2/task/{{ $json.body.task_id }}?include_subtasks=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth"
+      },
+      "id": "fetch-parent-task",
+      "name": "Fetch Parent + Subtasks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "clickup-api", "name": "ClickUp API Token" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract subtasks → emit one item per platform with parsed JSON variant.\nconst d = $json;\nconst subtasks = d.subtasks || [];\nconst out = [];\n\nfor (const st of subtasks) {\n  // Match platform from name like '[LINKEDIN] ...'\n  const m = (st.name || '').match(/^\\[([A-Z]+)\\]/);\n  const platform = m ? m[1].toLowerCase() : null;\n  if (!platform) continue;\n\n  // Pull JSON block from description\n  const desc = st.description || st.text_content || '';\n  const jsonMatch = desc.match(/```json\\s*([\\s\\S]*?)```/);\n  let variant = {};\n  if (jsonMatch) {\n    try { variant = JSON.parse(jsonMatch[1]); } catch (e) { variant = { error: 'parse_failed' }; }\n  }\n\n  out.push({\n    json: {\n      run_id: (desc.match(/Run:\\s*`?([\\w-]+)`?/) || [])[1] || 'unknown',\n      parent_task_id: d.id,\n      subtask_id: st.id,\n      platform,\n      variant,\n      source_title: d.name.replace(/^\\[Approval\\]\\s*/, '')\n    }\n  });\n}\n\nreturn out;"
+      },
+      "id": "parse-subtasks",
+      "name": "Extract Variants per Platform",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate next optimal posting slot per platform.\n// Stagger schedule = better reach + avoids spam flags.\nconst d = $json;\nconst now = new Date();\n\nconst SCHEDULES = {\n  linkedin:  { days: [2, 3, 4],       hour: 14, minute: 0  }, // Tue/Wed/Thu 9am EST = 14 UTC\n  x:         { days: [1, 2, 3, 4, 5], hour: 16, minute: 0  }, // Daily 11am EST = 16 UTC\n  facebook:  { days: [3, 5],          hour: 18, minute: 0  }, // Wed/Fri 1pm EST\n  instagram: { days: [1, 3, 5],       hour: 16, minute: 0  }, // Mon/Wed/Fri 11am EST\n  pinterest: { days: [6, 0],          hour: 1,  minute: 0  }, // Sat/Sun 8pm EST = 1 UTC next day\n  gbp:       { days: [2],             hour: 15, minute: 0  }, // Tue 10am EST\n  medium:    { days: [0],             hour: 14, minute: 0  }, // Sun 9am EST\n  threads:   { days: [1, 2, 3, 4, 5], hour: 0,  minute: 0  }  // Daily 7pm EST = 0 UTC next day\n};\n\nconst sched = SCHEDULES[d.platform];\nif (!sched) {\n  return [{ json: { ...d, scheduled_at: now.toISOString(), error: 'no_schedule_rule' } }];\n}\n\n// Find next valid slot\nconst candidate = new Date(now);\ncandidate.setUTCHours(sched.hour, sched.minute, 0, 0);\nfor (let i = 0; i < 14; i++) {\n  const day = candidate.getUTCDay();\n  if (sched.days.includes(day) && candidate.getTime() > now.getTime() + 30 * 60 * 1000) {\n    break;\n  }\n  candidate.setUTCDate(candidate.getUTCDate() + 1);\n}\n\nreturn [{\n  json: {\n    ...d,\n    scheduled_at: candidate.toISOString(),\n    scheduled_unix_ms: candidate.getTime()\n  }\n}];"
+      },
+      "id": "calculate-slot",
+      "name": "Calculate Optimal Slot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.POSTIZ_BASE_URL }}/api/integrations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "retry": { "maxTries": 2, "waitBetweenTries": 2000 }
+        }
+      },
+      "id": "fetch-postiz-integrations",
+      "name": "Fetch Postiz Integrations",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "postiz-api", "name": "Postiz API Key" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Map our platform key to Postiz integration ID.\nconst integrations = $json || [];\nconst current = $('Calculate Optimal Slot').item.json;\n\n// Postiz identifier mapping (these are typical names; adjust via env override).\nconst POSTIZ_KEYS = {\n  linkedin:  ['linkedin', 'linkedin-page'],\n  x:         ['x', 'twitter'],\n  facebook:  ['facebook', 'facebook-page'],\n  instagram: ['instagram', 'instagram-standalone'],\n  pinterest: ['pinterest'],\n  gbp:       ['google-business', 'google'],\n  medium:    ['medium'],\n  threads:   ['threads']\n};\n\nconst targetKeys = POSTIZ_KEYS[current.platform] || [current.platform];\nconst match = (integrations || []).find(i =>\n  targetKeys.includes((i.identifier || i.providerIdentifier || '').toLowerCase())\n);\n\nif (!match) {\n  return [{ json: { ...current, __error: `No Postiz integration found for platform: ${current.platform}` } }];\n}\n\nreturn [{ json: { ...current, postiz_integration_id: match.id } }];"
+      },
+      "id": "map-integration-id",
+      "name": "Map to Postiz Integration ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.__error }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "exists" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "if-mapping-failed",
+      "name": "If Mapping Failed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build Postiz post payload — schema matches Postiz self-hosted /api/posts.\nconst d = $json;\nconst v = d.variant || {};\n\n// Common content fields per platform shape.\nlet content = '';\nif (v.text)        content = v.text;\nelse if (v.caption)content = v.caption;\nelse if (v.body)   content = v.body;\nelse if (v.post)   content = v.post;\nelse if (v.thread && Array.isArray(v.thread)) content = v.thread.join('\\n\\n---\\n\\n');\nelse if (typeof v === 'string') content = v;\nelse content = JSON.stringify(v);\n\n// Append source URL where appropriate (not X/Threads — they have inline links)\nif (d.platform !== 'x' && d.platform !== 'threads' && d.platform !== 'medium' && v.cta_url) {\n  content += '\\n\\n' + v.cta_url;\n}\n\n// Postiz expects an array of posts (for threads/carousels).\nconst posts = [];\nif (d.platform === 'x' && v.thread && Array.isArray(v.thread)) {\n  v.thread.forEach((tweet) => posts.push({ content: tweet, image: [] }));\n} else {\n  const imageRef = d.source_image || v.image_url ? [{ url: d.source_image || v.image_url }] : [];\n  posts.push({ content, image: imageRef });\n}\n\nreturn [{\n  json: {\n    ...d,\n    postiz_payload: {\n      type: 'schedule',\n      date: d.scheduled_at,\n      shortLink: false,\n      tags: ['wpistic-auto'],\n      posts: [{\n        integration: { id: d.postiz_integration_id },\n        value: posts,\n        group: d.run_id\n      }]\n    }\n  }\n}];"
+      },
+      "id": "build-postiz-payload",
+      "name": "Build Postiz Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.POSTIZ_BASE_URL }}/api/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.postiz_payload) }}",
+        "options": {
+          "timeout": 30000,
+          "retry": { "maxTries": 3, "waitBetweenTries": 5000 }
+        }
+      },
+      "id": "post-to-postiz",
+      "name": "Schedule via Postiz API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2220, 300],
+      "credentials": {
+        "httpHeaderAuth": { "id": "postiz-api", "name": "Postiz API Key" }
+      },
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "value": "={{ $env.WPISTIC_LOG_SHEET_ID }}", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "Posts", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $('Build Postiz Payload').item.json.run_id }}",
+            "platform": "={{ $('Build Postiz Payload').item.json.platform }}",
+            "scheduled_at": "={{ $('Build Postiz Payload').item.json.scheduled_at }}",
+            "postiz_post_id": "={{ $json.id || '' }}",
+            "status": "scheduled",
+            "logged_at": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["run_id", "platform"]
+        }
+      },
+      "id": "log-success",
+      "name": "Log Scheduled Post",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [2440, 220],
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "google-sheets", "name": "Google Sheets OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.clickup.com/api/v2/list/{{ $env.CLICKUP_FAILED_LIST_ID }}/task",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"name\": \"[FAILED] \" + $('Build Postiz Payload').item.json.platform + \" — \" + $('Build Postiz Payload').item.json.source_title,\n  \"description\": \"**Platform:** \" + $('Build Postiz Payload').item.json.platform + \"\\n**Run:** \" + $('Build Postiz Payload').item.json.run_id + \"\\n**Error:** \" + (($json.error?.message) || JSON.stringify($json).slice(0, 1000)) + \"\\n\\n**Manual action required.**\",\n  \"priority\": 1,\n  \"tags\": [\"automation\", \"failed\", $('Build Postiz Payload').item.json.platform]\n}"
+      },
+      "id": "log-failure",
+      "name": "Create Failed Task",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2440, 400],
+      "credentials": {
+        "httpHeaderAuth": { "id": "clickup-api", "name": "ClickUp API Token" }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $env.WPISTIC_APPROVER_EMAIL }}",
+        "subject": "=[Wpistic FAILED] {{ $('Build Postiz Payload').item.json.platform }} post failed to schedule",
+        "emailType": "html",
+        "message": "=<div style=\"font-family:-apple-system,sans-serif;padding:24px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:8px\">\n  <h3 style=\"color:#991b1b;margin:0 0 8px\">❌ Post failed to schedule</h3>\n  <p><strong>Platform:</strong> {{ $('Build Postiz Payload').item.json.platform }}</p>\n  <p><strong>Run:</strong> <code>{{ $('Build Postiz Payload').item.json.run_id }}</code></p>\n  <p><strong>Error:</strong> {{ $json.error?.message || 'Unknown error' }}</p>\n  <p>A recovery task has been created in your Failed Posts ClickUp list.</p>\n</div>"
+      },
+      "id": "email-failure",
+      "name": "Email Failure Alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [2660, 400],
+      "credentials": {
+        "gmailOAuth2": { "id": "gmail-oauth", "name": "Gmail OAuth" }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ status: 'processing' }) }}"
+      },
+      "id": "respond-w3",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [460, 220]
+    }
+  ],
+  "connections": {
+    "ClickUp Status Webhook": {
+      "main": [[
+        { "node": "Only Process 'Approved'", "type": "main", "index": 0 },
+        { "node": "Respond", "type": "main", "index": 0 }
+      ]]
+    },
+    "Only Process 'Approved'": {
+      "main": [
+        [{ "node": "Fetch Parent + Subtasks", "type": "main", "index": 0 }],
+        []
+      ]
+    },
+    "Fetch Parent + Subtasks": {
+      "main": [[{ "node": "Extract Variants per Platform", "type": "main", "index": 0 }]]
+    },
+    "Extract Variants per Platform": {
+      "main": [[{ "node": "Calculate Optimal Slot", "type": "main", "index": 0 }]]
+    },
+    "Calculate Optimal Slot": {
+      "main": [[{ "node": "Fetch Postiz Integrations", "type": "main", "index": 0 }]]
+    },
+    "Fetch Postiz Integrations": {
+      "main": [[{ "node": "Map to Postiz Integration ID", "type": "main", "index": 0 }]]
+    },
+    "Map to Postiz Integration ID": {
+      "main": [[{ "node": "If Mapping Failed", "type": "main", "index": 0 }]]
+    },
+    "If Mapping Failed": {
+      "main": [
+        [{ "node": "Create Failed Task", "type": "main", "index": 0 }],
+        [{ "node": "Build Postiz Payload", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Postiz Payload": {
+      "main": [[{ "node": "Schedule via Postiz API", "type": "main", "index": 0 }]]
+    },
+    "Schedule via Postiz API": {
+      "main": [[{ "node": "Log Scheduled Post", "type": "main", "index": 0 }]],
+      "error": [[{ "node": "Create Failed Task", "type": "main", "index": 0 }]]
+    },
+    "Create Failed Task": {
+      "main": [[{ "node": "Email Failure Alert", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false
+}
