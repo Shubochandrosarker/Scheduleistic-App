@@ -27,13 +27,15 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
+     * Note: `is_platform_admin` is deliberately NOT mass-assignable — it is a
+     * privilege flag set only via seeders/console to prevent escalation.
+     *
      * @var array<int, string>
      */
     protected $fillable = [
         'name',
         'email',
         'password',
-        'is_platform_admin',
     ];
 
     /**

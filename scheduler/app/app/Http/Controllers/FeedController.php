@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\AuthorizesWorkspaceAccess;
 use App\Models\Feed;
 use App\Models\Workspace;
+use App\Support\SsrfGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -12,12 +13,17 @@ class FeedController extends Controller
 {
     use AuthorizesWorkspaceAccess;
 
-    public function store(Request $request, Workspace $workspace): RedirectResponse
+    public function store(Request $request, Workspace $workspace, SsrfGuard $ssrf): RedirectResponse
     {
         $this->guardWorkspace($request, $workspace);
 
         $validated = $request->validate([
-            'url'  => ['required', 'url', 'max:500'],
+            'url'  => [
+                'required', 'url', 'max:500',
+                // Reject internal/reserved targets up front (defense in depth;
+                // the fetch path re-checks with DNS resolution).
+                fn ($attr, $value, $fail) => $ssrf->isAllowed($value) ?: $fail('That feed URL is not allowed.'),
+            ],
             'name' => ['nullable', 'string', 'max:120'],
         ]);
 

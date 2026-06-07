@@ -36,6 +36,10 @@ Route::middleware([
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
+    // Feature routes are gated by organization status: a suspended org keeps
+    // billing access (to reactivate) but loses the publishing tooling.
+    Route::middleware('org.active')->group(function () {
+
     // Workspaces (clients).
     Route::get('/workspaces', [WorkspaceController::class, 'index'])->name('workspaces.index');
     Route::post('/workspaces', [WorkspaceController::class, 'store'])->name('workspaces.store');
@@ -72,8 +76,10 @@ Route::middleware([
     // Bulk CSV import.
     Route::post('/workspaces/{workspace}/import', [BulkImportController::class, 'store'])->name('workspaces.import');
 
-    // AI caption assistant.
-    Route::post('/ai/generate', [AiController::class, 'generate'])->name('ai.generate');
+    // AI caption assistant (throttled to limit paid-API cost abuse).
+    Route::post('/ai/generate', [AiController::class, 'generate'])
+        ->middleware('throttle:20,1')
+        ->name('ai.generate');
 
     // Analytics dashboard.
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
@@ -81,6 +87,8 @@ Route::middleware([
     // RSS / WordPress article feeds.
     Route::post('/workspaces/{workspace}/feeds', [FeedController::class, 'store'])->name('workspaces.feeds.store');
     Route::delete('/workspaces/{workspace}/feeds/{feed}', [FeedController::class, 'destroy'])->name('workspaces.feeds.destroy');
+
+    }); // end org.active group
 
     // Billing (Stripe / Cashier) — per organization.
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
