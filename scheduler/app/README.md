@@ -8,7 +8,7 @@ Phase 0 scaffold of the white-label, multi-tenant social scheduling platform des
 **native integrations only** (no third-party publishers).
 
 ## Stack
-- **Laravel 13** (PHP 8.3+)
+- **Laravel 13** (PHP 8.4+)
 - **Jetstream + Inertia + Vue 3 + Tailwind** — auth, 2FA, passkeys, email verification,
   organizations (Jetstream "teams") with invitations and roles
 - **MySQL** + **Redis** (queue / cache / sessions) in Docker

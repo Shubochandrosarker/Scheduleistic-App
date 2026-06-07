@@ -1,5 +1,5 @@
 # SOCIALISTIC application image (app, queue worker, scheduler all share this).
-FROM php:8.3-cli-bookworm
+FROM php:8.4-cli-bookworm
 
 # System deps + PHP extensions needed by Laravel + the publishing engine.
 RUN apt-get update && apt-get install -y --no-install-recommends \
