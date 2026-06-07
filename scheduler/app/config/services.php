@@ -35,4 +35,31 @@ return [
         ],
     ],
 
+    // --- SOCIALISTIC social provider OAuth credentials --------------------
+
+    'linkedin' => [
+        'client_id'     => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+    ],
+
+    'linkedin_company' => [
+        'client_id'     => env('LINKEDIN_CLIENT_ID'),
+        'client_secret' => env('LINKEDIN_CLIENT_SECRET'),
+    ],
+
+    'facebook' => [
+        'client_id'     => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+    ],
+
+    'instagram' => [
+        'client_id'     => env('INSTAGRAM_CLIENT_ID', env('FACEBOOK_CLIENT_ID')),
+        'client_secret' => env('INSTAGRAM_CLIENT_SECRET', env('FACEBOOK_CLIENT_SECRET')),
+    ],
+
+    'google_business' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+    ],
+
 ];

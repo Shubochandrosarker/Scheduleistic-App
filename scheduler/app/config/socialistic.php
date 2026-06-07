@@ -17,6 +17,18 @@ return [
     'tagline'     => 'Complete Social Automated System',
     'powered_by'  => 'Powered by WPistic — A product of the WORDPRESSISTIC Ecosystem',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Fake publishing
+    |--------------------------------------------------------------------------
+    |
+    | When true, every provider resolves to the FakeProvider — no live network
+    | calls are made. Useful for local development before OAuth apps exist.
+    |
+    */
+
+    'fake_publishing' => env('SOCIAL_FAKE', false),
+
     'colors' => [
         'primary'   => env('BRAND_PRIMARY', '#4f46e5'),
         'secondary' => env('BRAND_SECONDARY', '#0ea5e9'),

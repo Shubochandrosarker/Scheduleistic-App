@@ -59,7 +59,26 @@ Team (Organization / tenant)
        └── workspace_user (assignment + role: member|approver|client)
 ```
 
+## What Phase 1 adds
+- **Pluggable provider drivers** (`app/Social/`): a `SocialProvider` contract + `ProviderManager`
+  registry. Drivers for **LinkedIn (personal + company), Facebook, Instagram, Google Business
+  Profile**, plus a `FakeProvider` for local/dev (`SOCIAL_FAKE=true`).
+- **OAuth connect/disconnect flows** per workspace (`ChannelController`), with CSRF-style state
+  validation and tokens encrypted at rest.
+- **Post composer**: compose once, pick channels, per-network overrides, schedule or save draft
+  (`PostComposer` service + composer UI). Models: `Post`, `PostVersion`, `PostTarget`.
+- **Scheduling/publishing engine**: `posts:dispatch-due` (scheduled every minute) atomically
+  claims due posts and dispatches one queued `PublishPostJob` per target — with retries/backoff,
+  per-channel rate limiting, and independent per-target success/failure that rolls up into the
+  post status (`published` / `partially_failed` / `failed`).
+- **UI**: Workspaces, Channels, Composer, and Posts (calendar/list) pages + nav.
+
+### Turn on live posting
+Add the OAuth app credentials to `.env` (`LINKEDIN_CLIENT_ID`, `FACEBOOK_CLIENT_ID`,
+`GOOGLE_CLIENT_ID`, …). Until then, set `SOCIAL_FAKE=true` to exercise the full flow with no
+network calls.
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 1** — channel OAuth
-connect flows (LinkedIn personal + company, Facebook, Instagram, Google Business Profile),
-the post composer, and the scheduling/publishing engine.
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 2** — agency collaboration
+(approval workflows, client portal, queues/best-time, bulk import) and **Phase 3** (Stripe
+billing + white-label control plane).
