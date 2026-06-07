@@ -1,7 +1,8 @@
 <script setup>
-import { useForm } from '@inertiajs/vue3';
+import { useForm, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import SecondaryButton from '@/Components/SecondaryButton.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import TextInput from '@/Components/TextInput.vue';
 
@@ -10,8 +11,11 @@ const props = defineProps({
     customDomain: String,
     domainVerified: Boolean,
     verifyToken: String,
+    txtRecordName: String,
     cnameTarget: String,
 });
+
+const verifyDomain = () => router.post(route('branding.domain.verify'), {}, { preserveScroll: true });
 
 const form = useForm({
     name: props.branding.name ?? '',
@@ -76,16 +80,29 @@ const saveDomain = () => domainForm.put(route('branding.domain'), { preserveScro
                         <InputLabel for="domain" value="Custom domain" />
                         <TextInput id="domain" v-model="domainForm.custom_domain" class="mt-1 block w-full" placeholder="app.youragency.com" />
                     </div>
-                    <p v-if="customDomain" class="text-sm">
-                        Status:
-                        <span :class="domainVerified ? 'text-green-600' : 'text-amber-600'">
-                            {{ domainVerified ? 'Verified' : 'Pending verification' }}
-                        </span>
-                        <span v-if="!domainVerified && verifyToken" class="block text-gray-500 mt-1">
-                            Add a TXT record: <code class="bg-gray-100 px-1 rounded">{{ verifyToken }}</code>
-                        </span>
-                    </p>
-                    <div class="flex justify-end">
+                    <div v-if="customDomain" class="text-sm space-y-2">
+                        <p>
+                            Status:
+                            <span :class="domainVerified ? 'text-green-600' : 'text-amber-600'">
+                                {{ domainVerified ? 'Verified ✓' : 'Pending verification' }}
+                            </span>
+                        </p>
+                        <div v-if="!domainVerified && verifyToken" class="rounded-md bg-gray-50 p-3 text-gray-600 space-y-1">
+                            <p class="font-medium text-gray-700">To verify ownership, add this DNS record:</p>
+                            <p>Type: <code class="bg-gray-100 px-1 rounded">TXT</code></p>
+                            <p>Name: <code class="bg-gray-100 px-1 rounded break-all">{{ txtRecordName }}</code></p>
+                            <p>Value: <code class="bg-gray-100 px-1 rounded break-all">{{ verifyToken }}</code></p>
+                            <p class="pt-1">Then point your domain at us:
+                                Type <code class="bg-gray-100 px-1 rounded">CNAME</code> →
+                                <code class="bg-gray-100 px-1 rounded">{{ cnameTarget }}</code>.
+                                HTTPS is issued automatically once verified.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2">
+                        <SecondaryButton v-if="customDomain && !domainVerified" type="button" @click="verifyDomain">
+                            Verify now
+                        </SecondaryButton>
                         <PrimaryButton :disabled="domainForm.processing">Save domain</PrimaryButton>
                     </div>
                 </form>

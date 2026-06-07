@@ -136,7 +136,19 @@ See [`../docs/03-security.md`](../docs/03-security.md) for the threat model, con
 Phase 5 hardening pass (mass-assignment defense, SSRF guard, suspension enforcement, AI throttle,
 impersonation audit logging).
 
+## Deploying & operating
+See [`../docs/04-build-deploy-maintain-guide.md`](../docs/04-build-deploy-maintain-guide.md)
+(also available as a PDF in `scheduler/docs/SOCIALISTIC-Guide.pdf`) for the full go-live runbook
+(Hostinger VPS), OAuth/Stripe/AI setup, custom-domain white-label TLS, and VS Code maintenance.
+
+## Custom-domain white-label TLS
+Tenants can run the dashboard on their own domain with automatic HTTPS. They add a `TXT`
+ownership record (`_socialistic.<domain>`) plus a `CNAME` to the platform domain; the scheduler
+verifies it (`domains:verify`), and Caddy issues a Let's Encrypt certificate on demand — gated by
+the app's `/tls/check` endpoint so only verified domains get certs. `ResolveTenantDomain` serves
+each tenant's branding by host (including the guest login page).
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). All roadmap phases (0–4) are implemented and
-a security-hardening pass (Phase 5) is complete. Remaining work is operational: real OAuth/Stripe
-credentials, custom-domain TLS, optional GDPR endpoints, and deployment.
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). All roadmap phases plus security hardening and
+custom-domain TLS are complete. Remaining work is operational: obtaining real OAuth/Stripe
+credentials and running the go-live runbook.

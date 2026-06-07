@@ -18,3 +18,6 @@ Schedule::command('analytics:fetch')->hourly()->withoutOverlapping();
 
 // Poll RSS / WordPress feeds for new articles to draft.
 Schedule::command('feeds:poll')->everyFifteenMinutes()->withoutOverlapping();
+
+// Verify pending tenant custom domains via DNS.
+Schedule::command('domains:verify')->everyFiveMinutes()->withoutOverlapping();

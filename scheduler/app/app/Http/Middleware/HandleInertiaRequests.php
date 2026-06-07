@@ -35,7 +35,9 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $team = $request->user()?->currentTeam;
+        // Branding precedence: the custom-domain tenant (works for guests too),
+        // then the authenticated user's current organization.
+        $team = $request->attributes->get('tenant_team') ?? $request->user()?->currentTeam;
 
         return [
             ...parent::share($request),

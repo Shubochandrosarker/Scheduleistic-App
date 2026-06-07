@@ -12,11 +12,16 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TimeSlotController;
+use App\Http\Controllers\TlsController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceMemberController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// Public endpoint for Caddy on-demand TLS (no auth): approves cert issuance
+// only for the platform domain + verified tenant custom domains.
+Route::get('/tls/check', [TlsController::class, 'check'])->name('tls.check');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -99,6 +104,7 @@ Route::middleware([
     Route::get('/branding', [BrandingController::class, 'edit'])->name('branding.edit');
     Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
     Route::put('/branding/domain', [BrandingController::class, 'updateDomain'])->name('branding.domain');
+    Route::post('/branding/domain/verify', [BrandingController::class, 'verifyDomain'])->name('branding.domain.verify');
 
     // Stop impersonating (available to the impersonated session).
     Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
