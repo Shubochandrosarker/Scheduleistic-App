@@ -71,6 +71,10 @@ class PostController extends Controller
         $workspace = Workspace::findOrFail($validated['workspace_id']);
         abort_unless($workspace->team_id === $request->user()->currentTeam->id, 403);
 
+        if (! app(\App\Services\UsageService::class)->allows($workspace->team, 'monthly_posts')) {
+            return back()->withErrors(['plan' => 'You have reached this month\'s post limit on your plan. Upgrade for more.']);
+        }
+
         $composer->schedule(
             workspace: $workspace,
             content: $validated['content'],

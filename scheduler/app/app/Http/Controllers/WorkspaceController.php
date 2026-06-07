@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Workspace;
+use App\Services\UsageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -10,6 +11,8 @@ use Inertia\Response;
 
 class WorkspaceController extends Controller
 {
+    public function __construct(private readonly UsageService $usage) {}
+
     public function index(Request $request): Response
     {
         $organization = $request->user()->currentTeam;
@@ -31,7 +34,13 @@ class WorkspaceController extends Controller
             'color'       => ['nullable', 'string', 'max:9'],
         ]);
 
-        $request->user()->currentTeam->workspaces()->create($validated);
+        $team = $request->user()->currentTeam;
+
+        if (! $this->usage->allows($team, 'workspaces')) {
+            return back()->withErrors(['plan' => 'Your plan\'s workspace limit has been reached. Upgrade to add more.']);
+        }
+
+        $team->workspaces()->create($validated);
 
         return back()->with('status', 'workspace-created');
     }

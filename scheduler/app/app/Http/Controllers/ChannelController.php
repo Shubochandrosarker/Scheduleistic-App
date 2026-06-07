@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Channel;
 use App\Models\Workspace;
+use App\Services\UsageService;
 use App\Social\ProviderManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,10 @@ use Inertia\Response;
 
 class ChannelController extends Controller
 {
-    public function __construct(private readonly ProviderManager $providers) {}
+    public function __construct(
+        private readonly ProviderManager $providers,
+        private readonly UsageService $usage,
+    ) {}
 
     public function index(Request $request, Workspace $workspace): Response
     {
@@ -33,6 +37,10 @@ class ChannelController extends Controller
     public function connect(Request $request, Workspace $workspace, string $provider): RedirectResponse
     {
         $this->authorizeWorkspace($request, $workspace);
+
+        if (! $this->usage->allows($workspace->team, 'channels')) {
+            return back()->withErrors(['plan' => 'Your plan\'s channel limit has been reached. Upgrade to connect more accounts.']);
+        }
 
         $state = Str::random(40);
         $request->session()->put('oauth.state', $state);

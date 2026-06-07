@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\BillingController;
+use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\CommentController;
@@ -65,4 +68,24 @@ Route::middleware([
 
     // Bulk CSV import.
     Route::post('/workspaces/{workspace}/import', [BulkImportController::class, 'store'])->name('workspaces.import');
+
+    // Billing (Stripe / Cashier) — per organization.
+    Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
+    Route::post('/billing/checkout/{plan}', [BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/billing/portal', [BillingController::class, 'portal'])->name('billing.portal');
+
+    // White-label branding + custom domain.
+    Route::get('/branding', [BrandingController::class, 'edit'])->name('branding.edit');
+    Route::put('/branding', [BrandingController::class, 'update'])->name('branding.update');
+    Route::put('/branding/domain', [BrandingController::class, 'updateDomain'])->name('branding.domain');
+
+    // Stop impersonating (available to the impersonated session).
+    Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
+
+    // Super-admin control plane.
+    Route::middleware('platform.admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+        Route::post('/organizations/{organization}/suspend', [OrganizationController::class, 'suspend'])->name('organizations.suspend');
+        Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])->name('organizations.impersonate');
+    });
 });
