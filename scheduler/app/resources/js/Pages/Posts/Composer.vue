@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -23,6 +23,31 @@ const selectedWorkspace = computed(
 );
 
 const characters = computed(() => form.content.length);
+
+const aiBusy = ref(false);
+const aiTopic = ref('');
+
+const generate = async () => {
+    const providers = (selectedWorkspace.value?.channels ?? [])
+        .filter((c) => form.channel_ids.includes(c.id))
+        .map((c) => c.provider);
+
+    if (!aiTopic.value || providers.length === 0) {
+        return;
+    }
+
+    aiBusy.value = true;
+    try {
+        const { data } = await window.axios.post(route('ai.generate'), {
+            topic: aiTopic.value,
+            providers: [...new Set(providers)],
+        });
+        // Use the first generated caption as the base content.
+        form.content = Object.values(data.captions)[0] ?? form.content;
+    } finally {
+        aiBusy.value = false;
+    }
+};
 
 const submit = () => form.post(route('posts.store'));
 </script>
@@ -54,6 +79,21 @@ const submit = () => form.post(route('posts.store'));
                             </label>
                         </div>
                         <p v-else class="mt-2 text-sm text-gray-500">No channels in this workspace yet.</p>
+                    </div>
+
+                    <div class="rounded-md bg-indigo-50 p-3">
+                        <InputLabel for="ai_topic" value="✨ AI assistant — describe a topic" />
+                        <div class="mt-1 flex gap-2">
+                            <input id="ai_topic" v-model="aiTopic" type="text"
+                                class="block w-full border-gray-300 rounded-md shadow-sm text-sm"
+                                placeholder="e.g. 5 WordPress speed tips" />
+                            <button type="button" @click="generate"
+                                :disabled="aiBusy || form.channel_ids.length === 0"
+                                class="shrink-0 px-3 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 disabled:opacity-50">
+                                {{ aiBusy ? 'Generating…' : 'Generate' }}
+                            </button>
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">Generates brand-voice copy for the selected channels.</p>
                     </div>
 
                     <div>

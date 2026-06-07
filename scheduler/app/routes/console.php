@@ -12,3 +12,9 @@ Artisan::command('inspire', function () {
 Schedule::command('posts:dispatch-due')
     ->everyMinute()
     ->withoutOverlapping();
+
+// Capture engagement metrics for recently published posts.
+Schedule::command('analytics:fetch')->hourly()->withoutOverlapping();
+
+// Poll RSS / WordPress feeds for new articles to draft.
+Schedule::command('feeds:poll')->everyFifteenMinutes()->withoutOverlapping();

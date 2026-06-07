@@ -46,4 +46,11 @@ interface SocialProvider
      * @return array{max:int, per_seconds:int}
      */
     public function rateLimit(): array;
+
+    /**
+     * Fetch engagement metrics for a previously published post.
+     *
+     * @return array<string, int>  metric => value (e.g. ['likes' => 10, 'comments' => 2])
+     */
+    public function fetchMetrics(Channel $channel, string $providerPostId): array;
 }

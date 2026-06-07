@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\AiController;
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\BrandingController;
 use App\Http\Controllers\BulkImportController;
 use App\Http\Controllers\ChannelController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\WorkspaceController;
@@ -68,6 +71,16 @@ Route::middleware([
 
     // Bulk CSV import.
     Route::post('/workspaces/{workspace}/import', [BulkImportController::class, 'store'])->name('workspaces.import');
+
+    // AI caption assistant.
+    Route::post('/ai/generate', [AiController::class, 'generate'])->name('ai.generate');
+
+    // Analytics dashboard.
+    Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
+
+    // RSS / WordPress article feeds.
+    Route::post('/workspaces/{workspace}/feeds', [FeedController::class, 'store'])->name('workspaces.feeds.store');
+    Route::delete('/workspaces/{workspace}/feeds/{feed}', [FeedController::class, 'destroy'])->name('workspaces.feeds.destroy');
 
     // Billing (Stripe / Cashier) — per organization.
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');

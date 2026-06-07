@@ -68,4 +68,10 @@ class FakeProvider implements SocialProvider
     {
         return ['max' => 1000, 'per_seconds' => 60];
     }
+
+    /** @return array<string, int> */
+    public function fetchMetrics(Channel $channel, string $providerPostId): array
+    {
+        return ['impressions' => 100, 'likes' => 10, 'comments' => 2, 'shares' => 1];
+    }
 }

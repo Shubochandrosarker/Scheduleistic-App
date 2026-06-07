@@ -3,12 +3,20 @@
 namespace App\Social;
 
 use App\Social\Contracts\SocialProvider;
+use App\Social\Providers\BlueskyProvider;
 use App\Social\Providers\FacebookProvider;
 use App\Social\Providers\FakeProvider;
 use App\Social\Providers\GoogleBusinessProvider;
 use App\Social\Providers\InstagramProvider;
 use App\Social\Providers\LinkedInCompanyProvider;
 use App\Social\Providers\LinkedInProvider;
+use App\Social\Providers\MastodonProvider;
+use App\Social\Providers\MediumProvider;
+use App\Social\Providers\PinterestProvider;
+use App\Social\Providers\ThreadsProvider;
+use App\Social\Providers\TikTokProvider;
+use App\Social\Providers\WordPressProvider;
+use App\Social\Providers\YouTubeProvider;
 use InvalidArgumentException;
 
 /**
@@ -25,6 +33,14 @@ class ProviderManager
         'facebook'         => FacebookProvider::class,
         'instagram'        => InstagramProvider::class,
         'google_business'  => GoogleBusinessProvider::class,
+        'pinterest'        => PinterestProvider::class,
+        'threads'          => ThreadsProvider::class,
+        'tiktok'           => TikTokProvider::class,
+        'youtube'          => YouTubeProvider::class,
+        'mastodon'         => MastodonProvider::class,
+        'bluesky'          => BlueskyProvider::class,
+        'medium'           => MediumProvider::class,
+        'wordpress'        => WordPressProvider::class,
     ];
 
     /** @var array<string, SocialProvider> runtime overrides (used by tests). */
