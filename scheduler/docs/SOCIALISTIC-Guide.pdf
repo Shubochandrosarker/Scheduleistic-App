@@ -1,0 +1,557 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 13 /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R 22 0 R 24 0 R 26 0 R 28 0 R 30 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 3389 >>
+stream
+BT /F2 20 Tf 0.16 0.13 0.55 rg 54 695.0 Td (SOCIALISTIC ? Complete Build, Deploy & Maintain) Tj ET
+BT /F2 20 Tf 0.16 0.13 0.55 rg 54 668.0 Td (Guide) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 643.1 Td (A practical, end-to-end manual for the SOCIALISTIC social-media scheduling SaaS:) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 628.3 Td (what it is, how it was built, how to put it live on your Hostinger VPS, how) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 613.4 Td (tenant white-label custom domains + automatic HTTPS work, and how to maintain) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 598.6 Td (it day-to-day from VS Code.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 577.7 Td (Audience: the operator/owner \(you\). Assumes basic comfort with a terminal.) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 561.7 m 558 561.7 l S
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 517.5 Td (1. What you have) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 493.6 Td (SOCIALISTIC is a self-hosted, multi-tenant, white-label social-media scheduler) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 478.8 Td (\(a Buffer / Hootsuite / Postiz-style product you own outright\). Core features:) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 457.9 Td (? Multi-tenant organizations \(agencies\) ? each owns client workspaces.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 443.1 Td (? 13 social networks: LinkedIn \(personal + company\), Facebook, Instagram,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 428.2 Td (Google Business, Pinterest, Threads, TikTok, YouTube, Mastodon, Bluesky,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 413.4 Td (Medium, WordPress.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 398.5 Td (? Post composer with per-network overrides, media, scheduling, queues and) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 383.7 Td (recurring posts; a reliable publishing engine \(queued jobs, retries,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 368.8 Td (token refresh\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 354.0 Td (? Agency layer: approval workflow, client portal, comments, bulk CSV import.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 339.1 Td (? Monetization: Stripe billing \(Cashier\), plans + usage limits.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 324.3 Td (? White-label: per-org branding \(name, colours, logo\) and custom domains) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 309.4 Td (with automatic HTTPS.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 294.6 Td (? AI caption assistant, analytics, media auto-crop, RSS/WordPress) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 279.7 Td (article-to-social ingestion.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 264.9 Td (? Super-admin control plane \(suspend orgs, impersonate, stats\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 250.0 Td (? Security hardening: encrypted OAuth tokens, SSRF guard, suspension) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 235.2 Td (enforcement, throttling, audit logging.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 205.0 Td (Tech stack) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 182.1 Td (? Backend: Laravel 13 \(PHP 8.4\), Jetstream \(auth/teams\), Sanctum, Cashier.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 167.3 Td (? Frontend: Inertia.js + Vue 3 + Tailwind, built with Vite.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 152.4 Td (? Data: MySQL 8, Redis \(queues, cache, sessions\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 137.6 Td (? Edge: Caddy 2 \(automatic TLS, on-demand certs for custom domains\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 122.7 Td (? Runtime: Docker Compose ? five services: `caddy`, `app`, `worker`,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 107.9 Td (scheduler, plus mysql and redis.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 77.7 Td (How the pieces talk) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 3475 >>
+stream
+0.96 0.96 0.97 rg 54 565.3 504 166.7 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (Internet) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 702.2 Td (|) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 690.3 Td (v) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 678.4 Td ([ Caddy ]  :80/:443  TLS termination + per-tenant certs) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 666.5 Td (|) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 654.6 Td (v) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 642.7 Td ([ app ]  php artisan serve :8000  \(web requests, Inertia/Vue\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 630.8 Td (|--- [ worker ]    queue:work     publishes posts, refreshes tokens, analytics) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 618.9 Td (|--- [ scheduler ] schedule:work  dispatches due posts every minute, polls feeds, verifies) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 607.0 Td (domains) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 595.1 Td (|) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 583.2 Td (+--> [ mysql ]   durable data) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 571.3 Td (+--> [ redis ]   queue / cache / session) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 541.3 m 558 541.3 l S
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 497.0 Td (2. How it was built \(so you can build one like it\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 473.2 Td (The project was delivered in phases; each was a focused, tested pull request.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 458.3 Td (This is a good template for building any SaaS like this.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 428.1 Td (Phase 0 ? Foundation) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 411.3 Td (Laravel + Jetstream \(teams = organizations\), Docker Compose dev stack, CI) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 396.4 Td (\(GitHub Actions running the test suite\), base models and tenancy.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 366.2 Td (Phase 1 ? Publishing engine) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 349.4 Td (A SocialProvider contract + a ProviderManager registry. Each network is a) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 334.5 Td (driver implementing connect \(OAuth\), publish\(\), token refresh, rate limits.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 319.7 Td (A PostComposer turns composer input into a Post + per-channel PostTargets.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 304.8 Td (Queued PublishPostJobs do the actual posting with retries.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 274.6 Td (Phase 2 ? Agency layer) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 257.8 Td (Approval workflow \(draft ? pending ? approved/published\), a client portal) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 242.9 Td (\(external users assigned to a workspace\), comments, queue time-slots, recurring) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 228.1 Td (posts, bulk CSV import, notifications.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 197.9 Td (Phase 3 ? Monetization + white-label) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 181.0 Td (Stripe via Laravel Cashier with the organization as the billable entity;) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 166.2 Td (plans \(config/plans.php\) + UsageService enforcing limits; per-org branding;) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 151.3 Td (custom-domain storage; a super-admin panel.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 121.1 Td (Phase 4 ? Advanced) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 104.3 Td (8 more network drivers, AI caption assistant \(pluggable LLM\), analytics) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 89.4 Td (\(metrics capture + dashboard\), media auto-crop specs, RSS/WordPress ingestion.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 59.2 Td (Phase 5 ? Security hardening) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 1200 >>
+stream
+BT /F1 11 Tf 0 0 0 rg 54 717.1 Td (Full IDOR/authorization audit, SSRF guard, suspension enforcement, AI) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 702.3 Td (throttling, impersonation audit logging, mass-assignment defense.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 672.1 Td (Phase 6 ? Custom-domain TLS \(this release\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 655.2 Td (Caddy on-demand TLS gated by an app /tls/check endpoint, DNS TXT domain) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 640.4 Td (verification, and branding-by-host so a tenant's login page is white-labeled.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 610.2 Td (Principles worth copying) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 593.3 Td (? One contract, many drivers for anything pluggable \(networks, AI, payments\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 578.5 Td (? Queue everything slow \(publishing, token refresh, analytics, ingestion\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 563.6 Td (? Tenant isolation in one place \(a guard trait\) and test it.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 548.8 Td (? Config-driven limits/plans so pricing changes need no code.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 533.9 Td (? Tests per phase + CI; never merge red.) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 517.9 m 558 517.9 l S
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 13 0 R >>
+endobj
+13 0 obj
+<< /Length 2759 >>
+stream
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (3. Where to host it ? your two options) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (You have a Hostinger KVM 4 VPS \(4 vCPU, 16 GB RAM, 200 GB NVMe, 16+ TB) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 655.0 Td (bandwidth\) and a Business \(shared\) hosting plan.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 624.8 Td (Verdict: use the VPS. ?) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 602.0 Td (SOCIALISTIC needs long-running processes \(queue worker + scheduler\), Docker,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 587.1 Td (Redis, and the Caddy edge proxy binding ports 80/443. Shared/Business hosting) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 572.3 Td (cannot run any of these ? no root, no Docker, no persistent daemons, no) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 557.4 Td (custom ports. Business hosting is fine for a marketing landing page, not the app.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 536.6 Td (Your KVM 4 is comfortably sized: it can serve thousands of scheduled posts/day) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 521.7 Td (and dozens of organizations. RAM/CPU headroom is plenty \(the stack idles around) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 506.9 Td (1?2 GB\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 486.0 Td (> Tip: keep the Business hosting for your public marketing site) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 471.2 Td (> \(www.yourbrand.com\) and run the app on the VPS at app.yourbrand.com.) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 455.2 m 558 455.2 l S
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 410.9 Td (4. Go-live runbook \(Hostinger KVM 4, Ubuntu\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 387.1 Td (Follow top to bottom. Estimated time: 30?60 minutes \(plus waiting on OAuth app) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 372.2 Td (approvals from each network, which can take days ? start those early\).) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 342.0 Td (4.1 Point DNS at the VPS) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 319.2 Td (In your domain's DNS \(Hostinger hPanel ? Domains ? DNS, or your registrar\):) Tj ET
+0.96 0.96 0.97 rg 54 277.4 504 35.8 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 295.3 Td (Type   Name   Value                 TTL) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 283.4 Td (A      app    <your-VPS-IPv4>       300) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 248.5 Td (So app.yourbrand.com ? your VPS. \(Add an AAAA record too if the VPS has) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 233.7 Td (IPv6.\) Wait for it to resolve \(ping app.yourbrand.com\).) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 203.5 Td (4.2 Prepare the server) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 180.6 Td (SSH in as root \(Hostinger gives you the IP + password in hPanel\):) Tj ET
+0.96 0.96 0.97 rg 54 150.7 504 23.9 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 156.7 Td (ssh root@<your-VPS-IPv4>) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 121.9 Td (Create a non-root user and install Docker:) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 15 0 R >>
+endobj
+15 0 obj
+<< /Length 3170 >>
+stream
+0.96 0.96 0.97 rg 54 601.0 504 131.0 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (adduser deploy) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 702.2 Td (usermod -aG sudo deploy) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 690.3 Td (# Install Docker Engine + Compose plugin) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 678.4 Td (curl -fsSL https://get.docker.com | sh) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 666.5 Td (usermod -aG docker deploy) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 654.6 Td (# Basic firewall: allow SSH + web only) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 642.7 Td (ufw allow OpenSSH) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 630.8 Td (ufw allow 80) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 618.9 Td (ufw allow 443) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 607.0 Td (ufw --force enable) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 572.1 Td (Log back in as deploy:) Tj ET
+0.96 0.96 0.97 rg 54 530.4 504 35.8 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 548.2 Td (exit) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 536.4 Td (ssh deploy@<your-VPS-IPv4>) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 492.2 Td (4.3 Get the code) Tj ET
+0.96 0.96 0.97 rg 54 448.4 504 35.8 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 466.3 Td (git clone https://github.com/Shubochandrosarker/social-automation.zip.git) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 454.4 Td (cd social-automation.zip/scheduler/app) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 410.2 Td (4.4 Create the `.env`) Tj ET
+0.96 0.96 0.97 rg 54 366.4 504 35.8 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 384.3 Td (cp .env.example .env) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 372.4 Td (nano .env) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 337.5 Td (Set at least these \(full reference in the Appendix\):) Tj ET
+0.96 0.96 0.97 rg 54 117.2 504 214.3 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 313.6 Td (APP_NAME=SOCIALISTIC) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 301.7 Td (APP_ENV=production) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 289.8 Td (APP_DEBUG=false) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 277.9 Td (APP_URL=https://app.yourbrand.com) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 266.0 Td (APP_DOMAIN=app.yourbrand.com) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 254.1 Td (ACME_EMAIL=you@yourbrand.com) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 242.2 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 230.3 Td (DB_CONNECTION=mysql) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 218.4 Td (DB_HOST=mysql) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 206.5 Td (DB_DATABASE=socialistic) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 194.6 Td (DB_USERNAME=socialistic) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 182.7 Td (DB_PASSWORD=<choose-a-strong-password>) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 170.8 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 158.9 Td (REDIS_HOST=redis) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 147.0 Td (QUEUE_CONNECTION=redis) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 135.1 Td (CACHE_STORE=redis) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 123.2 Td (SESSION_DRIVER=redis) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 88.4 Td (> Make the DB password here match the mysql service password in) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 73.5 Td (> docker-compose.yml \(change both from the default secret\).) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 17 0 R >>
+endobj
+17 0 obj
+<< /Length 2487 >>
+stream
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 715.8 Td (4.5 Launch the stack) Tj ET
+0.96 0.96 0.97 rg 54 683.9 504 23.9 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 689.9 Td (docker compose up -d --build) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 655.0 Td (This builds the app image \(Composer + npm build happen inside\), then starts) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 640.2 Td (Caddy, app, worker, scheduler, MySQL and Redis.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 619.3 Td (Generate the app key, run migrations, cache config:) Tj ET
+0.96 0.96 0.97 rg 54 553.7 504 59.6 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 595.4 Td (docker compose exec app php artisan key:generate) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 583.5 Td (docker compose exec app php artisan migrate --force) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 571.6 Td (docker compose exec app php artisan config:cache) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 559.8 Td (docker compose exec app php artisan route:cache) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 515.5 Td (4.6 Create your platform-admin account) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 492.7 Td (Register normally at https://app.yourbrand.com/register, then promote) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 477.8 Td (yourself \(the flag is intentionally not web-settable\):) Tj ET
+0.96 0.96 0.97 rg 54 412.2 504 59.6 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 453.9 Td (docker compose exec app php artisan tinker) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 442.0 Td (>>> $u = App\\Models\\User::where\('email','you@yourbrand.com'\)->first\(\);) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 430.1 Td (>>> $u->forceFill\(['is_platform_admin' => true]\)->save\(\);) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 418.2 Td (>>> exit) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 383.4 Td (You'll now see the Admin nav item \(super-admin control plane\).) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 353.2 Td (4.7 Verify) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 330.3 Td (Visit https://app.yourbrand.com ? Caddy will have issued a Let's Encrypt) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 315.5 Td (certificate automatically. Log in, create a workspace, and you're live.) Tj ET
+0.96 0.96 0.97 rg 54 261.8 504 47.7 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 291.6 Td (docker compose ps                 # all services "running") Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 279.7 Td (docker compose logs -f caddy      # watch cert issuance) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 267.8 Td (docker compose logs -f worker     # watch the publishing engine) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 237.8 m 558 237.8 l S
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 19 0 R >>
+endobj
+19 0 obj
+<< /Length 3553 >>
+stream
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (5. Connecting the networks, Stripe, and AI) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (The app ships with all drivers; each network just needs your developer) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 655.0 Td (credentials in .env. Create an app on each platform's developer portal, set) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 640.2 Td (the OAuth redirect URL to:) Tj ET
+0.96 0.96 0.97 rg 54 610.3 504 23.9 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 616.3 Td (https://app.yourbrand.com/channels/callback/{provider}) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 581.4 Td (?replacing {provider} with linkedin, facebook, instagram,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 566.6 Td (google_business, pinterest, threads, tiktok, youtube, etc.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 536.4 Td (5.1 Per-network credentials \(start these early ? approvals take time\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 513.5 Td (? LinkedIn ? developer.linkedin.com ? create app ? Products: "Share on) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 498.7 Td (LinkedIn" + "Sign In". Copy Client ID/Secret to LINKEDIN_CLIENT_ID/SECRET.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 483.8 Td (? Meta \(Facebook, Instagram, Threads\) ? developers.facebook.com ? create a) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 469.0 Td (Business app ? add Facebook Login, Instagram Graph, Threads API. One app) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 454.1 Td (covers all three. Set FACEBOOK_* \(and Threads uses the same Meta app\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 439.3 Td (? Google \(YouTube, Business Profile\) ? console.cloud.google.com ? OAuth) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 424.4 Td (consent screen + credentials ? enable YouTube Data API / Business Profile API.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 409.6 Td (? TikTok ? developers.tiktok.com ? app with Content Posting API.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 394.7 Td (? Pinterest ? developers.pinterest.com ? app with `pins:write`.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 379.9 Td (? Mastodon / Bluesky / Medium / WordPress ? token/app-password based; users) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 365.0 Td (paste credentials in the connect UI \(no platform app needed from you\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 344.2 Td (> You don't need every network on day one. Connect the ones your customers want;) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 329.3 Td (> the rest simply won't appear as connectable until credentials exist.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 299.1 Td (5.2 Stripe billing) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 276.3 Td (1. Create a Stripe account ? Developers ? API keys. Put the secret key in) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 261.4 Td (STRIPE_SECRET and publishable key in STRIPE_KEY.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 246.6 Td (2. Create two Products with recurring Prices \(Pro, Agency\). Copy the) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 231.7 Td (price IDs into STRIPE_PRICE_PRO and STRIPE_PRICE_AGENCY.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 216.9 Td (3. Add a webhook endpoint ? URL `https://app.yourbrand.com/stripe/webhook`,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 202.0 Td (events: customer.subscription.*, invoice.*. Copy the signing secret to) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 187.2 Td (STRIPE_WEBHOOK_SECRET.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 172.3 Td (4. Re-cache config: `docker compose exec app php artisan config:cache`.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 151.5 Td (Plans/limits live in config/plans.php ? edit the limits there, no code needed.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 121.3 Td (5.3 AI caption assistant) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 98.4 Td (Use any OpenAI-compatible endpoint \(OpenRouter is easiest\):) Tj ET
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 21 0 R >>
+endobj
+21 0 obj
+<< /Length 3566 >>
+stream
+0.96 0.96 0.97 rg 54 672.4 504 59.6 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (AI_FAKE=false) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 702.2 Td (AI_ENDPOINT=https://openrouter.ai/api/v1/chat/completions) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 690.3 Td (AI_API_KEY=<your-key>) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 678.4 Td (AI_MODEL=openai/gpt-4o-mini) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 643.5 Td (Leave AI_FAKE=true to demo without spending. The endpoint is throttled) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 628.7 Td (\(20/min\) to cap cost.) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 612.7 m 558 612.7 l S
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 568.4 Td (6. White-label custom domains + automatic HTTPS) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 544.6 Td (This is the agency selling point: each customer can run the dashboard on their) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 529.7 Td (own domain \(e.g. social.theiragency.com\) with a valid certificate, fully) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 514.9 Td (branded ? no work from you per domain.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 484.7 Td (6.1 How it works \(architecture\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 461.8 Td (1. The org owner enters their domain under White-label ? Custom domain. The) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 447.0 Td (app stores it and issues a one-time verification token.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 432.1 Td (2. The owner adds two DNS records at their registrar:) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 417.3 Td (? `TXT  _socialistic.social.theiragency.com = socialistic-verify-?` \(proves) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 402.4 Td (ownership\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 387.6 Td (? `CNAME social.theiragency.com ? app.yourbrand.com` \(routes traffic to you\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 372.7 Td (3. The scheduler runs `domains:verify` every 5 minutes \(or the owner clicks) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 357.9 Td (Verify now\); a matching TXT record flips the domain to *verified*.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 343.0 Td (4. When a browser hits `https://social.theiragency.com`, Caddy sees an) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 328.2 Td (unknown hostname and asks the app GET /tls/check?domain=?. The app approves) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 313.3 Td (only verified tenant domains \(and your own\). Caddy then obtains a Let's) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 298.5 Td (Encrypt certificate on demand and caches it ? fully automatic.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 283.6 Td (5. `ResolveTenantDomain` middleware maps the host ? organization and serves that) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 268.8 Td (org's branding, even on the guest login page.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 247.9 Td (The /tls/check gate is important: it stops attackers from making Caddy request) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 233.1 Td (certificates for random hostnames and hitting ACME rate limits.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 202.9 Td (6.2 What you tell your customers) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 180.0 Td (> "Add a TXT record _socialistic.<your-domain> with the value we show you,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 165.2 Td (> and a CNAME from <your-domain> to app.yourbrand.com. Click Verify. HTTPS) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 150.3 Td (> turns on automatically within a couple of minutes.") Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 120.1 Td (6.3 Nothing to do per-domain on the server) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 97.3 Td (Caddy + the app handle issuance, renewal and routing. Certs persist in the) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 82.4 Td (caddy-data Docker volume \(don't delete it\).) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 66.4 m 558 66.4 l S
+endstream
+endobj
+22 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 23 0 R >>
+endobj
+23 0 obj
+<< /Length 3084 >>
+stream
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (7. Maintaining the app from VS Code \(Remote-SSH\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (The cleanest way to manage a live VPS app: edit and run commands on the) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 655.0 Td (server through VS Code, as if it were local.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 624.8 Td (7.1 One-time setup) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 602.0 Td (1. Install VS Code locally + the Remote - SSH extension \(by Microsoft\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 587.1 Td (2. \(Recommended\) set up an SSH key so you don't type passwords:) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 572.3 Td (ssh-keygen -t ed25519            # on your laptop, accept defaults) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 557.4 Td (ssh-copy-id deploy@<your-VPS-IP> # upload the key) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 542.6 Td (3. In VS Code: press `F1` ? "Remote-SSH: Connect to Host?" ?) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 527.7 Td (deploy@<your-VPS-IP>. A new window opens running *on the VPS*.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 512.9 Td (4. File ? Open Folder ? `/home/deploy/social-automation.zip`. You now edit live) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 498.0 Td (files with full IntelliSense, and the integrated terminal is the server.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 467.8 Td (7.2 Recommended VS Code extensions \(installed into the remote\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 445.0 Td (? PHP Intelephense \(PHP language features\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 430.1 Td (? Laravel Extension Pack / Laravel Blade) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 415.3 Td (? Vue - Official \(Volar\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 400.4 Td (? Tailwind CSS IntelliSense) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 385.6 Td (? DotENV) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 355.4 Td (7.3 The normal change ? deploy loop) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 332.5 Td (Best practice is to commit changes and pull them on the server \(not edit blind\):) Tj ET
+0.96 0.96 0.97 rg 54 219.3 504 107.2 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 308.6 Td (# on the VPS terminal \(inside VS Code\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 296.7 Td (cd ~/social-automation.zip) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 284.8 Td (git pull origin main                    # get the latest code) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 272.9 Td (cd scheduler/app) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 261.0 Td (docker compose up -d --build            # rebuild the app image) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 249.1 Td (docker compose exec app php artisan migrate --force) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 237.2 Td (docker compose exec app php artisan config:cache) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 225.3 Td (docker compose exec app php artisan queue:restart   # workers pick up new code) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 190.5 Td (> Make changes locally, push to GitHub, then git pull + rebuild on the VPS.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 175.6 Td (> Avoid editing files directly in the running container ? they vanish on rebuild.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 145.4 Td (7.4 Handy day-to-day commands) Tj ET
+endstream
+endobj
+24 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 25 0 R >>
+endobj
+25 0 obj
+<< /Length 3516 >>
+stream
+0.96 0.96 0.97 rg 54 636.7 504 95.3 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (docker compose ps                       # service health) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 702.2 Td (docker compose logs -f app              # web logs) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 690.3 Td (docker compose logs -f worker           # publishing engine) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 678.4 Td (docker compose exec app php artisan tinker      # REPL) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 666.5 Td (docker compose exec app php artisan schedule:list) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 654.6 Td (docker compose exec app php artisan queue:failed # failed jobs) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 642.7 Td (docker compose restart worker scheduler) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 612.7 m 558 612.7 l S
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 568.5 Td (8. Operations: backups, updates, monitoring, scaling) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 535.2 Td (8.1 Backups \(do this!\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 512.4 Td (Database \(nightly cron on the VPS\):) Tj ET
+0.96 0.96 0.97 rg 54 446.8 504 59.6 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 488.5 Td (# crontab -e  \(as deploy\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 476.6 Td (0 3 * * * docker compose -f ~/social-automation.zip/scheduler/app/docker-compose.yml \\) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 464.7 Td (exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> socialistic \\) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 452.8 Td (| gzip > ~/backups/db-$\(date +\\%F\).sql.gz) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 417.9 Td (Also back up these Docker volumes \(contain state you can't regenerate\):) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 403.1 Td (? `mysql-data` \(database\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 388.2 Td (? `caddy-data` \(issued TLS certificates\)) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 373.4 Td (? the `.env` file \(secrets\) ? store a copy in a password manager.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 352.5 Td (Pull backups off the box periodically \(e.g. scp to your laptop or object) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 337.7 Td (storage\).) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 307.5 Td (8.2 Updating the app) Tj ET
+0.96 0.96 0.97 rg 54 204.2 504 95.3 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 281.6 Td (cd ~/social-automation.zip && git pull origin main) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 269.7 Td (cd scheduler/app) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 257.8 Td (docker compose up -d --build) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 245.9 Td (docker compose exec app php artisan migrate --force) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 234.0 Td (docker compose exec app php artisan config:cache && \\) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 222.1 Td (docker compose exec app php artisan route:cache) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 210.2 Td (docker compose exec app php artisan queue:restart) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 166.0 Td (8.3 Monitoring) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 143.1 Td (? `docker compose ps` + `docker stats` for health and resource use.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 128.3 Td (? Laravel logs: `docker compose exec app tail -f storage/logs/laravel.log`.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 113.4 Td (? The `/up` health endpoint returns 200 when the app is healthy ? point an) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 98.6 Td (uptime monitor \(UptimeRobot, BetterStack\) at https://app.yourbrand.com/up.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 83.7 Td (? Impersonation and other sensitive actions are written to the log for audit.) Tj ET
+endstream
+endobj
+26 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 27 0 R >>
+endobj
+27 0 obj
+<< /Length 1512 >>
+stream
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 715.8 Td (8.4 Scaling on the KVM 4) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 692.9 Td (You have lots of headroom. When volume grows:) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 678.1 Td (? Run more workers: `docker compose up -d --scale worker=3`.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 663.2 Td (? Increase MySQL/Redis memory if needed \(they're modest by default\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 648.4 Td (? The single VPS handles substantial load; only consider a managed DB or a) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 633.5 Td (second node well past thousands of active organizations.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 603.3 Td (8.5 Troubleshooting quick table) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 580.5 Td (? Cert not issued for custom domain ? check the CNAME resolves to your app) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 565.6 Td (domain and the domain is *verified*; docker compose logs caddy.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 550.8 Td (? Posts not publishing ? `docker compose logs worker`; check) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 535.9 Td (queue:failed; verify the network's OAuth token isn't expired.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 521.1 Td (? 500 after deploy ? you probably changed `.env`; run `config:cache` again;) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 506.2 Td (check storage/logs/laravel.log.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 491.4 Td (? Scheduler not firing ? ensure the `scheduler` service is running) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 476.5 Td (\(schedule:work\).) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 460.5 m 558 460.5 l S
+endstream
+endobj
+28 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 29 0 R >>
+endobj
+29 0 obj
+<< /Length 3713 >>
+stream
+BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (9. Appendix) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 660.5 Td (9.1 `.env` reference \(key settings\)) Tj ET
+0.96 0.96 0.97 rg 54 426.3 504 226.2 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 634.6 Td (APP_NAME, APP_ENV=production, APP_DEBUG=false, APP_KEY \(php artisan key:generate\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 622.8 Td (APP_URL=https://app.yourbrand.com) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 610.9 Td (APP_DOMAIN=app.yourbrand.com         # Caddy: platform domain \(eager cert\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 599.0 Td (ACME_EMAIL=you@yourbrand.com         # Let's Encrypt registration) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 587.1 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 575.2 Td (DB_CONNECTION=mysql, DB_HOST=mysql, DB_DATABASE, DB_USERNAME, DB_PASSWORD) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 563.3 Td (REDIS_HOST=redis) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 551.4 Td (QUEUE_CONNECTION=redis, CACHE_STORE=redis, SESSION_DRIVER=redis) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 539.5 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 527.6 Td (# Billing) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 515.7 Td (STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 503.8 Td (STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, CASHIER_CURRENCY=usd) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 491.9 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 480.0 Td (# AI) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 468.1 Td (AI_FAKE=false, AI_ENDPOINT, AI_API_KEY, AI_MODEL) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 456.2 Td () Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 444.3 Td (# Per-network OAuth \(only what you use\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 432.4 Td (LINKEDIN_CLIENT_ID/SECRET, FACEBOOK_CLIENT_ID/SECRET, GOOGLE_CLIENT_ID/SECRET, ...) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 388.1 Td (9.2 Scheduled jobs \(run by the `scheduler` service\)) Tj ET
+0.96 0.96 0.97 rg 54 320.5 504 59.6 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 362.2 Td (posts:dispatch-due   every minute      # publish scheduled posts) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 350.4 Td (domains:verify       every 5 minutes   # verify pending custom domains) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 338.5 Td (analytics:fetch      hourly            # capture engagement metrics) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 326.6 Td (feeds:poll           every 15 minutes  # ingest RSS/WordPress articles) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 282.3 Td (9.3 Useful artisan commands) Tj ET
+0.96 0.96 0.97 rg 54 190.9 504 83.4 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 256.4 Td (php artisan migrate --force) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 244.5 Td (php artisan tinker) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 232.6 Td (php artisan queue:work / queue:failed / queue:retry all) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 220.7 Td (php artisan schedule:list) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 208.8 Td (php artisan domains:verify) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 196.9 Td (php artisan config:cache / route:cache / optimize:clear) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 152.8 Td (9.4 Security checklist before launch) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 129.9 Td (? [ ] `APP_DEBUG=false`, strong `APP_KEY`, strong DB password.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 115.1 Td (? [ ] Firewall: only 22/80/443 open; SSH key auth; disable root SSH login.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 100.2 Td (? [ ] Real Stripe webhook secret set; test a subscription in test mode first.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 85.4 Td (? [ ] Backups scheduled and verified \(restore once to be sure\).) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 70.5 Td (? [ ] Your admin account is the only platform admin.) Tj ET
+endstream
+endobj
+30 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 31 0 R >>
+endobj
+31 0 obj
+<< /Length 1389 >>
+stream
+BT /F1 11 Tf 0 0 0 rg 58 717.1 Td (? [ ] Review `scheduler/docs/03-security.md` for the full posture.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 686.9 Td (9.5 Repository map) Tj ET
+0.96 0.96 0.97 rg 54 571.8 504 107.2 re f
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 661.0 Td (scheduler/app/                Laravel application) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 649.1 Td (app/Social/                 provider drivers + contract) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 637.2 Td (app/Services/               PostComposer, Usage, Analytics, Ai, Ssrf, DomainVerification ?) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 625.4 Td (app/Http/Controllers/       web controllers \(incl. Admin/\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 613.5 Td (config/plans.php            plans + limits \(edit pricing here\)) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 601.6 Td (caddy/Caddyfile             edge proxy + on-demand TLS) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 589.7 Td (docker-compose.yml          the full stack) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 577.8 Td (scheduler/docs/               roadmap, security, this guide) Tj ET
+0.8 0.8 0.8 RG 0.5 w 54 547.8 m 558 547.8 l S
+BT /F1 11 Tf 0 0 0 rg 54 520.9 Td (*SOCIALISTIC ? you own the code, the data, and the customer relationship.*) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 506.0 Td (*Built to be operated by one person from a single VPS and a VS Code window.*) Tj ET
+endstream
+endobj
+xref
+0 32
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000199 00000 n 
+0000000269 00000 n 
+0000000344 00000 n 
+0000000412 00000 n 
+0000000558 00000 n 
+0000003999 00000 n 
+0000004145 00000 n 
+0000007672 00000 n 
+0000007820 00000 n 
+0000009073 00000 n 
+0000009221 00000 n 
+0000012033 00000 n 
+0000012181 00000 n 
+0000015404 00000 n 
+0000015552 00000 n 
+0000018092 00000 n 
+0000018240 00000 n 
+0000021846 00000 n 
+0000021994 00000 n 
+0000025613 00000 n 
+0000025761 00000 n 
+0000028898 00000 n 
+0000029046 00000 n 
+0000032615 00000 n 
+0000032763 00000 n 
+0000034328 00000 n 
+0000034476 00000 n 
+0000038242 00000 n 
+0000038390 00000 n 
+trailer
+<< /Size 32 /Root 1 0 R >>
+startxref
+39832
+%%EOF

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\DomainVerificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -23,8 +24,21 @@ class BrandingController extends Controller
             'customDomain'    => $team->custom_domain,
             'domainVerified'  => $team->customDomainVerified(),
             'verifyToken'     => $team->custom_domain_token,
+            'txtRecordName'   => $team->custom_domain
+                ? app(DomainVerificationService::class)->recordName($team->custom_domain)
+                : null,
             'cnameTarget'     => parse_url(config('app.url'), PHP_URL_HOST),
         ]);
+    }
+
+    /** Manually trigger DNS verification of the configured custom domain. */
+    public function verifyDomain(Request $request, DomainVerificationService $verifier): RedirectResponse
+    {
+        $this->guardOwner($request);
+
+        $verified = $verifier->verify($request->user()->currentTeam);
+
+        return back()->with('status', $verified ? 'domain-verified' : 'domain-unverified');
     }
 
     public function update(Request $request): RedirectResponse
