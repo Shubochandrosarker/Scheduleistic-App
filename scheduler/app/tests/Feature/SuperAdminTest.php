@@ -23,7 +23,7 @@ class SuperAdminTest extends TestCase
     public function test_platform_admin_sees_all_organizations(): void
     {
         User::factory()->withPersonalTeam()->create(); // some other org
-        $admin = User::factory()->withPersonalTeam()->create(['is_platform_admin' => true]);
+        $admin = User::factory()->platformAdmin()->withPersonalTeam()->create();
 
         $this->actingAs($admin)
             ->get(route('admin.organizations.index'))
@@ -35,7 +35,7 @@ class SuperAdminTest extends TestCase
 
     public function test_admin_can_suspend_and_unsuspend_an_organization(): void
     {
-        $admin = User::factory()->withPersonalTeam()->create(['is_platform_admin' => true]);
+        $admin = User::factory()->platformAdmin()->withPersonalTeam()->create();
         $target = User::factory()->withPersonalTeam()->create();
         $org = $target->currentTeam;
 
@@ -48,7 +48,7 @@ class SuperAdminTest extends TestCase
 
     public function test_admin_can_impersonate_and_then_stop(): void
     {
-        $admin = User::factory()->withPersonalTeam()->create(['is_platform_admin' => true]);
+        $admin = User::factory()->platformAdmin()->withPersonalTeam()->create();
         $target = User::factory()->withPersonalTeam()->create();
         $org = $target->currentTeam;
 

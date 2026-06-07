@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'platform.admin' => \App\Http\Middleware\EnsurePlatformAdmin::class,
+            'org.active'     => \App\Http\Middleware\EnsureOrganizationActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

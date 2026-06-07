@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Team;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,6 +52,16 @@ class OrganizationController extends Controller
     {
         $owner = $organization->owner;
         abort_if(! $owner, 404);
+
+        // Disallow nested impersonation.
+        abort_if($request->session()->has('impersonator_id'), 409, 'Already impersonating.');
+
+        // Audit trail: who impersonated whom.
+        Log::warning('Platform admin started impersonation', [
+            'admin_id'        => $request->user()->id,
+            'organization_id' => $organization->id,
+            'owner_id'        => $owner->id,
+        ]);
 
         $request->session()->put('impersonator_id', $request->user()->id);
         auth()->guard('web')->login($owner);

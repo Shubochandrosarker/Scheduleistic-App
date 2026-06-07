@@ -58,6 +58,6 @@ class BillingController extends Controller
     {
         $team = $request->user()->currentTeam;
 
-        return $team && $team->owner->is($request->user());
+        return $team && $team->owner && $team->owner->is($request->user());
     }
 }

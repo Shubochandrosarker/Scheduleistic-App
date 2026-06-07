@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Feed;
 use App\Models\Post;
+use App\Support\SsrfGuard;
 use Illuminate\Support\Facades\Http;
 
 /**
@@ -12,7 +13,10 @@ use Illuminate\Support\Facades\Http;
  */
 class RssIngestService
 {
-    public function __construct(private readonly PostComposer $composer) {}
+    public function __construct(
+        private readonly PostComposer $composer,
+        private readonly SsrfGuard $ssrf,
+    ) {}
 
     /** @return int number of new draft posts created */
     public function ingest(Feed $feed, ?string $rawXml = null): int
@@ -61,7 +65,12 @@ class RssIngestService
 
     private function fetch(string $url): ?string
     {
-        $response = Http::get($url);
+        // SSRF guard: never fetch internal/reserved addresses.
+        if (! $this->ssrf->isFetchable($url)) {
+            return null;
+        }
+
+        $response = Http::timeout(10)->get($url);
 
         return $response->successful() ? $response->body() : null;
     }

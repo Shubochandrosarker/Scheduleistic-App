@@ -131,7 +131,12 @@ Set `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, and the plan price i
 ### AI env
 `AI_FAKE`, `AI_ENDPOINT`, `AI_API_KEY`, `AI_MODEL`.
 
+## Security
+See [`../docs/03-security.md`](../docs/03-security.md) for the threat model, controls, and the
+Phase 5 hardening pass (mass-assignment defense, SSRF guard, suspension enforcement, AI throttle,
+impersonation audit logging).
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). All roadmap phases (0–4) are now implemented.
-Remaining work is **Phase 5**: hardening (security review, scale tests, GDPR), real OAuth/Stripe
-credentials, and deployment.
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). All roadmap phases (0–4) are implemented and
+a security-hardening pass (Phase 5) is complete. Remaining work is operational: real OAuth/Stripe
+credentials, custom-domain TLS, optional GDPR endpoints, and deployment.

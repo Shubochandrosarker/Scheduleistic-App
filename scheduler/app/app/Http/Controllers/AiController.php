@@ -13,6 +13,9 @@ class AiController extends Controller
     /** Generate brand-voice captions for the requested networks. */
     public function generate(Request $request): JsonResponse
     {
+        // Must belong to an organization (cost is attributable to a tenant).
+        abort_unless($request->user()->currentTeam, 403);
+
         $validated = $request->validate([
             'topic'       => ['required', 'string', 'max:500'],
             'providers'   => ['required', 'array', 'min:1'],

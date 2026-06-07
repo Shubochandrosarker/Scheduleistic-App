@@ -50,6 +50,18 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the user is a SOCIALISTIC platform operator.
+     *
+     * Uses forceFill so the test double can set the guarded privilege flag
+     * (which is intentionally not mass-assignable on the model).
+     */
+    public function platformAdmin(): static
+    {
+        return $this->afterMaking(fn (User $user) => $user->forceFill(['is_platform_admin' => true]))
+            ->afterCreating(fn (User $user) => $user->forceFill(['is_platform_admin' => true])->save());
+    }
+
+    /**
      * Indicate that the user should have a personal team.
      */
     public function withPersonalTeam(?callable $callback = null): static
