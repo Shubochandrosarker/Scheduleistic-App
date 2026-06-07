@@ -60,6 +60,15 @@ const logout = () => {
                                 <NavLink :href="route('workspaces.index')" :active="route().current('workspaces.*')">
                                     Workspaces
                                 </NavLink>
+                                <NavLink :href="route('billing.index')" :active="route().current('billing.*')">
+                                    Billing
+                                </NavLink>
+                                <NavLink :href="route('branding.edit')" :active="route().current('branding.*')">
+                                    White-label
+                                </NavLink>
+                                <NavLink v-if="$page.props.isPlatformAdmin" :href="route('admin.organizations.index')" :active="route().current('admin.*')">
+                                    Admin
+                                </NavLink>
                             </div>
                         </div>
 

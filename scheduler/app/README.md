@@ -94,6 +94,26 @@ network calls.
 - **Bulk CSV import** (`BulkImporter`): upload `content,scheduled_at,providers` rows to create
   many posts at once.
 
+## What Phase 3 adds (monetize + white-label)
+- **Stripe billing** (Laravel Cashier): the **organization (team) is the billable entity** —
+  `Team` is `Billable`, customer columns + subscriptions live on `teams`/`team_id`. Checkout +
+  billing-portal routes (`BillingController`).
+- **Plans, usage limits & feature gating** (`config/plans.php`, `PlanService`, `UsageService`):
+  free / pro / agency tiers with per-resource limits (workspaces, channels, members,
+  monthly posts). Enforced when creating workspaces, connecting channels, and scheduling posts.
+- **Per-tenant branding** (`BrandingController`): app name, tagline, colors, logo stored on the
+  organization and shared to the whole UI via Inertia (`branding` prop), merged over platform
+  defaults.
+- **Custom domains** (CNAME): set a domain + auto-issued verification token on the organization.
+- **Super-admin control plane** (`/admin`, `platform.admin` middleware): list every organization,
+  suspend/unsuspend, and impersonate an owner for support.
+
+### Billing env
+Set `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, and the plan price ids
+`STRIPE_PRICE_PRO` / `STRIPE_PRICE_AGENCY`. Mark yourself as a platform operator by setting
+`users.is_platform_admin = true`.
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 3** — Stripe billing,
-plans/usage limits, per-tenant branding, custom domains, and the super-admin control plane.
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 4** — analytics &
+reporting, AI caption assistant, media auto-crop, more networks, and WordPress/RSS article
+scheduling.

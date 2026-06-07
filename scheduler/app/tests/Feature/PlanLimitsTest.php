@@ -1,0 +1,88 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Workspace;
+use App\Services\UsageService;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class PlanLimitsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_free_plan_allows_the_first_workspace_but_blocks_the_second(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $this->assertSame('free', $user->currentTeam->plan);
+
+        $this->actingAs($user)
+            ->post(route('workspaces.store'), ['name' => 'First'])
+            ->assertSessionHasNoErrors();
+
+        $this->actingAs($user)
+            ->post(route('workspaces.store'), ['name' => 'Second'])
+            ->assertSessionHasErrors('plan');
+
+        $this->assertDatabaseCount('workspaces', 1);
+    }
+
+    public function test_usage_service_reports_usage_and_remaining(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        Workspace::create(['team_id' => $team->id, 'name' => 'W1']);
+
+        $usage = app(UsageService::class);
+
+        $this->assertSame(1, $usage->usage($team, 'workspaces'));
+        $this->assertSame(0, $usage->remaining($team, 'workspaces')); // free limit is 1
+        $this->assertFalse($usage->allows($team, 'workspaces'));
+    }
+
+    public function test_channel_limit_blocks_connecting_more_accounts(): void
+    {
+        config(['plans.free.limits.channels' => 1]);
+
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        $workspace = Workspace::create(['team_id' => $team->id, 'name' => 'W']);
+        $workspace->channels()->create(['provider' => 'linkedin', 'name' => 'LI']);
+
+        $this->actingAs($user)
+            ->get(route('workspaces.channels.connect', [$workspace->id, 'facebook']))
+            ->assertSessionHasErrors('plan');
+    }
+
+    public function test_monthly_post_limit_blocks_scheduling(): void
+    {
+        config(['plans.free.limits.monthly_posts' => 1]);
+
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        $workspace = Workspace::create(['team_id' => $team->id, 'name' => 'W']);
+        $channel = $workspace->channels()->create(['provider' => 'linkedin', 'name' => 'LI']);
+
+        Post::create(['workspace_id' => $workspace->id, 'content' => 'one', 'status' => Post::STATUS_DRAFT]);
+
+        $this->actingAs($user)
+            ->post(route('posts.store'), [
+                'workspace_id' => $workspace->id,
+                'content'      => 'two',
+                'channel_ids'  => [$channel->id],
+            ])
+            ->assertSessionHasErrors('plan');
+    }
+
+    public function test_agency_plan_is_unlimited(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        $team->update(['plan' => 'agency']);
+
+        $usage = app(UsageService::class);
+        $this->assertTrue($usage->allows($team, 'workspaces', 9999));
+    }
+}
