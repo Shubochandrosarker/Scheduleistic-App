@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
  */
 class PostComposer
 {
+    public function __construct(private readonly QueueScheduler $queue) {}
+
     /**
      * @param  array<int, int>  $channelIds        channels to publish to
      * @param  array<string, array{content?:string, options?:array}>  $overrides  per-provider overrides
@@ -27,6 +29,8 @@ class PostComposer
         array $overrides = [],
         ?int $authorId = null,
         array $media = [],
+        bool $useQueue = false,
+        ?string $recurringRule = null,
     ): Post {
         $channels = Channel::query()
             ->where('workspace_id', $workspace->id)
@@ -37,15 +41,21 @@ class PostComposer
             throw new \InvalidArgumentException('At least one valid channel is required.');
         }
 
-        return DB::transaction(function () use ($workspace, $content, $channels, $scheduledAt, $overrides, $authorId, $media) {
+        // "Add to queue" fills the next free posting-time slot.
+        if ($useQueue && ! $scheduledAt) {
+            $scheduledAt = $this->queue->nextSlot($workspace);
+        }
+
+        return DB::transaction(function () use ($workspace, $content, $channels, $scheduledAt, $overrides, $authorId, $media, $recurringRule) {
             $post = Post::create([
-                'workspace_id' => $workspace->id,
-                'author_id'    => $authorId,
-                'status'       => $scheduledAt ? Post::STATUS_SCHEDULED : Post::STATUS_DRAFT,
-                'content'      => $content,
-                'media'        => $media,
-                'scheduled_at' => $scheduledAt,
-                'timezone'     => $workspace->timezone ?? 'UTC',
+                'workspace_id'   => $workspace->id,
+                'author_id'      => $authorId,
+                'status'         => $scheduledAt ? Post::STATUS_SCHEDULED : Post::STATUS_DRAFT,
+                'content'        => $content,
+                'media'          => $media,
+                'scheduled_at'   => $scheduledAt,
+                'timezone'       => $workspace->timezone ?? 'UTC',
+                'recurring_rule' => $recurringRule,
             ]);
 
             $this->buildVersionsAndTargets($post, $channels, $overrides);

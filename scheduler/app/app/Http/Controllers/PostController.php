@@ -13,10 +13,10 @@ use Inertia\Response;
 
 class PostController extends Controller
 {
-    /** Calendar / list of posts across the organization's workspaces. */
+    /** Calendar / list of posts across every workspace the user can see. */
     public function index(Request $request): Response
     {
-        $workspaceIds = $request->user()->currentTeam->workspaces()->pluck('id');
+        $workspaceIds = $this->visibleWorkspaceIds($request);
 
         return Inertia::render('Posts/Index', [
             'posts' => Post::query()
@@ -26,6 +26,20 @@ class PostController extends Controller
                 ->limit(200)
                 ->get(),
         ]);
+    }
+
+    /**
+     * Workspaces the user may see: those owned by their current organization,
+     * plus any they are individually assigned to (the client portal).
+     */
+    protected function visibleWorkspaceIds(Request $request): \Illuminate\Support\Collection
+    {
+        $user = $request->user();
+
+        $owned    = $user->currentTeam?->workspaces()->pluck('id') ?? collect();
+        $assigned = $user->workspaces()->pluck('workspaces.id');
+
+        return $owned->merge($assigned)->unique()->values();
     }
 
     /** The composer. */
@@ -44,12 +58,14 @@ class PostController extends Controller
     public function store(Request $request, PostComposer $composer): RedirectResponse
     {
         $validated = $request->validate([
-            'workspace_id' => ['required', 'integer'],
-            'content'      => ['required', 'string'],
-            'channel_ids'  => ['required', 'array', 'min:1'],
-            'channel_ids.*'=> ['integer'],
-            'scheduled_at' => ['nullable', 'date'],
-            'overrides'    => ['nullable', 'array'],
+            'workspace_id'  => ['required', 'integer'],
+            'content'       => ['required', 'string'],
+            'channel_ids'   => ['required', 'array', 'min:1'],
+            'channel_ids.*' => ['integer'],
+            'scheduled_at'  => ['nullable', 'date'],
+            'use_queue'     => ['nullable', 'boolean'],
+            'recurring_rule'=> ['nullable', 'in:daily,weekly,monthly'],
+            'overrides'     => ['nullable', 'array'],
         ]);
 
         $workspace = Workspace::findOrFail($validated['workspace_id']);
@@ -62,6 +78,8 @@ class PostController extends Controller
             scheduledAt: isset($validated['scheduled_at']) ? Carbon::parse($validated['scheduled_at']) : null,
             overrides: $validated['overrides'] ?? [],
             authorId: $request->user()->id,
+            useQueue: (bool) ($validated['use_queue'] ?? false),
+            recurringRule: $validated['recurring_rule'] ?? null,
         );
 
         return redirect()->route('posts.index')->with('status', 'post-scheduled');

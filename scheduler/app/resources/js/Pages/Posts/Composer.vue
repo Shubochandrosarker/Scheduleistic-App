@@ -14,6 +14,8 @@ const form = useForm({
     content: '',
     channel_ids: [],
     scheduled_at: '',
+    use_queue: false,
+    recurring_rule: '',
 });
 
 const selectedWorkspace = computed(
@@ -63,14 +65,31 @@ const submit = () => form.post(route('posts.store'));
                     </div>
 
                     <div>
-                        <InputLabel for="scheduled_at" value="Schedule for (leave empty to save as draft)" />
+                        <InputLabel for="scheduled_at" value="Schedule for (leave empty to save as draft or use the queue)" />
                         <input id="scheduled_at" type="datetime-local" v-model="form.scheduled_at"
-                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" />
+                            :disabled="form.use_queue"
+                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm disabled:bg-gray-100" />
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-6">
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" v-model="form.use_queue" />
+                            <span class="text-sm text-gray-700">Add to queue (next best time slot)</span>
+                        </label>
+                        <div class="inline-flex items-center gap-2">
+                            <span class="text-sm text-gray-700">Repeat:</span>
+                            <select v-model="form.recurring_rule" class="border-gray-300 rounded-md shadow-sm text-sm">
+                                <option value="">Never</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly">Monthly</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="flex justify-end">
                         <PrimaryButton :disabled="form.processing || form.channel_ids.length === 0">
-                            {{ form.scheduled_at ? 'Schedule post' : 'Save draft' }}
+                            {{ (form.scheduled_at || form.use_queue) ? 'Schedule post' : 'Save draft' }}
                         </PrimaryButton>
                     </div>
                 </form>

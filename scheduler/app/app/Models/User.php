@@ -68,4 +68,12 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /** Workspaces this user is individually assigned to (incl. client portal). */
+    public function workspaces(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Workspace::class, 'workspace_user')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 }
