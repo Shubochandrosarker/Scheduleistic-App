@@ -91,6 +91,12 @@ class PublishPostJob implements ShouldQueue
         ]);
 
         $post->syncStatusFromTargets();
+
+        // When a recurring post is fully published, queue its next occurrence.
+        $fresh = $post->fresh();
+        if ($fresh && $fresh->status === \App\Models\Post::STATUS_PUBLISHED && $fresh->recurring_rule) {
+            app(\App\Services\RecurrenceService::class)->createNextOccurrence($fresh);
+        }
     }
 
     /** Called by the queue when the job has exhausted its retries. */
@@ -113,5 +119,9 @@ class PublishPostJob implements ShouldQueue
         ]);
 
         $target->post->syncStatusFromTargets();
+
+        // Alert the author so failures never pass silently.
+        $target->loadMissing('channel', 'post.author');
+        $target->post->author?->notify(new \App\Notifications\PostPublishFailed($target));
     }
 }

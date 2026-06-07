@@ -37,6 +37,24 @@ class Workspace extends Model
         return $this->hasMany(Channel::class);
     }
 
+    /** Posting-time templates used by the queue. */
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(TimeSlot::class);
+    }
+
+    /** Whether a user is assigned to this workspace (any role). */
+    public function hasUser(int $userId): bool
+    {
+        return $this->users()->where('users.id', $userId)->exists();
+    }
+
+    /** The workspace-level role for a user, if assigned. */
+    public function roleFor(int $userId): ?string
+    {
+        return $this->users()->where('users.id', $userId)->first()?->pivot?->role;
+    }
+
     /** Users assigned to this workspace, with their workspace role. */
     public function users(): BelongsToMany
     {

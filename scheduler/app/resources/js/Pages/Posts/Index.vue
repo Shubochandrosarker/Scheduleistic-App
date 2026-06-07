@@ -1,10 +1,18 @@
 <script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 
 defineProps({
     posts: Array,
 });
+
+const submit = (id) => router.post(route('posts.submit', id), {}, { preserveScroll: true });
+
+const decide = (id, decision) => router.post(
+    route('posts.decision', id),
+    { decision },
+    { preserveScroll: true },
+);
 
 const statusColor = (status) => ({
     draft: 'bg-gray-100 text-gray-700',
@@ -43,9 +51,25 @@ const statusColor = (status) => ({
                                 {{ post.targets?.length ?? 0 }} target(s)
                             </p>
                         </div>
-                        <span :class="statusColor(post.status)" class="shrink-0 px-2.5 py-1 rounded-full text-xs font-medium">
-                            {{ post.status }}
-                        </span>
+                        <div class="shrink-0 flex items-center gap-2">
+                            <button v-if="post.status === 'draft'" @click="submit(post.id)"
+                                class="text-xs px-2.5 py-1 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">
+                                Submit for approval
+                            </button>
+                            <template v-if="post.status === 'pending_approval'">
+                                <button @click="decide(post.id, 'approve')"
+                                    class="text-xs px-2.5 py-1 rounded-md bg-green-600 text-white hover:bg-green-700">
+                                    Approve
+                                </button>
+                                <button @click="decide(post.id, 'reject')"
+                                    class="text-xs px-2.5 py-1 rounded-md bg-red-600 text-white hover:bg-red-700">
+                                    Reject
+                                </button>
+                            </template>
+                            <span :class="statusColor(post.status)" class="px-2.5 py-1 rounded-full text-xs font-medium">
+                                {{ post.status }}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

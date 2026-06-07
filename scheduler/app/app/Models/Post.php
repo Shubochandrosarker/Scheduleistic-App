@@ -30,6 +30,8 @@ class Post extends Model
         'source',
         'scheduled_at',
         'timezone',
+        'recurring_rule',
+        'parent_post_id',
         'approval_state',
         'published_at',
     ];
@@ -68,6 +70,16 @@ class Post extends Model
     public function targets(): HasMany
     {
         return $this->hasMany(PostTarget::class);
+    }
+
+    public function approvals(): HasMany
+    {
+        return $this->hasMany(Approval::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
     }
 
     /** Content for a given provider, falling back to the post's base content. */

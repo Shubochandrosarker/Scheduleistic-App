@@ -78,7 +78,22 @@ Add the OAuth app credentials to `.env` (`LINKEDIN_CLIENT_ID`, `FACEBOOK_CLIENT_
 `GOOGLE_CLIENT_ID`, …). Until then, set `SOCIAL_FAKE=true` to exercise the full flow with no
 network calls.
 
+## What Phase 2 adds (agency layer)
+- **Approval workflows** (`ApprovalService`): submit → pending → approve / reject /
+  request-changes, with an `Approval` audit trail and `post.approval_state` kept in sync.
+- **Client portal**: clients are assigned to a workspace (`workspace_user` role) and see/act on
+  **only** their workspace; org owners/admins see everything. Enforced by
+  `AuthorizesWorkspaceAccess`.
+- **Collaboration**: per-post `Comment` thread with @mentions.
+- **Notifications** (mail + database): approver on submit, author on decision, author on publish
+  failure.
+- **Queues & best-time slots** (`TimeSlot` + `QueueScheduler`): "add to queue" fills the next
+  free posting slot, skipping collisions.
+- **Recurring posts** (`RecurrenceService`): daily/weekly/monthly — the next occurrence is created
+  automatically after a recurring post publishes (idempotent).
+- **Bulk CSV import** (`BulkImporter`): upload `content,scheduled_at,providers` rows to create
+  many posts at once.
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 2** — agency collaboration
-(approval workflows, client portal, queues/best-time, bulk import) and **Phase 3** (Stripe
-billing + white-label control plane).
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 3** — Stripe billing,
+plans/usage limits, per-tenant branding, custom domains, and the super-admin control plane.
