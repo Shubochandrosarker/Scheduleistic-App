@@ -113,7 +113,25 @@ Set `STRIPE_KEY`, `STRIPE_SECRET`, `STRIPE_WEBHOOK_SECRET`, and the plan price i
 `STRIPE_PRICE_PRO` / `STRIPE_PRICE_AGENCY`. Mark yourself as a platform operator by setting
 `users.is_platform_admin = true`.
 
+## What Phase 4 adds (advanced features)
+- **More networks**: Pinterest, Threads, TikTok, YouTube, Mastodon, Bluesky, Medium, WordPress —
+  13 providers total, all behind the same `SocialProvider` contract.
+- **AI caption assistant** (`AiAssistant` + `config/ai.php`): per-network, brand-voice copy from a
+  pluggable LLM (OpenRouter/OpenAI-compatible). `AI_FAKE=true` for a local stub. Composer has a
+  "✨ Generate" button; `POST /ai/generate` returns captions.
+- **Analytics & reporting** (`AnalyticsService`, `analytics_metrics`): providers expose
+  `fetchMetrics()`; an hourly `analytics:fetch` job captures engagement per published target; the
+  Analytics dashboard shows org-wide totals.
+- **Media auto-crop** (`MediaCropService`): computes centered per-network crop specs from a source
+  image (geometry unit-tested; pixel crop performed by the worker).
+- **WordPress / RSS article scheduling** (`RssIngestService`, `feeds` table, `feeds:poll`):
+  feeds auto-draft social posts from new articles, de-duplicated by guid — the article→social
+  pipeline, folding in the WORDPRESSISTIC ecosystem.
+
+### AI env
+`AI_FAKE`, `AI_ENDPOINT`, `AI_API_KEY`, `AI_MODEL`.
+
 ## Roadmap
-See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). Next up: **Phase 4** — analytics &
-reporting, AI caption assistant, media auto-crop, more networks, and WordPress/RSS article
-scheduling.
+See [`../docs/02-roadmap.md`](../docs/02-roadmap.md). All roadmap phases (0–4) are now implemented.
+Remaining work is **Phase 5**: hardening (security review, scale tests, GDPR), real OAuth/Stripe
+credentials, and deployment.

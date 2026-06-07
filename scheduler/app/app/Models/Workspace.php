@@ -43,6 +43,12 @@ class Workspace extends Model
         return $this->hasMany(TimeSlot::class);
     }
 
+    /** RSS / WordPress article feeds that auto-draft posts. */
+    public function feeds(): HasMany
+    {
+        return $this->hasMany(Feed::class);
+    }
+
     /** Whether a user is assigned to this workspace (any role). */
     public function hasUser(int $userId): bool
     {
