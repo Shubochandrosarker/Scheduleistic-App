@@ -26,6 +26,26 @@ Phase 0 scaffold of the white-label, multi-tenant social scheduling platform des
 - CI (`../../.github/workflows/ci.yml`) running the test suite — **46 tests green**
 
 ## Local development
+
+### Quick start (one command)
+```bash
+cd scheduler/app
+./dev.sh            # macOS / Linux / WSL2   (PHP 8.3+, Composer, Node 20+)
+# or on native Windows PowerShell:
+.\dev.ps1
+```
+This installs deps, creates a local **sqlite** `.env` with `SOCIAL_FAKE=true` + `AI_FAKE=true`
+(so you can connect channels and publish end-to-end with **no real API keys**), generates the app
+key, migrates, builds the front-end, and runs the web server **and** queue worker together.
+Then open http://localhost:8000, register, and make yourself admin:
+```bash
+php artisan tinker
+>>> App\Models\User::first()->forceFill(['is_platform_admin' => true])->save();
+```
+Use `./dev.sh setup` to do setup only (no servers). Local queue/cache/session use the database, so
+**no Redis is required**.
+
+### Manual
 ```bash
 cp .env.example .env
 composer install
