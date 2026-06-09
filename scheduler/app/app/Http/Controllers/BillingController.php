@@ -16,6 +16,12 @@ class BillingController extends Controller
     {
         $team = $request->user()->currentTeam;
 
+        // Reconcile the stored plan with the live subscription (covers cases where
+        // a webhook was missed, e.g. local dev without Stripe CLI forwarding).
+        if ($team->stripe_id) {
+            $team->syncPlanFromSubscription();
+        }
+
         return Inertia::render('Billing/Index', [
             'currentPlan' => $team->plan,
             'plans'       => collect(config('plans'))->map(fn ($p, $key) => [

@@ -62,4 +62,26 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
     ],
 
+    // YouTube uses the same Google Cloud OAuth client as Google Business.
+    'youtube' => [
+        'client_id'     => env('YOUTUBE_CLIENT_ID', env('GOOGLE_CLIENT_ID')),
+        'client_secret' => env('YOUTUBE_CLIENT_SECRET', env('GOOGLE_CLIENT_SECRET')),
+    ],
+
+    // Threads uses the same Meta app as Facebook/Instagram.
+    'threads' => [
+        'client_id'     => env('THREADS_CLIENT_ID', env('FACEBOOK_CLIENT_ID')),
+        'client_secret' => env('THREADS_CLIENT_SECRET', env('FACEBOOK_CLIENT_SECRET')),
+    ],
+
+    'pinterest' => [
+        'client_id'     => env('PINTEREST_CLIENT_ID'),
+        'client_secret' => env('PINTEREST_CLIENT_SECRET'),
+    ],
+
+    'tiktok' => [
+        'client_id'     => env('TIKTOK_CLIENT_ID'),
+        'client_secret' => env('TIKTOK_CLIENT_SECRET'),
+    ],
+
 ];

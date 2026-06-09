@@ -3,6 +3,7 @@
 namespace App\Social\Providers;
 
 use App\Models\Channel;
+use App\Social\Data\ConnectedAccount;
 use App\Social\Data\PublishPayload;
 use App\Social\Data\PublishResult;
 use App\Social\Exceptions\PublishException;
@@ -20,6 +21,25 @@ class MediumProvider extends AbstractTokenProvider
     public function label(): string
     {
         return 'Medium';
+    }
+
+    public function fields(): array
+    {
+        return [
+            ['key' => 'integration_token', 'label' => 'Integration token', 'type' => 'password'],
+            ['key' => 'author_id', 'label' => 'Author ID', 'type' => 'text'],
+        ];
+    }
+
+    public function accountFromCredentials(array $input): ConnectedAccount
+    {
+        return new ConnectedAccount(
+            providerAccountId: $input['author_id'] ?? ('medium-'.substr(sha1($input['integration_token'] ?? ''), 0, 8)),
+            name: 'Medium',
+            accessToken: $input['integration_token'] ?? '',
+            scopes: [],
+            meta: ['author_id' => $input['author_id'] ?? null],
+        );
     }
 
     public function publish(Channel $channel, PublishPayload $payload): PublishResult

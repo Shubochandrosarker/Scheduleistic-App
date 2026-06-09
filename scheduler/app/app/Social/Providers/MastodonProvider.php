@@ -3,6 +3,7 @@
 namespace App\Social\Providers;
 
 use App\Models\Channel;
+use App\Social\Data\ConnectedAccount;
 use App\Social\Data\PublishPayload;
 use App\Social\Data\PublishResult;
 use App\Social\Exceptions\PublishException;
@@ -20,6 +21,27 @@ class MastodonProvider extends AbstractTokenProvider
     public function label(): string
     {
         return 'Mastodon';
+    }
+
+    public function fields(): array
+    {
+        return [
+            ['key' => 'instance', 'label' => 'Instance URL (e.g. https://mastodon.social)', 'type' => 'url'],
+            ['key' => 'access_token', 'label' => 'Access token', 'type' => 'password'],
+        ];
+    }
+
+    public function accountFromCredentials(array $input): ConnectedAccount
+    {
+        $instance = rtrim($input['instance'] ?? 'https://mastodon.social', '/');
+
+        return new ConnectedAccount(
+            providerAccountId: 'mastodon-'.substr(sha1($instance.($input['access_token'] ?? '')), 0, 8),
+            name: 'Mastodon ('.parse_url($instance, PHP_URL_HOST).')',
+            accessToken: $input['access_token'] ?? '',
+            scopes: [],
+            meta: ['instance' => $instance],
+        );
     }
 
     public function publish(Channel $channel, PublishPayload $payload): PublishResult

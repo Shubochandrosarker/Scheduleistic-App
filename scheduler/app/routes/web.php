@@ -37,9 +37,7 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     // Feature routes are gated by organization status: a suspended org keeps
     // billing access (to reactivate) but loses the publishing tooling.
@@ -53,6 +51,7 @@ Route::middleware([
     // Channels (connected social accounts) within a workspace.
     Route::get('/workspaces/{workspace}/channels', [ChannelController::class, 'index'])->name('workspaces.channels.index');
     Route::get('/workspaces/{workspace}/channels/connect/{provider}', [ChannelController::class, 'connect'])->name('workspaces.channels.connect');
+    Route::post('/workspaces/{workspace}/channels/token/{provider}', [ChannelController::class, 'storeToken'])->name('workspaces.channels.token');
     Route::delete('/workspaces/{workspace}/channels/{channel}', [ChannelController::class, 'destroy'])->name('workspaces.channels.destroy');
 
     // OAuth callback (provider redirects here).
