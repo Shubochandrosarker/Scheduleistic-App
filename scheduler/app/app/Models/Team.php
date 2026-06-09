@@ -75,6 +75,37 @@ class Team extends JetstreamTeam
         return $this->suspended_at !== null;
     }
 
+    /**
+     * Resolve the plan key this organization is entitled to from its active
+     * Stripe subscription (falls back to free / its current value).
+     */
+    public function planFromSubscription(): string
+    {
+        $subscription = $this->subscription('default');
+
+        if (! $subscription || ! $subscription->valid()) {
+            return 'free';
+        }
+
+        foreach (config('plans') as $key => $plan) {
+            if (! empty($plan['price_id']) && $plan['price_id'] === $subscription->stripe_price) {
+                return $key;
+            }
+        }
+
+        return $this->plan; // unknown price — leave entitlement unchanged
+    }
+
+    /** Reconcile the stored plan column with the live subscription. */
+    public function syncPlanFromSubscription(): void
+    {
+        $plan = $this->planFromSubscription();
+
+        if ($this->plan !== $plan) {
+            $this->forceFill(['plan' => $plan])->save();
+        }
+    }
+
     public function customDomainVerified(): bool
     {
         return $this->custom_domain_verified_at !== null;

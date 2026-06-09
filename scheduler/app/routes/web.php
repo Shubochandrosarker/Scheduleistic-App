@@ -53,6 +53,7 @@ Route::middleware([
     // Channels (connected social accounts) within a workspace.
     Route::get('/workspaces/{workspace}/channels', [ChannelController::class, 'index'])->name('workspaces.channels.index');
     Route::get('/workspaces/{workspace}/channels/connect/{provider}', [ChannelController::class, 'connect'])->name('workspaces.channels.connect');
+    Route::post('/workspaces/{workspace}/channels/token/{provider}', [ChannelController::class, 'storeToken'])->name('workspaces.channels.token');
     Route::delete('/workspaces/{workspace}/channels/{channel}', [ChannelController::class, 'destroy'])->name('workspaces.channels.destroy');
 
     // OAuth callback (provider redirects here).

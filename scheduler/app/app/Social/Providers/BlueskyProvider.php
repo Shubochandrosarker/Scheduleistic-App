@@ -3,6 +3,7 @@
 namespace App\Social\Providers;
 
 use App\Models\Channel;
+use App\Social\Data\ConnectedAccount;
 use App\Social\Data\PublishPayload;
 use App\Social\Data\PublishResult;
 use App\Social\Exceptions\PublishException;
@@ -25,6 +26,27 @@ class BlueskyProvider extends AbstractTokenProvider
     public function label(): string
     {
         return 'Bluesky';
+    }
+
+    public function fields(): array
+    {
+        return [
+            ['key' => 'handle', 'label' => 'Handle (e.g. you.bsky.social)', 'type' => 'text'],
+            ['key' => 'app_password', 'label' => 'App password', 'type' => 'password'],
+        ];
+    }
+
+    public function accountFromCredentials(array $input): ConnectedAccount
+    {
+        $handle = $input['handle'] ?? '';
+
+        return new ConnectedAccount(
+            providerAccountId: 'bluesky-'.substr(sha1($handle), 0, 8),
+            name: $handle ?: 'Bluesky',
+            accessToken: $input['app_password'] ?? '',
+            scopes: [],
+            meta: ['handle' => $handle],
+        );
     }
 
     public function publish(Channel $channel, PublishPayload $payload): PublishResult

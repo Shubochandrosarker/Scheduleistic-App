@@ -57,6 +57,12 @@ abstract class AbstractOAuthProvider implements SocialProvider
         return config("services.{$this->key()}.client_secret");
     }
 
+    /** Whether this OAuth app has credentials configured on this instance. */
+    public function isConfigured(): bool
+    {
+        return ! empty($this->clientId()) && ! empty($this->clientSecret());
+    }
+
     public function authorizationUrl(string $state, string $redirectUri): string
     {
         return $this->authorizeEndpoint().'?'.http_build_query([

@@ -3,6 +3,7 @@
 namespace App\Social\Providers;
 
 use App\Models\Channel;
+use App\Social\Data\ConnectedAccount;
 use App\Social\Data\PublishPayload;
 use App\Social\Data\PublishResult;
 use App\Social\Exceptions\PublishException;
@@ -24,6 +25,28 @@ class WordPressProvider extends AbstractTokenProvider
     public function label(): string
     {
         return 'WordPress';
+    }
+
+    public function fields(): array
+    {
+        return [
+            ['key' => 'site_url', 'label' => 'Site URL (e.g. https://blog.example.com)', 'type' => 'url'],
+            ['key' => 'username', 'label' => 'Username', 'type' => 'text'],
+            ['key' => 'app_password', 'label' => 'Application password', 'type' => 'password'],
+        ];
+    }
+
+    public function accountFromCredentials(array $input): ConnectedAccount
+    {
+        $site = rtrim($input['site_url'] ?? '', '/');
+
+        return new ConnectedAccount(
+            providerAccountId: 'wordpress-'.substr(sha1($site.($input['username'] ?? '')), 0, 8),
+            name: 'WordPress ('.parse_url($site, PHP_URL_HOST).')',
+            accessToken: $input['app_password'] ?? '',
+            scopes: [],
+            meta: ['site_url' => $site, 'username' => $input['username'] ?? null],
+        );
     }
 
     public function publish(Channel $channel, PublishPayload $payload): PublishResult
