@@ -9,7 +9,7 @@ use App\Social\Data\PublishResult;
 
 /**
  * The contract every social network driver implements. Adding a new network
- * to SOCIALISTIC means writing one class that fulfils this interface and
+ * to Scheduleistic means writing one class that fulfils this interface and
  * registering it with the ProviderManager — nothing else changes.
  */
 interface SocialProvider

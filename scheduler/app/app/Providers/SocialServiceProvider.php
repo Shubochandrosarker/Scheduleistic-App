@@ -14,7 +14,7 @@ class SocialServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ProviderManager::class, function () {
             return new ProviderManager(
-                fake: (bool) config('socialistic.fake_publishing', false),
+                fake: (bool) config('scheduleistic.fake_publishing', false),
             );
         });
     }

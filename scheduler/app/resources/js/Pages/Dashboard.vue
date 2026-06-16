@@ -39,7 +39,7 @@ const actions = [
                 <div class="bg-white shadow sm:rounded-lg p-6 flex items-center justify-between">
                     <div>
                         <h3 class="text-lg font-semibold text-gray-900">
-                            Welcome to {{ branding.name || 'SOCIALISTIC' }}
+                            Welcome to {{ branding.name || 'Scheduleistic' }}
                         </h3>
                         <p class="text-sm text-gray-500">{{ branding.tagline || 'Schedule and publish across every network.' }}</p>
                     </div>

@@ -25,9 +25,11 @@ class BillingController extends Controller
         return Inertia::render('Billing/Index', [
             'currentPlan' => $team->plan,
             'plans'       => collect(config('plans'))->map(fn ($p, $key) => [
-                'key'    => $key,
-                'name'   => $p['name'],
-                'limits' => $p['limits'],
+                'key'      => $key,
+                'name'     => $p['name'],
+                'price'    => $p['price'] ?? 0,
+                'limits'   => $p['limits'],
+                'features' => $p['features'] ?? [],
             ])->values(),
             'usage'        => $this->usage->snapshot($team),
             'subscribed'   => $team->subscribed('default'),

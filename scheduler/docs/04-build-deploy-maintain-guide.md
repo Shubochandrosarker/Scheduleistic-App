@@ -1,6 +1,6 @@
-# SOCIALISTIC — Complete Build, Deploy & Maintain Guide
+# Scheduleistic — Complete Build, Deploy & Maintain Guide
 
-A practical, end-to-end manual for the SOCIALISTIC social-media scheduling SaaS:
+A practical, end-to-end manual for the Scheduleistic social-media scheduling SaaS:
 what it is, how it was built, how to put it live on your Hostinger VPS, how
 tenant white-label custom domains + automatic HTTPS work, and how to maintain
 it day-to-day from VS Code.
@@ -11,7 +11,7 @@ Audience: the operator/owner (you). Assumes basic comfort with a terminal.
 
 ## 1. What you have
 
-SOCIALISTIC is a self-hosted, multi-tenant, white-label social-media scheduler
+Scheduleistic is a self-hosted, multi-tenant, white-label social-media scheduler
 (a Buffer / Hootsuite / Postiz-style product you own outright). Core features:
 
 - Multi-tenant **organizations** (agencies) → each owns client **workspaces**.
@@ -114,7 +114,7 @@ bandwidth) and a **Business (shared) hosting** plan.
 
 ### Verdict: use the VPS. ✅
 
-SOCIALISTIC needs long-running processes (queue worker + scheduler), Docker,
+Scheduleistic needs long-running processes (queue worker + scheduler), Docker,
 Redis, and the Caddy edge proxy binding ports 80/443. **Shared/Business hosting
 cannot run any of these** — no root, no Docker, no persistent daemons, no
 custom ports. Business hosting is fine for a marketing landing page, not the app.
@@ -192,7 +192,7 @@ nano .env
 Set at least these (full reference in the Appendix):
 
 ```
-APP_NAME=SOCIALISTIC
+APP_NAME=Scheduleistic
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://app.yourbrand.com
@@ -201,8 +201,8 @@ ACME_EMAIL=you@yourbrand.com
 
 DB_CONNECTION=mysql
 DB_HOST=mysql
-DB_DATABASE=socialistic
-DB_USERNAME=socialistic
+DB_DATABASE=scheduleistic
+DB_USERNAME=scheduleistic
 DB_PASSWORD=<choose-a-strong-password>
 
 REDIS_HOST=redis
@@ -331,7 +331,7 @@ branded — no work from you per domain.
 1. The org owner enters their domain under **White-label → Custom domain**. The
    app stores it and issues a one-time verification token.
 2. The owner adds two DNS records at their registrar:
-   - `TXT  _socialistic.social.theiragency.com = socialistic-verify-…` (proves
+   - `TXT  _scheduleistic.social.theiragency.com = scheduleistic-verify-…` (proves
      ownership)
    - `CNAME social.theiragency.com → app.yourbrand.com` (routes traffic to you)
 3. The scheduler runs `domains:verify` every 5 minutes (or the owner clicks
@@ -348,7 +348,7 @@ certificates for random hostnames and hitting ACME rate limits.
 
 ### 6.2 What you tell your customers
 
-> "Add a TXT record `_socialistic.<your-domain>` with the value we show you,
+> "Add a TXT record `_scheduleistic.<your-domain>` with the value we show you,
 > and a CNAME from `<your-domain>` to `app.yourbrand.com`. Click Verify. HTTPS
 > turns on automatically within a couple of minutes."
 
@@ -428,7 +428,7 @@ Database (nightly cron on the VPS):
 ```
 # crontab -e  (as deploy)
 0 3 * * * docker compose -f ~/social-automation.zip/scheduler/app/docker-compose.yml \
-  exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> socialistic \
+  exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> scheduleistic \
   | gzip > ~/backups/db-$(date +\%F).sql.gz
 ```
 
@@ -552,5 +552,5 @@ scheduler/docs/               roadmap, security, this guide
 
 ---
 
-*SOCIALISTIC — you own the code, the data, and the customer relationship.*
+*Scheduleistic — you own the code, the data, and the customer relationship.*
 *Built to be operated by one person from a single VPS and a VS Code window.*

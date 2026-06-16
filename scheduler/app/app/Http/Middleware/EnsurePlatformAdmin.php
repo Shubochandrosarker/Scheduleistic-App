@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Restricts the super-admin control plane to SOCIALISTIC platform operators.
+ * Restricts the super-admin control plane to Scheduleistic platform operators.
  */
 class EnsurePlatformAdmin
 {

@@ -12,7 +12,7 @@ use Laravel\Jetstream\Events\TeamUpdated;
 use Laravel\Jetstream\Team as JetstreamTeam;
 
 /**
- * In SOCIALISTIC a Jetstream "team" is an Organization (an agency / tenant /
+ * In Scheduleistic a Jetstream "team" is an Organization (an agency / tenant /
  * white-label account). Each organization owns many client Workspaces, carries
  * a plan + subscription (Cashier billable), and its own white-label branding.
  */
@@ -119,12 +119,12 @@ class Team extends JetstreamTeam
     public function brandingConfig(): array
     {
         $defaults = [
-            'name'       => config('socialistic.name'),
-            'tagline'    => config('socialistic.tagline'),
-            'powered_by' => config('socialistic.powered_by'),
-            'primary'    => config('socialistic.colors.primary'),
-            'secondary'  => config('socialistic.colors.secondary'),
-            'logo'       => config('socialistic.logo'),
+            'name'       => config('scheduleistic.name'),
+            'tagline'    => config('scheduleistic.tagline'),
+            'powered_by' => config('scheduleistic.powered_by'),
+            'primary'    => config('scheduleistic.colors.primary'),
+            'secondary'  => config('scheduleistic.colors.secondary'),
+            'logo'       => config('scheduleistic.logo'),
         ];
 
         return array_merge($defaults, array_filter($this->branding ?? []));

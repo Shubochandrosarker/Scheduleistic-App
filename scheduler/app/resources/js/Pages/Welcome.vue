@@ -9,7 +9,7 @@ defineProps({
 });
 
 const branding = usePage().props.branding ?? {};
-const appName = branding.name || 'SOCIALISTIC';
+const appName = branding.name || 'Scheduleistic';
 
 const features = [
     { title: '13 networks', body: 'LinkedIn, Facebook, Instagram, Threads, TikTok, YouTube, Pinterest, Mastodon, Bluesky, Medium, WordPress and more.' },

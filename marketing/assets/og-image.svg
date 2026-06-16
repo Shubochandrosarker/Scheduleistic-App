@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="Scheduleistic — Social Media Scheduling Software for Agencies">
+  <rect width="1200" height="630" fill="#0F1714"/>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <defs>
+    <radialGradient id="g" cx="20%" cy="0%" r="90%">
+      <stop offset="0%" stop-color="#16211D"/>
+      <stop offset="100%" stop-color="#0F1714"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(90,90)">
+    <rect x="0" y="0" width="58" height="52" rx="9" fill="none" stroke="#8BE7C2" stroke-width="5"/>
+    <line x1="0" y1="15" x2="58" y2="15" stroke="#8BE7C2" stroke-width="5"/>
+    <path d="M16 33 l8 8 l18 -18" fill="none" stroke="#00D084" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="172" y="132" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="700" fill="#F5F7F6">Scheduleistic</text>
+  <text x="90" y="300" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="800" fill="#F5F7F6">Schedule posts.</text>
+  <text x="90" y="380" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="800" fill="#F5F7F6">Manage clients.</text>
+  <text x="90" y="460" font-family="Segoe UI, Arial, sans-serif" font-size="68" font-weight="800" fill="#8BE7C2">Publish with confidence.</text>
+  <text x="90" y="540" font-family="Segoe UI, Arial, sans-serif" font-size="30" fill="#AAB8B2">Social media scheduling software for agencies, creators &amp; teams</text>
+</svg>

@@ -1,4 +1,4 @@
-# SOCIALISTIC application image (app, queue worker, scheduler all share this).
+# Scheduleistic application image (app, queue worker, scheduler all share this).
 FROM php:8.4-cli-bookworm
 
 # System deps + PHP extensions needed by Laravel + the publishing engine.

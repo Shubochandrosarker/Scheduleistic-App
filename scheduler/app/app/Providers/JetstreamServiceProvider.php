@@ -45,7 +45,7 @@ class JetstreamServiceProvider extends ServiceProvider
     {
         Jetstream::defaultApiTokenPermissions(['read']);
 
-        // Organization (Jetstream "team") roles for SOCIALISTIC.
+        // Organization (Jetstream "team") roles for Scheduleistic.
         // The organization Owner is the team creator and implicitly has every
         // permission; the roles below are assigned to invited members.
 

@@ -76,13 +76,20 @@ class PlanLimitsTest extends TestCase
             ->assertSessionHasErrors('plan');
     }
 
-    public function test_agency_plan_is_unlimited(): void
+    public function test_higher_plans_grant_larger_limits(): void
     {
         $user = User::factory()->withPersonalTeam()->create();
         $team = $user->currentTeam;
-        $team->update(['plan' => 'agency']);
-
         $usage = app(UsageService::class);
-        $this->assertTrue($usage->allows($team, 'workspaces', 9999));
+
+        // Agency: 15 workspaces — allowed up to the limit, blocked beyond it.
+        $team->update(['plan' => 'agency']);
+        $this->assertTrue($usage->allows($team, 'workspaces', 15));
+        $this->assertFalse($usage->allows($team, 'workspaces', 16));
+
+        // Scale: 50 workspaces.
+        $team->update(['plan' => 'scale']);
+        $this->assertTrue($usage->allows($team, 'workspaces', 50));
+        $this->assertFalse($usage->allows($team, 'workspaces', 51));
     }
 }

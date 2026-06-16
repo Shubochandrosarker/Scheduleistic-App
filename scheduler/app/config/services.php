@@ -35,7 +35,7 @@ return [
         ],
     ],
 
-    // --- SOCIALISTIC social provider OAuth credentials --------------------
+    // --- Scheduleistic social provider OAuth credentials --------------------
 
     'linkedin' => [
         'client_id'     => env('LINKEDIN_CLIENT_ID'),

@@ -72,7 +72,7 @@ class BrandingController extends Controller
         $request->user()->currentTeam->update([
             'custom_domain'             => $validated['custom_domain'] ?? null,
             'custom_domain_verified_at' => null,
-            'custom_domain_token'       => 'socialistic-verify-'.Str::random(24),
+            'custom_domain_token'       => 'scheduleistic-verify-'.Str::random(24),
         ]);
 
         return back()->with('status', 'domain-updated');

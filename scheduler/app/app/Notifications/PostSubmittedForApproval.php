@@ -25,7 +25,7 @@ class PostSubmittedForApproval extends Notification
             ->subject('A post needs your approval')
             ->line("A post in workspace \"{$this->post->workspace->name}\" is awaiting review.")
             ->action('Review post', url('/posts'))
-            ->line('Thank you for using '.config('socialistic.name').'.');
+            ->line('Thank you for using '.config('scheduleistic.name').'.');
     }
 
     /** @return array<string, mixed> */

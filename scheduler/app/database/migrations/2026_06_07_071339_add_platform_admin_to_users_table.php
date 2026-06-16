@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Marks a user as a SOCIALISTIC platform operator (you), granting access to
+ * Marks a user as a Scheduleistic platform operator (you), granting access to
  * the super-admin control plane across all organizations.
  */
 return new class extends Migration

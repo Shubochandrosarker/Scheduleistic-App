@@ -50,7 +50,7 @@ class UserFactory extends Factory
     }
 
     /**
-     * Indicate that the user is a SOCIALISTIC platform operator.
+     * Indicate that the user is a Scheduleistic platform operator.
      *
      * Uses forceFill so the test double can set the guarded privilege flag
      * (which is intentionally not mass-assignable on the model).

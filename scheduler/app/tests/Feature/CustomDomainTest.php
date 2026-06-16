@@ -17,13 +17,13 @@ class CustomDomainTest extends TestCase
         $team = $user->currentTeam;
         $team->forceFill([
             'custom_domain'       => 'app.agency.com',
-            'custom_domain_token' => 'socialistic-verify-abc123',
+            'custom_domain_token' => 'scheduleistic-verify-abc123',
         ])->save();
 
         // Inject a fake DNS resolver that returns the expected token.
         $service = new DomainVerificationService(
-            fn (string $host) => $host === '_socialistic.app.agency.com'
-                ? ['socialistic-verify-abc123']
+            fn (string $host) => $host === '_scheduleistic.app.agency.com'
+                ? ['scheduleistic-verify-abc123']
                 : [],
         );
 
@@ -37,7 +37,7 @@ class CustomDomainTest extends TestCase
         $team = $user->currentTeam;
         $team->forceFill([
             'custom_domain'       => 'app.agency.com',
-            'custom_domain_token' => 'socialistic-verify-abc123',
+            'custom_domain_token' => 'scheduleistic-verify-abc123',
         ])->save();
 
         $service = new DomainVerificationService(fn (string $host) => ['some-other-value']);
@@ -61,9 +61,9 @@ class CustomDomainTest extends TestCase
 
     public function test_tls_check_approves_the_platform_domain(): void
     {
-        config(['app.url' => 'https://app.socialistic.test']);
+        config(['app.url' => 'https://app.scheduleistic.test']);
 
-        $this->get('/tls/check?domain=app.socialistic.test')->assertOk();
+        $this->get('/tls/check?domain=app.scheduleistic.test')->assertOk();
     }
 
     public function test_guest_on_a_custom_domain_gets_tenant_branding(): void
