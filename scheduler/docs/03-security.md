@@ -1,4 +1,4 @@
-# SOCIALISTIC — Security posture & hardening
+# Scheduleistic — Security posture & hardening
 
 This document records the security review of the platform and the hardening
 applied in the Phase 5 pass.

@@ -1,4 +1,4 @@
-# SOCIALISTIC — Application
+# Scheduleistic — Application
 
 **Complete Social Automated System**
 _Powered by WPistic — A product of the WORDPRESSISTIC Ecosystem_
@@ -21,7 +21,7 @@ Phase 0 scaffold of the white-label, multi-tenant social scheduling platform des
   `app/Providers/JetstreamServiceProvider.php`)
 - **Tenancy layer**: `Workspace` (a client/brand) → `Channel` (a connected social account),
   with encrypted-at-rest OAuth tokens
-- Branding config (`config/socialistic.php`) + white-label env switches
+- Branding config (`config/scheduleistic.php`) + white-label env switches
 - Docker stack: `app`, `worker` (queue), `scheduler` (cron), `mysql`, `redis`
 - CI (`../../.github/workflows/ci.yml`) running the test suite — **46 tests green**
 
@@ -158,12 +158,12 @@ impersonation audit logging).
 
 ## Deploying & operating
 See [`../docs/04-build-deploy-maintain-guide.md`](../docs/04-build-deploy-maintain-guide.md)
-(also available as a PDF in `scheduler/docs/SOCIALISTIC-Guide.pdf`) for the full go-live runbook
+(also available as a PDF in `scheduler/docs/Scheduleistic-Guide.pdf`) for the full go-live runbook
 (Hostinger VPS), OAuth/Stripe/AI setup, custom-domain white-label TLS, and VS Code maintenance.
 
 ## Custom-domain white-label TLS
 Tenants can run the dashboard on their own domain with automatic HTTPS. They add a `TXT`
-ownership record (`_socialistic.<domain>`) plus a `CNAME` to the platform domain; the scheduler
+ownership record (`_scheduleistic.<domain>`) plus a `CNAME` to the platform domain; the scheduler
 verifies it (`domains:verify`), and Caddy issues a Let's Encrypt certificate on demand — gated by
 the app's `/tls/check` endpoint so only verified domains get certs. `ResolveTenantDomain` serves
 each tenant's branding by host (including the guest login page).

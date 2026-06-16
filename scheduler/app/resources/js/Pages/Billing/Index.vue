@@ -44,14 +44,20 @@ const label = (v) => (v === -1 ? 'Unlimited' : v);
                 </div>
 
                 <!-- Plans -->
-                <div class="grid gap-6 md:grid-cols-3">
+                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                     <div v-for="p in plans" :key="p.key" class="bg-white shadow sm:rounded-lg p-6 flex flex-col">
                         <h3 class="text-lg font-semibold text-gray-900 capitalize">{{ p.name }}</h3>
+                        <p class="mt-1 text-2xl font-bold text-gray-900">
+                            <span v-if="p.price">${{ p.price }}<span class="text-sm font-normal text-gray-400">/mo</span></span>
+                            <span v-else class="text-gray-500">Free</span>
+                        </p>
                         <ul class="mt-4 space-y-1 text-sm text-gray-600 flex-1">
                             <li>{{ label(p.limits.workspaces) }} workspaces</li>
                             <li>{{ label(p.limits.channels) }} channels</li>
                             <li>{{ label(p.limits.members) }} team members</li>
                             <li>{{ label(p.limits.monthly_posts) }} posts / month</li>
+                            <li v-if="p.features && p.features.client_approval">Client approval</li>
+                            <li v-if="p.features && p.features.white_label">White-label branding</li>
                         </ul>
                         <PrimaryButton v-if="p.key !== currentPlan && p.key !== 'free'"
                             class="mt-4 justify-center" @click="subscribe(p.key)">

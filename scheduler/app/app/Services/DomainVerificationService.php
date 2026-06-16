@@ -9,7 +9,7 @@ use Closure;
  * Verifies that an organization owns the custom domain it configured, by
  * checking for a DNS TXT record containing the issued verification token.
  *
- * Expected record:  TXT  _socialistic.<custom_domain>  =  <custom_domain_token>
+ * Expected record:  TXT  _scheduleistic.<custom_domain>  =  <custom_domain_token>
  *
  * The DNS resolver is injectable so the behaviour is unit-testable without
  * real network lookups.
@@ -36,7 +36,7 @@ class DomainVerificationService
 
     public function recordName(string $domain): string
     {
-        return '_socialistic.'.$domain;
+        return '_scheduleistic.'.$domain;
     }
 
     /** Run the DNS check and persist verification state. Returns true if verified. */

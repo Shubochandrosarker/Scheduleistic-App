@@ -45,9 +45,9 @@ class HandleInertiaRequests extends Middleware
             'branding' => $team
                 ? $team->brandingConfig()
                 : [
-                    'name'       => config('socialistic.name'),
-                    'tagline'    => config('socialistic.tagline'),
-                    'powered_by' => config('socialistic.powered_by'),
+                    'name'       => config('scheduleistic.name'),
+                    'tagline'    => config('scheduleistic.tagline'),
+                    'powered_by' => config('scheduleistic.powered_by'),
                 ],
             'isPlatformAdmin'  => (bool) $request->user()?->is_platform_admin,
             'isImpersonating'  => $request->session()->has('impersonator_id'),

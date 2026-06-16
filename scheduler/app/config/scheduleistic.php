@@ -4,7 +4,7 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | SOCIALISTIC Branding
+    | Scheduleistic Branding
     |--------------------------------------------------------------------------
     |
     | These values drive the default (platform owner) branding. For white-label
@@ -13,9 +13,9 @@ return [
     |
     */
 
-    'name'        => env('APP_NAME', 'SOCIALISTIC'),
-    'tagline'     => 'Complete Social Automated System',
-    'powered_by'  => 'Powered by WPistic — A product of the WORDPRESSISTIC Ecosystem',
+    'name'        => env('APP_NAME', 'Scheduleistic'),
+    'tagline'     => 'Schedule posts. Manage clients. Publish with confidence.',
+    'powered_by'  => env('BRAND_POWERED_BY', 'Powered by Scheduleistic'),
 
     /*
     |--------------------------------------------------------------------------
