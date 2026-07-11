@@ -85,7 +85,7 @@ docker --version && docker compose version
 ```bash
 sudo mkdir -p /opt && sudo chown deploy:deploy /opt
 cd /opt
-git clone https://github.com/Shubochandrosarker/social-automation.zip.git scheduleistic
+git clone https://github.com/Shubochandrosarker/Scheduleistic-App.git scheduleistic
 cd scheduleistic/scheduler/app
 
 cp .env.production.example .env
@@ -101,7 +101,8 @@ Fill in, at minimum:
 - `DB_PASSWORD=` a long random string — **must match** `MYSQL_PASSWORD` in
   `docker-compose.yml` (edit the compose file or move these to env).
 - `MAIL_*` — a real SMTP provider so verification/approval emails send.
-- `STRIPE_*` — see `STRIPE_SETUP` notes below (optional for first boot).
+- `STRIPE_*` — see [`../docs/04-build-deploy-maintain-guide.md`](../docs/04-build-deploy-maintain-guide.md#5-connecting-the-networks-stripe-and-ai)
+  §5.2 for the Stripe setup steps (optional for first boot).
 
 > **Never commit `.env`.** It is git-ignored. Keep an encrypted off-server backup.
 

@@ -1,7 +1,8 @@
 # Scheduleistic — Security posture & hardening
 
 This document records the security review of the platform and the hardening
-applied in the Phase 5 pass.
+applied in the Phase 5 pass. See [`01-architecture.md`](01-architecture.md) for
+the system design these controls sit on top of.
 
 ## Threat model (multi-tenant SaaS)
 
@@ -44,6 +45,16 @@ applied in the Phase 5 pass.
 5. **Impersonation hardening** — nested impersonation is rejected, and every
    impersonation is written to the audit log (admin id, org id, owner id).
 
+## Brain Gateway integration (optional, disabled by default)
+
+The AI assistant and post AI agents can optionally call out to the external
+`wpistic-ai-gateway` (`BrainGatewayClient`) to ground generations in a team's
+own brand knowledge and report usage. Requests are HMAC-signed with
+`BRAIN_GATEWAY_SECRET`. It is off by default (`BRAIN_GATEWAY_ENABLED=false`),
+fails soft if unreachable or misconfigured (AI features keep working
+ungrounded), and `BRAIN_GATEWAY_FAKE=true` gives a deterministic local stub
+with no outbound network calls for development.
+
 ## Audit findings reviewed and dismissed (false positives)
 
 - *"ChannelController / PostController missing client-portal pivot check"* — these
@@ -58,6 +69,8 @@ applied in the Phase 5 pass.
 ## Known follow-ups for production (operational, not code)
 
 - Real OAuth app credentials + Stripe keys/webhook secret in `.env`.
-- TLS automation for tenant custom domains (infra).
 - GDPR data export/delete endpoints (if operating in the EU).
 - Rate limiting at the edge (WAF) in addition to app-level throttles.
+
+TLS automation for tenant custom domains shipped in Phase 6 (Caddy on-demand TLS gated by
+`/tls/check` — see [`01-architecture.md`](01-architecture.md)#8.3) and is no longer a follow-up.

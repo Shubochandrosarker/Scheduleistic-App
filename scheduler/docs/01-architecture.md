@@ -1,68 +1,48 @@
-# Social Scheduler — Architecture & System Design
+# Scheduleistic — Architecture & System Design
 
-**Product codename:** Wpistic Social (working title — fully rebrandable, see White-Label section)
-**Type:** Multi-tenant, white-label, resellable SaaS for social media scheduling & management
-**Inspiration:** Mixpost (self-hostable Laravel scheduler) + agency-grade client/team management
-**Status:** Architecture proposal — _no application code written yet. Approve this before build._
+**Type:** Multi-tenant, white-label, resellable SaaS for social media scheduling & management.
+**Inspiration:** Mixpost (self-hostable Laravel scheduler) + agency-grade client/team management.
+**Status:** Current — this document describes the shipped, deployed application, not a proposal.
+For what changed release-by-release, see [`02-roadmap.md`](02-roadmap.md).
 
 ---
 
-## 1. Product Vision
+## 1. What this is
 
-A social media management platform you can:
+Scheduleistic is a full SaaS platform, not "just a scheduler":
 
-1. **Use yourself** to schedule every kind of social post across many networks.
-2. **Run as an agency** — invite team members, assign them to clients, manage each client's
+1. **Use it yourself** to schedule every kind of social post across 13 networks.
+2. **Run it as an agency** — invite team members, assign them to clients, manage each client's
    own connected social accounts in isolation.
-3. **Sell as a SaaS** — sign up paying customers with plans, usage limits, and billing.
-4. **License white-label** — resell the whole product under a buyer's brand, logo, and domain
-   (the "white-label deal" you mentioned), either self-hosted or managed by you.
+3. **Sell it as a SaaS** — paying customers on metered plans with Stripe billing.
+4. **License it white-label** — a tenant can run the dashboard on their own branded domain.
 
-This is **not** "just a scheduler." It is a full SaaS platform: auth, multi-tenancy, billing,
-role-based access, an advanced post composer, a reliable publishing engine, analytics,
-client approval workflows, AI assistance, and a super-admin control plane.
-
----
-
-## 2. Why this is bigger than the current repo
-
-The existing `automation/` folder is **glue code** (a WordPress plugin + n8n workflows) that
-pushes blog posts into **Postiz** and **ClickUp**. It has no app of its own — no database, UI,
-users, teams, or billing. This new product is the **application layer** those tools stand in for.
-
-The good news: several existing assets fold directly into the new product (see §15).
+It ships as one Laravel monolith: auth, multi-tenancy, billing, role-based access, a post
+composer, a reliable publishing engine, analytics, client approval workflows, AI assistance, and
+a super-admin control plane.
 
 ---
 
-## 3. Tech Stack Decision
+## 2. Tech stack (as built)
 
-| Layer | Choice | Why |
-|---|---|---|
-| **Backend framework** | **Laravel 11 (PHP 8.3)** | Matches Mixpost; mature SaaS ecosystem; self-hostable as one package (key for white-label resale). |
-| **Frontend** | **Inertia.js + Vue 3 + Tailwind CSS** | SPA feel without a separate API/frontend repo; same stack Mixpost uses; fast to build. |
-| **Database** | **MySQL 8 / MariaDB** (PostgreSQL supported) | Ubiquitous on shared & VPS hosting buyers will use. |
-| **Cache / Queue / Locks** | **Redis** | Drives the scheduling engine, rate-limit buckets, idempotency. |
-| **Background jobs** | **Laravel Queues + Horizon** | The publishing engine runs entirely on workers. |
-| **Scheduler** | **Laravel Scheduler (cron)** | Dispatches due posts every minute. |
-| **Auth + teams** | **Laravel Fortify/Jetstream + Spatie Laravel-Permission** | Email/password, 2FA, social login, RBAC. |
-| **Billing** | **Laravel Cashier (Stripe)** + optional Paddle driver | Subscriptions, plans, usage metering, invoices. |
-| **Media storage** | **S3-compatible** (AWS S3 / Cloudflare R2 / MinIO) | Cheap, scalable; local disk fallback for self-host. |
-| **Realtime** | **Laravel Reverb / Pusher** | Live calendar, notifications, collaboration. |
-| **AI** | **OpenRouter / OpenAI / Anthropic** (pluggable) | Reuse existing brand-voice prompts for caption generation. |
-| **Deployment** | **Docker Compose** (app + worker + redis + db + reverb) | One-command self-host; the unit you license to white-label buyers. |
-
-### Alternatives considered
-- **Next.js + Supabase** (also available in this session): excellent for a *cloud-only* SaaS, but
-  harder to package as a self-hostable white-label unit and diverges from the PHP/Mixpost model
-  you prefer. Kept as a fallback if you decide cloud-only.
-- **Extending Postiz/n8n** (your option C): fastest, but you'd never own the core scheduler UI or
-  the billing/white-label layer — a dead end for a product you want to sell.
-
-> **Decision:** Laravel monolith (modular). Revisit only if you explicitly want cloud-only SaaS.
+| Layer | What's actually running |
+|---|---|
+| **Backend framework** | Laravel 13, PHP 8.4. |
+| **Frontend** | Inertia.js + Vue 3 + Tailwind CSS, built with Vite — one repo, SPA feel, no separate API/frontend split. |
+| **Database** | MySQL 8 in Docker/production; SQLite for local dev and CI. |
+| **Cache / Queue / Sessions** | Redis in production (`QUEUE_CONNECTION=redis`, `CACHE_STORE=redis`, `SESSION_DRIVER=redis`); the Laravel `database` driver locally, so local dev needs no Redis. |
+| **Background jobs** | Plain Laravel Queues — a `queue:work` worker process (no Horizon). |
+| **Scheduler** | Laravel's task scheduler via `schedule:work`, dispatching `posts:dispatch-due` every minute plus the other console commands below. |
+| **Auth + teams** | Laravel Jetstream (Fortify under the hood): email/password, 2FA, email verification, teams. Team = **Organization**. |
+| **Roles & permissions** | Jetstream's own role/permission system (`Jetstream::role(...)` in `app/Providers/JetstreamServiceProvider.php`) — **not** a separate ACL package. Workspace-level roles are a plain `role` column on the `workspace_user` pivot. |
+| **Billing** | Laravel Cashier (Stripe only — no Paddle driver). |
+| **Media storage** | Local disk by default (`FILESYSTEM_DISK=local`); swappable to S3-compatible storage via Laravel's filesystem config. |
+| **AI** | Pluggable OpenAI-compatible chat endpoint (`config/ai.php`), defaults to OpenRouter. No realtime/websocket layer is implemented. |
+| **Deployment** | Docker Compose: `caddy` (edge/TLS), `app`, `worker` (queue), `scheduler` (cron), `mysql`, `redis`. |
 
 ---
 
-## 4. High-Level Architecture
+## 3. High-Level Architecture
 
 ```
                           ┌────────────────────────────────────────────┐
@@ -72,62 +52,64 @@ The good news: several existing assets fold directly into the new product (see �
                                                   │ Inertia (HTTPS)
                           ┌───────────────────────▼──────────────────────┐
                           │              Laravel Application               │
-                          │  Auth · RBAC · Tenancy · Composer · Billing    │
-                          │  REST/Internal API · Webhooks · Admin panel    │
+                          │  Auth · Tenancy · Composer · Billing · Admin   │
                           └───┬───────────────┬───────────────────┬───────┘
                               │               │                   │
                   ┌───────────▼───┐   ┌───────▼────────┐   ┌──────▼───────────┐
-                  │  MySQL/Maria  │   │     Redis      │   │  S3 / R2 media   │
-                  │ (tenant data) │   │ queue·cache·   │   │  (images/video)  │
-                  └───────────────┘   │ locks·ratelim  │   └──────────────────┘
+                  │     MySQL     │   │     Redis      │   │  Local / S3      │
+                  │ (tenant data) │   │ queue · cache  │   │  media storage   │
+                  └───────────────┘   │  · sessions    │   └──────────────────┘
                                       └───────┬────────┘
                                               │ jobs
                           ┌───────────────────▼──────────────────────────┐
-                          │      Queue Workers (Horizon) + Scheduler       │
-                          │  PublishPostJob · RefreshTokenJob · Analytics  │
+                          │   Queue Worker + Scheduler (Docker services)   │
+                          │  PublishPostJob · FetchMetricsJob · PollFeeds  │
                           └───────────────────┬──────────────────────────┘
                                               │ OAuth2 / platform APIs
    ┌──────────┬──────────┬──────────┬─────────▼────────┬──────────┬──────────┬──────────┐
-   │ LinkedIn │    X     │ Facebook │    Instagram     │ Pinterest│  TikTok  │ YouTube  │ ...
+   │ LinkedIn │ Facebook │Instagram │  Google Business  │Pinterest │  TikTok  │ YouTube  │ +6 more
    └──────────┴──────────┴──────────┴──────────────────┴──────────┴──────────┴──────────┘
 ```
 
-The web app **never** publishes inline. It only enqueues jobs. Workers own all outbound
-platform calls so publishing is retryable, rate-limited, and observable.
+The web app never publishes inline. It only enqueues jobs. The `worker` service owns all outbound
+platform calls so publishing is retryable, rate-limited, and observable; the `scheduler` service
+only decides *what's due* and hands off to the queue.
 
 ---
 
-## 5. Multi-Tenancy Model
+## 4. Multi-Tenancy Model
 
 Three nested levels — this is what makes it agency- and resale-ready.
 
 ```
-Organization (tenant / a paying account, e.g. an agency or a white-label buyer's customer)
-│   └─ has a subscription, plan limits, branding, billing
+Team ("teams" table — a Jetstream team = an Organization / tenant)
+│   └─ Cashier Billable: stripe_id, subscription, plan, branding json, custom_domain, suspended_at
 │
-├── Members (Users with org-level roles: Owner, Admin, Member)
+├── Members (Users with an org-level Jetstream role: admin, member, approver, client)
 │
-└── Workspaces  ("clients" / brands)               ← your "add my client's platforms"
-        │   └─ isolates one client's channels, posts, media, approvals
+└── Workspaces  ("workspaces" table — clients / brands)
+        │   team_id → teams.id
         │
-        ├── Channels (connected social accounts: LinkedIn page, IG account, etc.)
-        ├── Posts / Drafts / Scheduled / Published
-        ├── Media library
-        ├── Approval flows
-        └── Workspace memberships (which team members & clients can see this workspace)
+        ├── Channels (connected social accounts — provider, encrypted tokens)
+        ├── Posts → PostVersions → PostTargets
+        ├── Approvals, Comments
+        ├── TimeSlots (queue templates)
+        └── Feeds (RSS/WordPress ingestion)
+        └── workspace_user pivot: which users can see this workspace, and their
+            workspace-level role (member | approver | client)
 ```
 
-- **Tenancy strategy:** single database, **row-level scoping** by `organization_id` enforced via a
-  global Eloquent scope + middleware (simple, cheap, proven). Optional DB-per-tenant later for
-  enterprise/self-host buyers.
-- A **User** can belong to multiple organizations (for your own super-admin + reseller scenarios).
-- A **client** is modeled as a Workspace plus User(s) with the `client` role limited to that workspace.
+- **Tenancy strategy:** single database, row-level scoping by `team_id` (workspaces) and
+  `workspace_id` (everything under a workspace), enforced in controllers via the
+  `AuthorizesWorkspaceAccess` concern (`guardWorkspace()` / `guardPost()`) rather than a global
+  Eloquent scope.
+- A **User** can belong to multiple teams (Jetstream's standard multi-team support).
+- A **client** is modeled as a `workspace_user` row with `role = 'client'`, scoped to exactly one
+  workspace — never assigned org-wide.
 
 ---
 
-## 6. Roles & Permissions
-
-You asked for Owner/Admin, Team members, and Clients. Full matrix:
+## 5. Roles & Permissions
 
 | Capability | Owner | Admin | Team Member | Approver | Client |
 |---|:--:|:--:|:--:|:--:|:--:|
@@ -135,235 +117,229 @@ You asked for Owner/Admin, Team members, and Clients. Full matrix:
 | Manage organization settings / branding | ✅ | ✅ | – | – | – |
 | Invite/remove users & set roles | ✅ | ✅ | – | – | – |
 | Create/delete workspaces (clients) | ✅ | ✅ | – | – | – |
-| Connect/disconnect social channels | ✅ | ✅ | ✅* | – | ✅* |
-| Create & schedule posts | ✅ | ✅ | ✅ | – | ✅* |
-| Approve / reject posts | ✅ | ✅ | ✅* | ✅ | ✅* |
-| View analytics | ✅ | ✅ | ✅ | ✅ | ✅* |
+| Connect/disconnect social channels | ✅ | ✅ | assigned only | – | – |
+| Create & schedule posts | ✅ | ✅ | assigned only | – | assigned only |
+| Approve / reject posts | ✅ | ✅ | – | assigned only | assigned only |
+| View analytics | ✅ | ✅ | assigned only | assigned only | assigned only |
 | Access all workspaces | ✅ | ✅ | assigned only | assigned only | own only |
 
-`*` = only within workspaces they're assigned to. Built on **Spatie Permission** with
-workspace-scoped role assignment. Roles are customizable per organization (advanced plans).
+The Owner is implicitly the team creator and has every permission. `admin`, `member`, `approver`,
+and `client` are Jetstream org-level roles defined in `JetstreamServiceProvider`; a user's actual
+reach into a given workspace is additionally gated by their `workspace_user.role` (or plain
+membership) and enforced server-side by `AuthorizesWorkspaceAccess` on every workspace-scoped
+controller. Billing checkout/portal is owner-only.
 
 ---
 
-## 7. Core Data Model (entities)
+## 6. Core Data Model (entities)
 
-> Field lists are representative, not exhaustive. All tenant tables carry `organization_id`.
+Reflects the actual migrations under `database/migrations/`. All tenant tables trace back to a
+`team_id` (directly, or via `workspace_id → workspaces.team_id`).
 
-- **organizations** — name, slug, plan, branding json, custom_domain, trial_ends_at
-- **users** — name, email, password, 2fa, avatar
-- **organization_user** — org membership + role
-- **workspaces** — organization_id, name, client_name, timezone, color, logo
-- **workspace_user** — assignment + workspace role (member/approver/client)
-- **channels** — workspace_id, provider (linkedin/x/…), provider_account_id, name, avatar,
-  access_token (encrypted), refresh_token (encrypted), token_expires_at, scopes, status
-- **posts** — workspace_id, author_id, status (draft/pending_approval/scheduled/publishing/
-  published/failed), scheduled_at, timezone, recurring_rule, approval_state, source (manual/
-  rss/wordpress/ai), group_id
-- **post_versions** — post_id, channel_id (or provider), content, media[], options json
-  (per-network customization: first comment, thread, alt text, link, location, board, etc.)
-- **post_targets** — post_id + channel_id + per-target status, provider_post_id, error, published_at
-- **media** — workspace_id, disk path, mime, width/height, alt, variants (auto-cropped per network)
-- **approvals** — post_id, requested_by, approver_id, state, comment, decided_at
-- **comments** — post_id, user_id, body (internal collaboration + @mentions)
-- **calendar_slots / queue_categories** — per-channel time-slot templates for "best time" queues
-- **analytics_metrics** — post_target_id/channel_id, metric, value, captured_at
-- **plans / subscriptions / usage_counters** — billing & limits
-- **audit_logs** — actor, action, subject, ip, meta (security/compliance)
-- **integrations** — RSS feeds, WordPress sites, webhooks
-- **notifications** — in-app + email queue
+- **teams** (Jetstream) — name, `stripe_id`/subscription columns (Cashier), `branding` json,
+  `custom_domain` (+ verification token/verified_at), `suspended_at`.
+- **users** — name, email, password, 2FA secret, `is_platform_admin` (not mass-assignable).
+- **team_user** (Jetstream) — org membership + org-level role.
+- **workspaces** — `team_id`, name, `client_name`, timezone, color, logo.
+- **workspace_user** — `workspace_id`, `user_id`, `role` (member/approver/client).
+- **channels** — `workspace_id`, provider, `provider_account_id`, name, encrypted access/refresh
+  tokens, scopes, meta, status.
+- **posts** — `workspace_id`, author, status (draft/pending_approval/scheduled/publishing/
+  published/partially_failed/failed), `scheduled_at`, `recurring_rule`, `parent_post_id`,
+  `group_id` (bulk/recurring linkage).
+- **post_versions** — per-provider content variant: content, media, options (arrays).
+- **post_targets** — one `post` × one `channel`: status, `provider_post_id`, error, attempts,
+  `published_at`.
+- **approvals** — post, requester, approver, state (pending/approved/rejected/changes_requested).
+- **comments** — post, user, body, mentions.
+- **time_slots** — workspace, day_of_week, time (queue templates).
+- **feeds** — workspace, RSS/WordPress source, `seen_guids`, `last_polled_at`.
+- **analytics_metrics** — post_target/channel, metric, value, captured_at.
+- **team_invitations** (Jetstream) — pending invites.
+
+There is **no** separate `plans`/`subscriptions` table — plans and their limits live in
+`config/plans.php`, and subscriptions are Cashier's own `subscriptions`/`subscription_items`
+tables against the `teams` billable.
 
 ---
 
-## 8. Core Modules (feature areas)
+## 7. Core Modules (feature areas)
 
-### 8.1 Onboarding & Auth
-Email/password, social login, email verification, 2FA, invite acceptance, org creation wizard.
+### 7.1 Onboarding & Auth
+Register, login, email verification, 2FA, team creation/invitations — stock Jetstream, themed.
 
-### 8.2 Workspaces / Client Management  ← _"add my clients' platforms"_
+### 7.2 Workspaces / Client Management
 Create a workspace per client, set timezone/branding, assign team members, connect that client's
-own social accounts. Full isolation between clients.
+own social accounts. Full isolation between clients (`WorkspaceController`).
 
-### 8.3 Channel Connections (OAuth)
-Per-provider OAuth2 connect flow, token storage (encrypted at rest), auto-refresh worker,
-reconnect prompts on expiry, health status badges. See §10 for the provider matrix.
+### 7.3 Channel Connections
+Per-provider OAuth2 connect flow (`ChannelController`), or manual token entry for token-based
+networks (Mastodon, Bluesky, Medium, WordPress). Tokens encrypted at rest; state validated on
+OAuth callback.
 
-### 8.4 Post Composer (the heart)
-- Compose once, **customize per network** (different text/media per platform from one editor).
-- Media attach with drag-drop; auto-validation against each network's limits.
-- **Threads** (X/Threads/LinkedIn carousels), **first comment**, hashtag groups, mentions,
-  link shortening, emoji, UTM tagging.
-- Network-specific options: IG reels/stories, Pinterest board+link, YouTube title/visibility,
-  TikTok privacy, GBP CTA button, location tagging, alt text.
-- Live previews per network. Save as draft / template.
+### 7.4 Post Composer
+Compose once, customize per network, attach media, schedule or save as draft
+(`PostComposer` service). Models: `Post`, `PostVersion`, `PostTarget`.
 
-### 8.5 Scheduling Engine
-- Schedule at exact time, add to a **queue** (auto-fills next best slot from time-slot templates),
-  **recurring** posts, **bulk CSV import**, and **smart stagger** to avoid spam flags
-  (carried over from the existing n8n logic).
-- Per-workspace timezone handling. Calendar drag-to-reschedule.
-- Reliability: due-dispatcher cron → `PublishPostJob` per target → retries w/ backoff →
-  rate-limit buckets per channel → failures surfaced + optional auto-retry.
+### 7.5 Scheduling & Publishing Engine
+`posts:dispatch-due` runs every minute, atomically claims due posts, and dispatches one queued
+`PublishPostJob` per target — with retries/backoff and independent per-target success/failure
+that rolls up into the post's overall status (`published` / `partially_failed` / `failed`).
 
-### 8.6 Calendar & Queue Views
-Month/week/list calendar, color-coded by workspace/channel/status, filterable, drag-reschedule.
+### 7.6 Calendar & Queues
+Time-slot templates (`TimeSlot` + `QueueScheduler`) so "add to queue" fills the next free posting
+slot per workspace, skipping collisions.
 
-### 8.7 Approval Workflows  ← _team + client review_
-Submit → pending → approver/client approves or requests changes (with comments) → schedules.
-Clients can be limited to approve-only on their own workspace. Email + in-app notifications.
+### 7.7 Approval Workflows
+`ApprovalService`: submit → pending → approve / reject / request-changes, with an audit trail and
+`post.approval_state` kept in sync. Clients only ever act on their own workspace.
 
-### 8.8 Media Library
-Per-workspace asset library, auto-crop variants per network dimension (the n8n "future
-enhancement" becomes built-in), alt text, reuse across posts, optional stock/Canva integration.
+### 7.8 Collaboration
+Per-post `Comment` thread with @mentions; mail + database notifications on submit/decision/
+publish-failure.
 
-### 8.9 Analytics & Reporting
-Per-post and per-channel metrics (reach, engagement, clicks, follower growth), workspace
-dashboards, scheduled **white-label PDF reports** for clients, best-time recommendations.
+### 7.9 Recurring posts & bulk import
+`RecurrenceService` creates the next occurrence automatically (idempotent) after a recurring post
+publishes. `BulkImporter` turns a CSV of `content,scheduled_at,providers` rows into many posts.
 
-### 8.10 Article / RSS / WordPress Scheduling  ← _Mixpost-like + your existing automation_
-- RSS feed ingestion → auto-draft social posts.
-- **WordPress integration** via the existing plugin (publish → auto-create social drafts).
-- "Article scheduling": queue website articles and auto-syndicate to social.
+### 7.10 Analytics
+`AnalyticsService` + the `analytics_metrics` table; an hourly `analytics:fetch` job captures
+engagement per published target via each provider's `fetchMetrics()`.
 
-### 8.11 AI Assistant
-Caption/variant generation per network using the **existing brand-voice prompts**, hashtag
-suggestions, rewrite/shorten, multi-language. Pluggable provider; usage metered per plan.
+### 7.11 Media auto-crop
+`MediaCropService` computes centered per-network crop specs from a source image.
 
-### 8.12 Collaboration & Notifications
-Internal comments, @mentions, activity feed, email + in-app + optional Slack/Telegram alerts.
+### 7.12 RSS / WordPress → social
+`RssIngestService` + the `feeds` table: `feeds:poll` ingests new articles and auto-drafts social
+posts, de-duplicated by GUID, with an SSRF guard on the feed URL.
 
----
-
-## 9. White-Label & SaaS Control Plane
-
-This is what turns it into a sellable product.
-
-### 9.1 Branding per tenant
-Logo, favicon, color theme, app name, email "from" name/templates, login page, **custom domain**
-(CNAME + automated TLS). All driven by `organizations.branding` + a theming layer.
-
-### 9.2 Billing & Plans (Laravel Cashier + Stripe)
-- Plans with **feature flags & usage limits**: # workspaces, # channels, # team members,
-  # scheduled posts/month, AI credits, analytics retention.
-- Trials, coupons, proration, dunning, invoices, tax. Paddle driver as alt (better for global
-  digital sales / MoR).
-- **Usage metering** enforced via middleware + counters; graceful "upgrade" prompts.
-
-### 9.3 Reseller / White-Label deal models
-1. **Managed white-label:** you host; reseller gets a branded org + custom domain, you bill them.
-2. **Self-hosted license:** ship the Docker package + a license key check; reseller runs it on
-   their own server under their brand. (License server is a small add-on module.)
-
-### 9.4 Super-Admin panel
-A separate `/admin` (Filament-based) for **you** as platform owner: manage organizations,
-plans, feature flags, impersonate for support, view global metrics, suspend tenants, manage
-white-label licenses, broadcast announcements.
+### 7.13 AI Assistant
+`AiAssistant` (caption generation) and `PostAiAgents` (Pro+ agents: rewrite/cleanup, hashtag
+optimization, quality check) against a pluggable LLM. Optionally grounded in a team's own brand
+knowledge via `BrainGatewayClient`, which also reports real usage back to the external
+`wpistic-ai-gateway` — both disabled by default and fully optional.
 
 ---
 
-## 10. Platform Integration Matrix
+## 8. White-Label & SaaS Control Plane
 
-Built as **pluggable provider drivers** (one class per network implementing a common
-`SocialProvider` contract: `connect`, `refresh`, `publish`, `fetchMetrics`, `limits`).
+### 8.1 Branding per tenant
+Name, tagline, colors, logo stored on the `teams` row (`BrandingController`), merged over
+platform defaults and shared to the whole UI via an Inertia `branding` prop.
 
-| Provider | Auth | Notable build notes |
+### 8.2 Billing & Plans (Laravel Cashier + Stripe)
+Four plans in `config/plans.php` — **Free, Pro, Agency, Scale** — each with limits (workspaces,
+channels, members, monthly posts) and feature flags (`client_approval`, `white_label`,
+`analytics` tier, `ai_captions`, `ai_agents`). `PlanService` + `UsageService` enforce limits when
+creating workspaces, connecting channels, and scheduling posts; `BillingController` drives Stripe
+Checkout and the billing portal. The organization (`Team`) is the billable entity.
+
+### 8.3 Custom domains + automatic TLS
+An org owner adds a domain; the app stores it with a verification token. `domains:verify`
+(`DomainVerificationService`) checks a DNS `TXT` record every 5 minutes. Once verified, Caddy's
+on-demand TLS asks the app's `/tls/check` endpoint before issuing a Let's Encrypt certificate —
+so only verified tenant domains (and the platform's own) ever get a cert. `ResolveTenantDomain`
+middleware then serves that tenant's branding by host, including the guest login page.
+
+### 8.4 Super-admin control plane
+A plain Inertia/Vue panel under `/admin` (`Admin/OrganizationController`, gated by the
+`platform.admin` middleware / `EnsurePlatformAdmin` and the non-mass-assignable
+`is_platform_admin` flag): list every organization, suspend/unsuspend, and impersonate an owner
+for support — every impersonation is audit-logged, and nested impersonation is rejected.
+
+---
+
+## 9. Platform Integration Matrix
+
+Built as pluggable provider drivers, one class per network implementing the common
+`SocialProvider` contract (`app/Social/Contracts/SocialProvider.php`), resolved through
+`ProviderManager` (`app/Social/ProviderManager.php`). OAuth-based drivers share
+`AbstractOAuthProvider`; token-based drivers share `AbstractTokenProvider`.
+
+| Provider | Auth | Class |
 |---|---|---|
-| **LinkedIn** | OAuth2 | Personal + Org pages; doc-share for articles. |
-| **X (Twitter)** | OAuth2 | Threads; paid API tier limits — handle 429 + tier detection. |
-| **Facebook Pages** | OAuth2 (Meta) | Page tokens, long-lived token refresh. |
-| **Instagram** | OAuth2 (Meta Graph) | Business/Creator only; feed/reels/stories; 2-step media container publish. |
-| **Pinterest** | OAuth2 | Board required; pin + destination link. |
-| **TikTok** | OAuth2 | Content Posting API; video processing/polling. |
-| **YouTube** | OAuth2 (Google) | Resumable video upload; title/visibility/schedule. |
-| **Google Business Profile** | OAuth2 (Google) | Location-scoped; CTA buttons; ~1 post/day norm. |
-| **Threads** | OAuth2 (Meta) | Newer API; similar to IG container flow. |
-| **Mastodon / Bluesky** | OAuth2 / app-pw | Easy wins, popular with agencies. |
-| **Medium** | API token | Article cross-posting (carried from current setup). |
-| **WordPress** | App password / plugin | Inbound (RSS/plugin) + outbound article publish. |
-
-Optional escape hatch: a **Postiz/Ayrshare driver** so you can ship faster on networks whose
-direct APIs aren't built yet, then replace with native drivers over time. (Reuses your existing
-Postiz knowledge from this repo.)
+| LinkedIn (personal) | OAuth2 | `LinkedInProvider` |
+| LinkedIn (company page) | OAuth2 | `LinkedInCompanyProvider` |
+| Facebook Pages | OAuth2 (Meta) | `FacebookProvider` |
+| Instagram | OAuth2 (Meta Graph) | `InstagramProvider` |
+| Google Business Profile | OAuth2 (Google) | `GoogleBusinessProvider` |
+| Pinterest | OAuth2 | `PinterestProvider` |
+| Threads | OAuth2 (Meta) | `ThreadsProvider` |
+| TikTok | OAuth2 | `TikTokProvider` |
+| YouTube | OAuth2 (Google) | `YouTubeProvider` |
+| Mastodon | App password / token | `MastodonProvider` |
+| Bluesky | App password / token | `BlueskyProvider` |
+| Medium | API token | `MediumProvider` |
+| WordPress | App password | `WordPressProvider` |
+| — (local/dev only) | none | `FakeProvider` — every provider resolves to this when `SOCIAL_FAKE=true`, so the full connect → compose → publish flow works with zero OAuth credentials. |
 
 ---
 
-## 11. Scheduling/Publishing Engine Internals
+## 10. Scheduling/Publishing Engine Internals
 
-1. **Cron (every minute):** `PublishDuePosts` selects posts where `scheduled_at <= now` and
-   `status=scheduled`, marks `publishing`, dispatches one `PublishPostJob` per `post_target`.
-2. **Per-target job:** acquires a Redis rate-limit token for that channel → calls the provider
-   driver → on success stores `provider_post_id` + `published_at`; on failure records error and
-   retries with exponential backoff (configurable), then routes to a **failed** state + alert.
-3. **Idempotency:** `group_id` + per-target unique lock prevents double-posting on retries/restart
-   (same principle as the current WP plugin's idempotency meta).
-4. **Token refresh:** scheduled `RefreshExpiringTokensJob`; reconnect notifications on hard failures.
-5. **Analytics:** periodic `FetchMetricsJob` per published target.
+1. **Cron (every minute):** the `posts:dispatch-due` command (`DispatchDuePosts`) selects posts
+   where `scheduled_at <= now` and `status = scheduled`, atomically marks them `publishing`, and
+   dispatches one `PublishPostJob` per `post_target`.
+2. **Per-target job:** calls the provider driver's `publish()`; on success stores
+   `provider_post_id` + `published_at`; on failure records the error and retries with backoff,
+   then surfaces a `failed` target.
+3. **Rollup:** a post's overall status becomes `published`, `partially_failed`, or `failed`
+   depending on how its targets resolved — one bad channel never blocks the others.
+4. **Analytics:** `analytics:fetch` (`FetchMetricsJob`) runs hourly against targets published in
+   the last 30 days.
+5. **Feeds:** `feeds:poll` runs every 15 minutes against active RSS/WordPress feeds.
+6. **Domains:** `domains:verify` runs every 5 minutes against pending custom domains.
 
-Observability: Horizon dashboard, structured logs, an in-app "Activity/Failures" view replacing
-the old Google-Sheet + ClickUp "Failed Posts" lists.
-
----
-
-## 12. Security & Compliance
-
-- **OAuth tokens encrypted at rest** (Laravel encryption / KMS), never exposed to frontend.
-- **RBAC** enforced server-side on every action; workspace scoping via global query scopes.
-- **Audit log** for sensitive actions (connect/disconnect, publish, role changes, billing).
-- **Tenant isolation** verified by automated tests (no cross-org data leakage).
-- **GDPR:** data export + delete per org; DPA-ready; configurable data retention.
-- Webhook signature verification (reuse the HMAC pattern from the WP plugin).
-- 2FA, rate limiting on auth, password policies, session management.
+Observability: structured logs plus an in-app failed-jobs view (`queue:failed`); no external APM
+is wired in by default.
 
 ---
 
-## 13. Infrastructure & Deployment
+## 11. Security & Compliance
 
-**Self-host package (the white-label unit):** `docker-compose.yml` with services:
-`app` (php-fpm + nginx) · `worker` (Horizon) · `scheduler` (cron) · `mysql` · `redis` ·
-`reverb` (websockets). Object storage via S3/R2 or MinIO. `.env`-driven config; install wizard.
-
-**Managed multi-tenant SaaS (you host):** same image, horizontally scaled app + worker tiers,
-managed MySQL + Redis, S3/R2, queue autoscaling, custom-domain TLS automation.
-
-CI: tests + static analysis (Pest + PHPStan) + build → image registry.
+See [`03-security.md`](03-security.md) for the full threat model and the hardening pass applied
+(mass-assignment defense, SSRF guard, suspension enforcement, AI throttling, impersonation audit
+logging). In short: OAuth tokens are encrypted at rest and hidden from the frontend, every
+workspace-scoped action is guarded server-side, and 2FA/CSRF/session security come from Jetstream
+and Laravel's defaults.
 
 ---
 
-## 14. Non-Functional Requirements
+## 12. Infrastructure & Deployment
 
-- **Reliability:** no missed/duplicate posts; failed posts always visible & retryable.
-- **Scale target (initial):** thousands of scheduled posts/day across hundreds of channels.
-- **Security:** encrypted tokens, strict tenant isolation, audit trail.
-- **Extensibility:** new network = one driver class. New AI provider = one adapter.
-- **White-label:** zero code changes to rebrand a tenant.
-- **Self-host friendly:** one-command Docker bring-up.
+**Self-host package:** `docker-compose.yml` with `caddy`, `app`, `worker`, `scheduler`, `mysql`,
+`redis`. `.env`-driven config. This is the exact stack documented in
+[`04-build-deploy-maintain-guide.md`](04-build-deploy-maintain-guide.md) and
+[`../app/DEPLOYMENT_HOSTINGER.md`](../app/DEPLOYMENT_HOSTINGER.md) and running at
+`app.scheduleistic.com`.
+
+CI (`.github/workflows/ci.yml`): PHP 8.4 + Node 22, installs dependencies, builds the front end,
+and runs the full test suite against SQLite on every push/PR.
 
 ---
 
-## 15. How existing repo assets fold in
+## 13. Non-Functional Requirements
 
-| Existing asset | Reused as |
+- **Reliability:** no missed/duplicate posts; failed posts always visible & retryable
+  (`queue:failed`).
+- **Security:** encrypted tokens, strict tenant isolation (tested), audit trail for sensitive
+  actions.
+- **Extensibility:** a new network is one driver class implementing `SocialProvider`; a new AI
+  provider is a config change to `config/ai.php`.
+- **White-label:** zero code changes to rebrand a tenant — branding and domain are data, not code.
+- **Self-host friendly:** one `docker compose up -d --build` brings up the whole stack.
+
+---
+
+## 14. How the legacy `automation/` assets folded in
+
+| Legacy asset | Became |
 |---|---|
-| `wp-plugin/wpistic-content-automation.php` | Official **WordPress integration** (inbound article → social drafts; HMAC pattern → webhook security). |
-| `prompts/brand-voice-prompts.md` | Seed prompts for the **AI Assistant** (§8.11). |
-| n8n workflow logic (stagger, idempotency, fan-out, retry/recovery) | Ported natively into the **publishing engine** (§11) — no n8n dependency. |
-| `docs/postiz-setup.md` | Basis for an optional **Postiz/aggregator driver** (§10) for fast network coverage. |
-| Platform list, image-dimension table, rate-limit table | Direct inputs to provider drivers + media auto-crop. |
+| `automation/wp-plugin/wpistic-content-automation.php` | The native **WordPress provider** (`app/Social/Providers/WordPressProvider.php`) and inbound RSS ingestion (`app/Services/RssIngestService.php`). |
+| `automation/prompts/brand-voice-prompts.md` | Seed prompts for the AI Assistant (`config/ai.php`) — the file is still credited in a code comment there. |
+| n8n workflow logic (stagger, idempotency, fan-out, retry/recovery) | Ported natively into the publishing engine (§10) — no n8n dependency remains. |
+| Platform list, image-dimension table, rate-limit notes | Direct inputs to the provider drivers and `MediaCropService`. |
 
-The new product **absorbs and replaces** the n8n/ClickUp/Postiz stack with owned, sellable code.
-
----
-
-## 16. Open Questions (for you)
-
-1. **Billing processor:** Stripe (great if you have a company/entity) vs **Paddle** (Merchant of
-   Record — handles global tax for you; better for solo selling worldwide). Recommendation: Paddle
-   if selling globally solo, else Stripe.
-2. **Launch networks:** which of the §10 platforms must be in the **MVP** vs later? (Building all
-   12 natively is a lot — recommend an MVP set, e.g. LinkedIn, X, Facebook, Instagram.)
-3. **White-label primary model:** managed (you host) vs self-hosted license — which first?
-4. **Cloud vs self-host emphasis:** confirms Laravel monolith (recommended) vs pivot to
-   Next.js+Supabase cloud-only.
-5. **Branding:** keep "Wpistic" as the default skin, or a neutral name since it's resold?
-
-These don't block starting Phase 0/1 — see `02-roadmap.md`.
+The application fully absorbs and replaces the n8n/ClickUp/Postiz stack described in
+`automation/`; that directory is kept only for historical reference (see
+[`../README.md`](../README.md)).

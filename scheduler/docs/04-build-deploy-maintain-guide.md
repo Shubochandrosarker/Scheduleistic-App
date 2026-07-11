@@ -178,8 +178,8 @@ ssh deploy@<your-VPS-IPv4>
 ### 4.3 Get the code
 
 ```
-git clone https://github.com/Shubochandrosarker/social-automation.zip.git
-cd social-automation.zip/scheduler/app
+git clone https://github.com/Shubochandrosarker/Scheduleistic-App.git scheduleistic
+cd scheduleistic/scheduler/app
 ```
 
 ### 4.4 Create the `.env`
@@ -295,8 +295,9 @@ https://app.yourbrand.com/channels/callback/{provider}
 
 1. Create a Stripe account → Developers → API keys. Put the **secret** key in
    `STRIPE_SECRET` and publishable key in `STRIPE_KEY`.
-2. Create two **Products** with recurring **Prices** (Pro, Agency). Copy the
-   price IDs into `STRIPE_PRICE_PRO` and `STRIPE_PRICE_AGENCY`.
+2. Create three **Products** with recurring **Prices** (Pro, Agency, Scale — Free has no Stripe
+   price). Copy the price IDs into `STRIPE_PRICE_PRO`, `STRIPE_PRICE_AGENCY`, and
+   `STRIPE_PRICE_SCALE`.
 3. Add a webhook endpoint → URL `https://app.yourbrand.com/stripe/webhook`,
    events: `customer.subscription.*`, `invoice.*`. Copy the signing secret to
    `STRIPE_WEBHOOK_SECRET`.
@@ -376,7 +377,7 @@ server** through VS Code, as if it were local.
    ```
 3. In VS Code: press `F1` → "Remote-SSH: Connect to Host…" →
    `deploy@<your-VPS-IP>`. A new window opens running *on the VPS*.
-4. File → Open Folder → `/home/deploy/social-automation.zip`. You now edit live
+4. File → Open Folder → `/home/deploy/scheduleistic`. You now edit live
    files with full IntelliSense, and the integrated terminal is the server.
 
 ### 7.2 Recommended VS Code extensions (installed into the remote)
@@ -393,7 +394,7 @@ Best practice is to commit changes and pull them on the server (not edit blind):
 
 ```
 # on the VPS terminal (inside VS Code)
-cd ~/social-automation.zip
+cd ~/scheduleistic
 git pull origin main                    # get the latest code
 cd scheduler/app
 docker compose up -d --build            # rebuild the app image
@@ -427,7 +428,7 @@ Database (nightly cron on the VPS):
 
 ```
 # crontab -e  (as deploy)
-0 3 * * * docker compose -f ~/social-automation.zip/scheduler/app/docker-compose.yml \
+0 3 * * * docker compose -f ~/scheduleistic/scheduler/app/docker-compose.yml \
   exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> scheduleistic \
   | gzip > ~/backups/db-$(date +\%F).sql.gz
 ```
@@ -443,7 +444,7 @@ storage).
 ### 8.2 Updating the app
 
 ```
-cd ~/social-automation.zip && git pull origin main
+cd ~/scheduleistic && git pull origin main
 cd scheduler/app
 docker compose up -d --build
 docker compose exec app php artisan migrate --force
@@ -499,7 +500,7 @@ QUEUE_CONNECTION=redis, CACHE_STORE=redis, SESSION_DRIVER=redis
 
 # Billing
 STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET
-STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, CASHIER_CURRENCY=usd
+STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, STRIPE_PRICE_SCALE, CASHIER_CURRENCY=usd
 
 # AI
 AI_FAKE=false, AI_ENDPOINT, AI_API_KEY, AI_MODEL
