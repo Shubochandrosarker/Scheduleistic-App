@@ -42,7 +42,7 @@ class AiAssistant
 
         $messages[] = ['role' => 'user', 'content' => $prompt];
 
-        return trim($this->chat($messages));
+        return trim($this->chat($messages, [], $team, "caption:{$provider}"));
     }
 
     /**
@@ -65,23 +65,40 @@ class AiAssistant
     /**
      * Low-level chat-completions call shared by caption generation and the
      * post-assist agents (PostAiAgents) — one place owning the HTTP call,
-     * model/endpoint config, and error handling.
+     * model/endpoint config, error handling, and (when a Team is supplied)
+     * self-reporting this call's real usage back to the brain gateway so
+     * the Brain Home Dashboard sees this brand's true cost/token figures —
+     * see BrainGatewayClient::reportUsage()'s docblock for why that call
+     * exists at all.
      *
      * @param  array<int, array{role: string, content: string}>  $messages
      */
-    public function chat(array $messages, array $opts = []): string
+    public function chat(array $messages, array $opts = [], ?Team $team = null, ?string $agent = null): string
     {
+        $model = $opts['model'] ?? config('ai.model');
+
         $response = Http::withToken(config('ai.key'))
             ->post(config('ai.endpoint'), array_merge([
-                'model' => config('ai.model'),
+                'model' => $model,
                 'messages' => $messages,
             ], $opts));
 
         if ($response->failed()) {
+            if ($team) {
+                $this->brain->reportUsage($team, $this->providerLabel(), $model, 0, 0, refused: true, agent: $agent);
+            }
             throw new PublishException('AI generation failed: '.$response->body(), retryable: false);
         }
 
-        return (string) Arr::get($response->json(), 'choices.0.message.content', '');
+        $content = (string) Arr::get($response->json(), 'choices.0.message.content', '');
+
+        if ($team) {
+            $inputTokens = (int) Arr::get($response->json(), 'usage.prompt_tokens', $this->estimateTokens(implode(' ', array_column($messages, 'content'))));
+            $outputTokens = (int) Arr::get($response->json(), 'usage.completion_tokens', $this->estimateTokens($content));
+            $this->brain->reportUsage($team, $this->providerLabel(), $model, $inputTokens, $outputTokens, refused: trim($content) === '', agent: $agent);
+        }
+
+        return $content;
     }
 
     public function isFake(): bool
@@ -107,5 +124,17 @@ class AiAssistant
     private function fakeCaption(string $topic, string $provider): string
     {
         return ucfirst($provider).": {$topic} — here is a brand-voice draft you can edit before scheduling.";
+    }
+
+    /** A short label for which service actually generated the completion, for reportUsage(). */
+    private function providerLabel(): string
+    {
+        return parse_url((string) config('ai.endpoint'), PHP_URL_HOST) ?: 'unknown';
+    }
+
+    /** Rough token estimate (4 chars ≈ 1 token) when a provider's response doesn't include real usage. */
+    private function estimateTokens(string $text): int
+    {
+        return (int) ceil(mb_strlen($text) / 4);
     }
 }

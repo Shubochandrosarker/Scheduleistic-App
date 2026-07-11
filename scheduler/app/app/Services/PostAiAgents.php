@@ -38,7 +38,7 @@ class PostAiAgents
         }
         $messages[] = ['role' => 'user', 'content' => "Clean up this post:\n\n".mb_substr((string) $post->content, 0, 4000)];
 
-        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 1000]));
+        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 1000], $post->workspace?->team, 'rewrite'));
 
         return $this->applyRewrite($post, is_array($data) ? (string) ($data['content'] ?? '') : '');
     }
@@ -60,7 +60,7 @@ class PostAiAgents
         }
         $messages[] = ['role' => 'user', 'content' => "Suggest hashtags for:\n\n".mb_substr((string) $post->content, 0, 2000)];
 
-        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 200]));
+        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 200], $post->workspace?->team, 'hashtags'));
         $hashtags = is_array($data) && is_array($data['hashtags'] ?? null) ? $data['hashtags'] : [];
 
         return $this->applyHashtags($post, $hashtags);
@@ -84,7 +84,7 @@ class PostAiAgents
         }
         $messages[] = ['role' => 'user', 'content' => "Review this post:\n\n".mb_substr((string) $post->content, 0, 4000)];
 
-        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 400]));
+        $data = $this->decodeJson($this->ai->chat($messages, ['max_tokens' => 400], $post->workspace?->team, 'quality'));
 
         return $this->applyQuality($post, is_array($data) ? $data : []);
     }

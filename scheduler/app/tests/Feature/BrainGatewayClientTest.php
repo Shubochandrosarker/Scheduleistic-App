@@ -90,6 +90,38 @@ class BrainGatewayClientTest extends TestCase
         $this->assertFalse($client->ingestForTeam($team, 'text'));
     }
 
+    public function test_report_usage_posts_a_signed_body_and_reports_ok(): void
+    {
+        $this->configureGateway();
+
+        Http::fake(['*' => Http::response(['ok' => true])]);
+
+        $team = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $ok = app(BrainGatewayClient::class)->reportUsage(
+            $team, 'openrouter.ai', 'openai/gpt-4o-mini', 120, 45, refused: false, agent: 'caption:linkedin',
+        );
+
+        $this->assertTrue($ok);
+        Http::assertSent(fn ($request) => $request->url() === 'https://gateway.test/v1/brain/usage'
+            && $request['provider'] === 'openrouter.ai'
+            && $request['model'] === 'openai/gpt-4o-mini'
+            && $request['inputTokens'] === 120
+            && $request['outputTokens'] === 45
+            && $request['agent'] === 'caption:linkedin');
+    }
+
+    public function test_report_usage_is_a_no_op_when_unconfigured(): void
+    {
+        config(['ai.brain_gateway.enabled' => false]);
+        Http::fake();
+
+        $team = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $ok = app(BrainGatewayClient::class)->reportUsage($team, 'openrouter.ai', 'gpt-4o-mini', 10, 10);
+
+        $this->assertFalse($ok);
+        Http::assertNothingSent();
+    }
+
     public function test_tier_maps_to_the_gateways_vocabulary(): void
     {
         $this->configureGateway();
