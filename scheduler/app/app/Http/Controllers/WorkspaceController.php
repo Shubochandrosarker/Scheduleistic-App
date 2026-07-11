@@ -19,7 +19,7 @@ class WorkspaceController extends Controller
 
         return Inertia::render('Workspaces/Index', [
             'workspaces' => $organization->workspaces()
-                ->withCount('channels')
+                ->withCount(['channels', 'feeds', 'timeSlots'])
                 ->latest()
                 ->get(),
         ]);

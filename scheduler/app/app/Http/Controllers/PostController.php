@@ -21,11 +21,41 @@ class PostController extends Controller
         return Inertia::render('Posts/Index', [
             'posts' => Post::query()
                 ->whereIn('workspace_id', $workspaceIds)
-                ->with(['workspace:id,name', 'targets:id,post_id,status'])
+                ->with([
+                    'workspace:id,name',
+                    'targets:id,post_id,status',
+                    'comments.user:id,name',
+                ])
                 ->latest('scheduled_at')
                 ->limit(200)
                 ->get(),
+            'workspaceMembers' => $this->workspaceMembers($workspaceIds),
         ]);
+    }
+
+    /**
+     * Users who can be @mentioned in a comment on a post in each workspace:
+     * the organization's owner + members, plus anyone individually assigned
+     * to that specific workspace (the client portal).
+     *
+     * @return array<int, array<int, array{id: int, name: string}>> keyed by workspace_id
+     */
+    protected function workspaceMembers(\Illuminate\Support\Collection $workspaceIds): array
+    {
+        return Workspace::query()
+            ->whereIn('id', $workspaceIds)
+            ->with(['team.owner:id,name', 'team.users:id,name', 'users:id,name'])
+            ->get()
+            ->mapWithKeys(function (Workspace $workspace) {
+                $members = $workspace->team->allUsers()
+                    ->merge($workspace->users)
+                    ->unique('id')
+                    ->map(fn ($u) => ['id' => $u->id, 'name' => $u->name])
+                    ->values();
+
+                return [$workspace->id => $members];
+            })
+            ->all();
     }
 
     /**

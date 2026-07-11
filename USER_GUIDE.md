@@ -72,7 +72,7 @@ From the Dashboard's **Compose a post**, or **+ Compose** on the Posts list:
    - Leave **Schedule for** empty → saves as a **draft**.
    - Set a **Schedule for** date/time → schedules it for that exact moment.
    - Check **Add to queue** instead → it takes the next open slot from that workspace's posting
-     schedule (configured via time slots — see §11).
+     schedule (configured via time slots — see §14).
 5. Optionally set **Repeat** (Never / Daily / Weekly / Monthly) for a recurring post — the next
    occurrence is created automatically once the current one publishes.
 6. The submit button reads **Schedule post** or **Save draft** depending on what you chose.
@@ -91,14 +91,15 @@ If your plan includes client approval (Agency and Scale):
 
 1. A draft's **Submit for approval** button moves it to `pending_approval`.
 2. Whoever has approval rights on that workspace — an approver, admin, owner, or the workspace's
-   client user — sees **Approve** / **Reject** buttons on the Posts list for anything pending.
-3. Approving schedules it; rejecting sends it back to draft.
+   client user — sees **Approve**, **Request changes**, and **Reject** buttons on the Posts list
+   for anything pending.
+3. **Approve** schedules it. **Reject** sends it straight back to draft. **Request changes** opens
+   an inline note field — whatever you type is saved on the approval record and emailed to the
+   post's author, and the post goes back to draft so they can fix it and resubmit.
 
-The approval service also supports a **"request changes"** decision with a comment (distinct from
-a flat reject), but as shipped the Posts list only wires up Approve and Reject buttons — request-
-changes is available to anyone integrating against the API but doesn't have its own button yet.
-Comments with @mentions are likewise a real, tested backend feature (`POST /posts/{post}/comments`)
-without a dedicated comment-thread panel in the current UI.
+Every post also has a **comment thread** (the "💬 N comments" toggle under it) for internal
+discussion — write a note and optionally **@mention** teammates assigned to that workspace; the
+mentioned names render as clickable-looking chips under the comment.
 
 ## 8. Analytics
 
@@ -166,18 +167,22 @@ If your user has been marked a platform admin (a console-only flag — see `INST
 subscription status, with **Suspend/Unsuspend** and **Impersonate** (for support) on each. This is
 for whoever operates the platform, not for regular customers.
 
-## 14. Power-user features without a dedicated screen (yet)
+## 14. Workspace settings: feeds, time slots, and bulk import
 
-These are real, tested backend capabilities exposed as routes but without their own settings page
-in the dashboard today — useful to know about, driven via a direct form post or API call rather
-than a button:
+From **Workspaces**, each workspace row has three more links besides "Manage channels":
 
-- **Bulk CSV import** — `POST /workspaces/{workspace}/import` with `content,scheduled_at,providers`
-  rows creates many posts at once.
-- **RSS / WordPress feeds** — `POST /workspaces/{workspace}/feeds` registers a feed URL; a
-  background job polls it and auto-drafts a post per new article.
-- **Time-slot queue templates** — `POST /workspaces/{workspace}/time-slots` defines the
-  day/time slots that "Add to queue" (§5) fills in order.
+- **Time slots** — define the day-of-week + time templates that "Add to queue" (§5) fills in
+  order, grouped by day, with each slot removable.
+- **Feeds** — register an RSS/WordPress feed URL (with an optional label); a background job polls
+  it periodically and auto-drafts a post per new article, shown with its active status and when
+  it was last checked.
+- **Import CSV** — upload a `content,scheduled_at,providers` CSV to create many posts at once
+  (leave `scheduled_at` empty to queue instead of scheduling exactly, and `providers` empty to
+  post to every connected channel). The page shows the exact format and your workspace's channel
+  keys before you upload.
+
+A small green confirmation banner (e.g. "Feed added.", "Imported 3 post(s), skipped 1.") appears
+at the top of the page after any of these actions.
 
 ## 15. Tips
 

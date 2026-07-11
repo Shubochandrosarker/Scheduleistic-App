@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { computed, ref, watch } from 'vue';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import ApplicationMark from '@/Components/ApplicationMark.vue';
 import Banner from '@/Components/Banner.vue';
 import Dropdown from '@/Components/Dropdown.vue';
@@ -13,6 +13,41 @@ defineProps({
 });
 
 const showingNavigationDropdown = ref(false);
+
+// Friendly text for the short status codes controllers set via
+// back()->with('status', '...'). Anything not listed here still shows —
+// just humanized (dashes → spaces) — so a new status code never goes silent.
+const STATUS_MESSAGES = {
+    'workspace-created': 'Workspace created.',
+    'workspace-deleted': 'Workspace deleted.',
+    'channel-connected': 'Channel connected.',
+    'channel-disconnected': 'Channel disconnected.',
+    'post-scheduled': 'Post scheduled.',
+    'slot-added': 'Time slot added.',
+    'slot-removed': 'Time slot removed.',
+    'feed-added': 'Feed added.',
+    'feed-removed': 'Feed removed.',
+    'comment-added': 'Comment added.',
+    'submitted-for-approval': 'Submitted for approval.',
+    'approval-decided': 'Decision recorded.',
+};
+
+const page = usePage();
+const dismissed = ref(false);
+watch(() => page.props.status, () => { dismissed.value = false; });
+
+const statusMessage = computed(() => {
+    const status = page.props.status;
+    if (!status || dismissed.value) return null;
+
+    if (STATUS_MESSAGES[status]) return STATUS_MESSAGES[status];
+
+    // "imported-3-skipped-1" → "Imported 3, skipped 1."
+    const imported = status.match(/^imported-(\d+)-skipped-(\d+)$/);
+    if (imported) return `Imported ${imported[1]} post(s), skipped ${imported[2]}.`;
+
+    return status.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) + '.';
+});
 
 const switchToTeam = (team) => {
     router.put(route('current-team.update'), {
@@ -293,6 +328,16 @@ const logout = () => {
                     </div>
                 </div>
             </nav>
+
+            <!-- Flash status banner -->
+            <div v-if="statusMessage" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+                <div class="flex items-center justify-between gap-4 rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800">
+                    <span>{{ statusMessage }}</span>
+                    <button type="button" class="text-green-600 hover:text-green-800" @click="dismissed = true">
+                        &times;
+                    </button>
+                </div>
+            </div>
 
             <!-- Page Heading -->
             <header v-if="$slots.header" class="bg-white shadow">

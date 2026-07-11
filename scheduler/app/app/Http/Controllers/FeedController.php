@@ -8,10 +8,22 @@ use App\Models\Workspace;
 use App\Support\SsrfGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class FeedController extends Controller
 {
     use AuthorizesWorkspaceAccess;
+
+    public function index(Request $request, Workspace $workspace): Response
+    {
+        $this->guardWorkspace($request, $workspace);
+
+        return Inertia::render('Feeds/Index', [
+            'workspace' => $workspace,
+            'feeds'     => $workspace->feeds()->latest()->get(),
+        ]);
+    }
 
     public function store(Request $request, Workspace $workspace, SsrfGuard $ssrf): RedirectResponse
     {

@@ -75,10 +75,12 @@ Route::middleware([
         Route::delete('/workspaces/{workspace}/members/{user}', [WorkspaceMemberController::class, 'destroy'])->name('workspaces.members.destroy');
 
         // Queue time-slot templates.
+        Route::get('/workspaces/{workspace}/time-slots', [TimeSlotController::class, 'index'])->name('workspaces.time-slots.index');
         Route::post('/workspaces/{workspace}/time-slots', [TimeSlotController::class, 'store'])->name('workspaces.time-slots.store');
         Route::delete('/workspaces/{workspace}/time-slots/{timeSlot}', [TimeSlotController::class, 'destroy'])->name('workspaces.time-slots.destroy');
 
         // Bulk CSV import.
+        Route::get('/workspaces/{workspace}/import', [BulkImportController::class, 'create'])->name('workspaces.import.create');
         Route::post('/workspaces/{workspace}/import', [BulkImportController::class, 'store'])->name('workspaces.import');
 
         // AI caption assistant (throttled to limit paid-API cost abuse).
@@ -101,6 +103,7 @@ Route::middleware([
         Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 
         // RSS / WordPress article feeds.
+        Route::get('/workspaces/{workspace}/feeds', [FeedController::class, 'index'])->name('workspaces.feeds.index');
         Route::post('/workspaces/{workspace}/feeds', [FeedController::class, 'store'])->name('workspaces.feeds.store');
         Route::delete('/workspaces/{workspace}/feeds/{feed}', [FeedController::class, 'destroy'])->name('workspaces.feeds.destroy');
 

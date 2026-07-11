@@ -61,16 +61,26 @@ const destroy = (id) => {
                     <div v-if="workspaces.length === 0" class="p-6 text-gray-500">
                         No workspaces yet. Add your first client above.
                     </div>
-                    <div v-for="ws in workspaces" :key="ws.id" class="p-6 flex items-center justify-between">
+                    <div v-for="ws in workspaces" :key="ws.id" class="p-6 flex items-center justify-between flex-wrap gap-3">
                         <div>
                             <p class="font-medium text-gray-900">{{ ws.name }}</p>
                             <p class="text-sm text-gray-500">
                                 {{ ws.client_name || '—' }} · {{ ws.timezone }} · {{ ws.channels_count }} channel(s)
+                                · {{ ws.feeds_count }} feed(s) · {{ ws.time_slots_count }} time slot(s)
                             </p>
                         </div>
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 flex-wrap">
                             <Link :href="route('workspaces.channels.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
                                 Manage channels
+                            </Link>
+                            <Link :href="route('workspaces.time-slots.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
+                                Time slots
+                            </Link>
+                            <Link :href="route('workspaces.feeds.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
+                                Feeds
+                            </Link>
+                            <Link :href="route('workspaces.import.create', ws.id)" class="text-indigo-600 hover:underline text-sm">
+                                Import CSV
                             </Link>
                             <DangerButton @click="destroy(ws.id)">Delete</DangerButton>
                         </div>
