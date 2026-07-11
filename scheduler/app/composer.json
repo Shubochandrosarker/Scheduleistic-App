@@ -1,10 +1,10 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "scheduleistic/app",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
-    "license": "MIT",
+    "description": "Scheduleistic — multi-tenant, white-label social media scheduling SaaS.",
+    "keywords": ["laravel", "social-media", "scheduling", "saas", "multi-tenant"],
+    "license": "GPL-2.0-or-later",
     "require": {
         "php": "^8.3",
         "inertiajs/inertia-laravel": "^2.0",

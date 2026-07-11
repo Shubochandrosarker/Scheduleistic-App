@@ -3,9 +3,11 @@
 **Complete Social Automated System**
 _Powered by WPistic — A product of the WORDPRESSISTIC Ecosystem_
 
-Phase 0 scaffold of the white-label, multi-tenant social scheduling platform described in
-[`../docs/01-architecture.md`](../docs/01-architecture.md). Built as a Laravel monolith with
-**native integrations only** (no third-party publishers).
+The shipped application: a white-label, multi-tenant social scheduling platform, architecture
+described in full in [`../docs/01-architecture.md`](../docs/01-architecture.md). Built as a
+Laravel monolith with **native integrations only** (no third-party publishers). The sections
+below trace how it was built, phase by phase — see [`../docs/02-roadmap.md`](../docs/02-roadmap.md)
+for the delivery history and what's still genuinely open.
 
 ## Stack
 - **Laravel 13** (PHP 8.4+)
@@ -23,7 +25,9 @@ Phase 0 scaffold of the white-label, multi-tenant social scheduling platform des
   with encrypted-at-rest OAuth tokens
 - Branding config (`config/scheduleistic.php`) + white-label env switches
 - Docker stack: `app`, `worker` (queue), `scheduler` (cron), `mysql`, `redis`
-- CI (`../../.github/workflows/ci.yml`) running the test suite — **46 tests green**
+- CI (`../../.github/workflows/ci.yml`) running the test suite on every push/PR — **154 of 161
+  tests passing** (7 skipped by design for Jetstream features this app disables, e.g. API tokens
+  and account self-deletion; 0 failing)
 
 ## Local development
 

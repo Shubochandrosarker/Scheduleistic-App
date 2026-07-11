@@ -58,17 +58,24 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <ul class="nav-links" id="nav-links">
-        <li><a href="/features.html">Features</a></li>
-        <li><a href="/scheduler.html">Scheduler</a></li>
+        <li class="nav-item-dropdown">
+          <button type="button" class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="product-menu">
+            Product
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <ul class="nav-dropdown-menu" id="product-menu" role="menu">
+            <li role="none"><a role="menuitem" href="/features.html">Features</a></li>
+            <li role="none"><a role="menuitem" href="/scheduler.html">Social Media Scheduler</a></li>
+            <li role="none"><a role="menuitem" href="/client-approval.html">Client Approval</a></li>
+          </ul>
+        </li>
         <li><a href="/agencies.html">Agencies</a></li>
-        <li><a href="/client-approval.html">Client Approval</a></li>
         <li><a href="/pricing.html" aria-current="page">Pricing</a></li>
         <li><a href="/resources.html">Resources</a></li>
         <li><a href="/contact.html">Contact</a></li>
         <li><a href="https://app.scheduleistic.com/login">Login</a></li>
       </ul>
       <div class="nav-actions">
-        <a class="btn btn-outline" href="/pricing.html">View Pricing</a>
         <a class="btn btn-cta" href="https://app.scheduleistic.com/register">Start Free Trial</a>
       </div>
     </div>
@@ -198,12 +205,12 @@
           <p class="mt-1">A clean, reliable social scheduling platform for agencies, creators, and small businesses.</p>
         </div>
         <div><h4>Product</h4><ul><li><a href="/features.html">Features</a></li><li><a href="/scheduler.html">Social Media Scheduler</a></li><li><a href="/pricing.html">Pricing</a></li><li><a href="/client-approval.html">Client Approval</a></li></ul></div>
-        <div><h4>Company</h4><ul><li><a href="/agencies.html">For Agencies</a></li><li><a href="/resources.html">Resources</a></li><li><a href="/contact.html">Contact</a></li><li><a href="https://app.scheduleistic.com/login">Login</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="/agencies.html">For Agencies</a></li><li><a href="/resources.html">Resources</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
         <div><h4>Legal</h4><ul><li><a href="/privacy.html">Privacy Policy</a></li><li><a href="/terms.html">Terms of Service</a></li></ul></div>
       </div>
       <div class="footer-bottom">
         <p class="mb-0">&copy; <span id="year">2026</span> Scheduleistic. All rights reserved.</p>
-        <p class="mb-0"><a href="https://app.scheduleistic.com/register">Start Free Trial</a></p>
+        <p class="mb-0"><a href="https://app.scheduleistic.com/login">Login</a> &middot; <a href="https://app.scheduleistic.com/register">Start Free Trial</a></p>
       </div>
     </div>
   </footer>

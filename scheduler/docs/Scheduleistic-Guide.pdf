@@ -18,18 +18,18 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 7 0 R >>
 endobj
 7 0 obj
-<< /Length 3389 >>
+<< /Length 3395 >>
 stream
-BT /F2 20 Tf 0.16 0.13 0.55 rg 54 695.0 Td (SOCIALISTIC ? Complete Build, Deploy & Maintain) Tj ET
-BT /F2 20 Tf 0.16 0.13 0.55 rg 54 668.0 Td (Guide) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 643.1 Td (A practical, end-to-end manual for the SOCIALISTIC social-media scheduling SaaS:) Tj ET
+BT /F2 20 Tf 0.16 0.13 0.55 rg 54 695.0 Td (Scheduleistic ? Complete Build, Deploy &) Tj ET
+BT /F2 20 Tf 0.16 0.13 0.55 rg 54 668.0 Td (Maintain Guide) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 643.1 Td (A practical, end-to-end manual for the Scheduleistic social-media scheduling SaaS:) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 628.3 Td (what it is, how it was built, how to put it live on your Hostinger VPS, how) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 613.4 Td (tenant white-label custom domains + automatic HTTPS work, and how to maintain) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 598.6 Td (it day-to-day from VS Code.) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 577.7 Td (Audience: the operator/owner \(you\). Assumes basic comfort with a terminal.) Tj ET
 0.8 0.8 0.8 RG 0.5 w 54 561.7 m 558 561.7 l S
 BT /F2 15 Tf 0.1 0.1 0.12 rg 54 517.5 Td (1. What you have) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 493.6 Td (SOCIALISTIC is a self-hosted, multi-tenant, white-label social-media scheduler) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 493.6 Td (Scheduleistic is a self-hosted, multi-tenant, white-label social-media scheduler) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 478.8 Td (\(a Buffer / Hootsuite / Postiz-style product you own outright\). Core features:) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 457.9 Td (? Multi-tenant organizations \(agencies\) ? each owns client workspaces.) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 443.1 Td (? 13 social networks: LinkedIn \(personal + company\), Facebook, Instagram,) Tj ET
@@ -127,13 +127,13 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 13 0 R >>
 endobj
 13 0 obj
-<< /Length 2759 >>
+<< /Length 2761 >>
 stream
 BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (3. Where to host it ? your two options) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (You have a Hostinger KVM 4 VPS \(4 vCPU, 16 GB RAM, 200 GB NVMe, 16+ TB) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 655.0 Td (bandwidth\) and a Business \(shared\) hosting plan.) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 624.8 Td (Verdict: use the VPS. ?) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 602.0 Td (SOCIALISTIC needs long-running processes \(queue worker + scheduler\), Docker,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 602.0 Td (Scheduleistic needs long-running processes \(queue worker + scheduler\), Docker,) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 587.1 Td (Redis, and the Caddy edge proxy binding ports 80/443. Shared/Business hosting) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 572.3 Td (cannot run any of these ? no root, no Docker, no persistent daemons, no) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 557.4 Td (custom ports. Business hosting is fine for a marketing landing page, not the app.) Tj ET
@@ -164,7 +164,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 15 0 R >>
 endobj
 15 0 obj
-<< /Length 3170 >>
+<< /Length 3178 >>
 stream
 0.96 0.96 0.97 rg 54 601.0 504 131.0 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (adduser deploy) Tj ET
@@ -183,15 +183,15 @@ BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 548.2 Td (exit) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 536.4 Td (ssh deploy@<your-VPS-IPv4>) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 492.2 Td (4.3 Get the code) Tj ET
 0.96 0.96 0.97 rg 54 448.4 504 35.8 re f
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 466.3 Td (git clone https://github.com/Shubochandrosarker/social-automation.zip.git) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 454.4 Td (cd social-automation.zip/scheduler/app) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 466.3 Td (git clone https://github.com/Shubochandrosarker/Scheduleistic-App.git scheduleistic) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 454.4 Td (cd scheduleistic/scheduler/app) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 410.2 Td (4.4 Create the `.env`) Tj ET
 0.96 0.96 0.97 rg 54 366.4 504 35.8 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 384.3 Td (cp .env.example .env) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 372.4 Td (nano .env) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 337.5 Td (Set at least these \(full reference in the Appendix\):) Tj ET
 0.96 0.96 0.97 rg 54 117.2 504 214.3 re f
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 313.6 Td (APP_NAME=SOCIALISTIC) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 313.6 Td (APP_NAME=Scheduleistic) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 301.7 Td (APP_ENV=production) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 289.8 Td (APP_DEBUG=false) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 277.9 Td (APP_URL=https://app.yourbrand.com) Tj ET
@@ -200,8 +200,8 @@ BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 254.1 Td (ACME_EMAIL=you@yourbrand.com) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 242.2 Td () Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 230.3 Td (DB_CONNECTION=mysql) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 218.4 Td (DB_HOST=mysql) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 206.5 Td (DB_DATABASE=socialistic) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 194.6 Td (DB_USERNAME=socialistic) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 206.5 Td (DB_DATABASE=scheduleistic) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 194.6 Td (DB_USERNAME=scheduleistic) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 182.7 Td (DB_PASSWORD=<choose-a-strong-password>) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 170.8 Td () Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 158.9 Td (REDIS_HOST=redis) Tj ET
@@ -252,7 +252,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 19 0 R >>
 endobj
 19 0 obj
-<< /Length 3553 >>
+<< /Length 3652 >>
 stream
 BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (5. Connecting the networks, Stripe, and AI) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (The app ships with all drivers; each network just needs your developer) Tj ET
@@ -279,22 +279,23 @@ BT /F1 11 Tf 0 0 0 rg 54 329.3 Td (> the rest simply won't appear as connectable
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 299.1 Td (5.2 Stripe billing) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 276.3 Td (1. Create a Stripe account ? Developers ? API keys. Put the secret key in) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 261.4 Td (STRIPE_SECRET and publishable key in STRIPE_KEY.) Tj ET
-BT /F1 11 Tf 0 0 0 rg 58 246.6 Td (2. Create two Products with recurring Prices \(Pro, Agency\). Copy the) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 231.7 Td (price IDs into STRIPE_PRICE_PRO and STRIPE_PRICE_AGENCY.) Tj ET
-BT /F1 11 Tf 0 0 0 rg 58 216.9 Td (3. Add a webhook endpoint ? URL `https://app.yourbrand.com/stripe/webhook`,) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 202.0 Td (events: customer.subscription.*, invoice.*. Copy the signing secret to) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 187.2 Td (STRIPE_WEBHOOK_SECRET.) Tj ET
-BT /F1 11 Tf 0 0 0 rg 58 172.3 Td (4. Re-cache config: `docker compose exec app php artisan config:cache`.) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 151.5 Td (Plans/limits live in config/plans.php ? edit the limits there, no code needed.) Tj ET
-BT /F2 12 Tf 0.2 0.2 0.25 rg 54 121.3 Td (5.3 AI caption assistant) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 98.4 Td (Use any OpenAI-compatible endpoint \(OpenRouter is easiest\):) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 246.6 Td (2. Create three Products with recurring Prices \(Pro, Agency, Scale ? Free has no Stripe) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 231.7 Td (price\). Copy the price IDs into STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, and) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 216.9 Td (STRIPE_PRICE_SCALE.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 202.0 Td (3. Add a webhook endpoint ? URL `https://app.yourbrand.com/stripe/webhook`,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 187.2 Td (events: customer.subscription.*, invoice.*. Copy the signing secret to) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 172.3 Td (STRIPE_WEBHOOK_SECRET.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 157.5 Td (4. Re-cache config: `docker compose exec app php artisan config:cache`.) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 136.6 Td (Plans/limits live in config/plans.php ? edit the limits there, no code needed.) Tj ET
+BT /F2 12 Tf 0.2 0.2 0.25 rg 54 106.4 Td (5.3 AI caption assistant) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 83.6 Td (Use any OpenAI-compatible endpoint \(OpenRouter is easiest\):) Tj ET
 endstream
 endobj
 20 0 obj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 21 0 R >>
 endobj
 21 0 obj
-<< /Length 3566 >>
+<< /Length 3572 >>
 stream
 0.96 0.96 0.97 rg 54 672.4 504 59.6 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (AI_FAKE=false) Tj ET
@@ -312,7 +313,7 @@ BT /F2 12 Tf 0.2 0.2 0.25 rg 54 484.7 Td (6.1 How it works \(architecture\)) Tj 
 BT /F1 11 Tf 0 0 0 rg 58 461.8 Td (1. The org owner enters their domain under White-label ? Custom domain. The) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 447.0 Td (app stores it and issues a one-time verification token.) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 432.1 Td (2. The owner adds two DNS records at their registrar:) Tj ET
-BT /F1 11 Tf 0 0 0 rg 58 417.3 Td (? `TXT  _socialistic.social.theiragency.com = socialistic-verify-?` \(proves) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 417.3 Td (? `TXT  _scheduleistic.social.theiragency.com = scheduleistic-verify-?` \(proves) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 402.4 Td (ownership\)) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 387.6 Td (? `CNAME social.theiragency.com ? app.yourbrand.com` \(routes traffic to you\)) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 372.7 Td (3. The scheduler runs `domains:verify` every 5 minutes \(or the owner clicks) Tj ET
@@ -326,7 +327,7 @@ BT /F1 11 Tf 0 0 0 rg 54 268.8 Td (org's branding, even on the guest login page.
 BT /F1 11 Tf 0 0 0 rg 54 247.9 Td (The /tls/check gate is important: it stops attackers from making Caddy request) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 233.1 Td (certificates for random hostnames and hitting ACME rate limits.) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 202.9 Td (6.2 What you tell your customers) Tj ET
-BT /F1 11 Tf 0 0 0 rg 54 180.0 Td (> "Add a TXT record _socialistic.<your-domain> with the value we show you,) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 180.0 Td (> "Add a TXT record _scheduleistic.<your-domain> with the value we show you,) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 165.2 Td (> and a CNAME from <your-domain> to app.yourbrand.com. Click Verify. HTTPS) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 150.3 Td (> turns on automatically within a couple of minutes.") Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 120.1 Td (6.3 Nothing to do per-domain on the server) Tj ET
@@ -339,7 +340,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 23 0 R >>
 endobj
 23 0 obj
-<< /Length 3084 >>
+<< /Length 3068 >>
 stream
 BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (7. Maintaining the app from VS Code \(Remote-SSH\)) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 669.9 Td (The cleanest way to manage a live VPS app: edit and run commands on the) Tj ET
@@ -351,7 +352,7 @@ BT /F1 11 Tf 0 0 0 rg 54 572.3 Td (ssh-keygen -t ed25519            # on your la
 BT /F1 11 Tf 0 0 0 rg 54 557.4 Td (ssh-copy-id deploy@<your-VPS-IP> # upload the key) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 542.6 Td (3. In VS Code: press `F1` ? "Remote-SSH: Connect to Host?" ?) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 527.7 Td (deploy@<your-VPS-IP>. A new window opens running *on the VPS*.) Tj ET
-BT /F1 11 Tf 0 0 0 rg 58 512.9 Td (4. File ? Open Folder ? `/home/deploy/social-automation.zip`. You now edit live) Tj ET
+BT /F1 11 Tf 0 0 0 rg 58 512.9 Td (4. File ? Open Folder ? `/home/deploy/scheduleistic`. You now edit live) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 498.0 Td (files with full IntelliSense, and the integrated terminal is the server.) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 467.8 Td (7.2 Recommended VS Code extensions \(installed into the remote\)) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 445.0 Td (? PHP Intelephense \(PHP language features\)) Tj ET
@@ -363,7 +364,7 @@ BT /F2 12 Tf 0.2 0.2 0.25 rg 54 355.4 Td (7.3 The normal change ? deploy loop) T
 BT /F1 11 Tf 0 0 0 rg 54 332.5 Td (Best practice is to commit changes and pull them on the server \(not edit blind\):) Tj ET
 0.96 0.96 0.97 rg 54 219.3 504 107.2 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 308.6 Td (# on the VPS terminal \(inside VS Code\)) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 296.7 Td (cd ~/social-automation.zip) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 296.7 Td (cd ~/scheduleistic) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 284.8 Td (git pull origin main                    # get the latest code) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 272.9 Td (cd scheduler/app) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 261.0 Td (docker compose up -d --build            # rebuild the app image) Tj ET
@@ -379,7 +380,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 25 0 R >>
 endobj
 25 0 obj
-<< /Length 3516 >>
+<< /Length 3502 >>
 stream
 0.96 0.96 0.97 rg 54 636.7 504 95.3 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 714.1 Td (docker compose ps                       # service health) Tj ET
@@ -395,8 +396,8 @@ BT /F2 12 Tf 0.2 0.2 0.25 rg 54 535.2 Td (8.1 Backups \(do this!\)) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 512.4 Td (Database \(nightly cron on the VPS\):) Tj ET
 0.96 0.96 0.97 rg 54 446.8 504 59.6 re f
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 488.5 Td (# crontab -e  \(as deploy\)) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 476.6 Td (0 3 * * * docker compose -f ~/social-automation.zip/scheduler/app/docker-compose.yml \\) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 464.7 Td (exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> socialistic \\) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 476.6 Td (0 3 * * * docker compose -f ~/scheduleistic/scheduler/app/docker-compose.yml \\) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 464.7 Td (exec -T mysql mysqldump -usocialistic -p<DB_PASSWORD> scheduleistic \\) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 452.8 Td (| gzip > ~/backups/db-$\(date +\\%F\).sql.gz) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 417.9 Td (Also back up these Docker volumes \(contain state you can't regenerate\):) Tj ET
 BT /F1 11 Tf 0 0 0 rg 58 403.1 Td (? `mysql-data` \(database\)) Tj ET
@@ -406,7 +407,7 @@ BT /F1 11 Tf 0 0 0 rg 54 352.5 Td (Pull backups off the box periodically \(e.g. 
 BT /F1 11 Tf 0 0 0 rg 54 337.7 Td (storage\).) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 307.5 Td (8.2 Updating the app) Tj ET
 0.96 0.96 0.97 rg 54 204.2 504 95.3 re f
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 281.6 Td (cd ~/social-automation.zip && git pull origin main) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 281.6 Td (cd ~/scheduleistic && git pull origin main) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 269.7 Td (cd scheduler/app) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 257.8 Td (docker compose up -d --build) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 245.9 Td (docker compose exec app php artisan migrate --force) Tj ET
@@ -449,7 +450,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 29 0 R >>
 endobj
 29 0 obj
-<< /Length 3713 >>
+<< /Length 3733 >>
 stream
 BT /F2 15 Tf 0.1 0.1 0.12 rg 54 693.8 Td (9. Appendix) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 660.5 Td (9.1 `.env` reference \(key settings\)) Tj ET
@@ -465,7 +466,7 @@ BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 551.4 Td (QUEUE_CONNECTION=redis, CACHE_STORE=
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 539.5 Td () Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 527.6 Td (# Billing) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 515.7 Td (STRIPE_KEY, STRIPE_SECRET, STRIPE_WEBHOOK_SECRET) Tj ET
-BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 503.8 Td (STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, CASHIER_CURRENCY=usd) Tj ET
+BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 503.8 Td (STRIPE_PRICE_PRO, STRIPE_PRICE_AGENCY, STRIPE_PRICE_SCALE, CASHIER_CURRENCY=usd) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 491.9 Td () Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 480.0 Td (# AI) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 468.1 Td (AI_FAKE=false, AI_ENDPOINT, AI_API_KEY, AI_MODEL) Tj ET
@@ -498,7 +499,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R >> >> /Contents 31 0 R >>
 endobj
 31 0 obj
-<< /Length 1389 >>
+<< /Length 1391 >>
 stream
 BT /F1 11 Tf 0 0 0 rg 58 717.1 Td (? [ ] Review `scheduler/docs/03-security.md` for the full posture.) Tj ET
 BT /F2 12 Tf 0.2 0.2 0.25 rg 54 686.9 Td (9.5 Repository map) Tj ET
@@ -512,7 +513,7 @@ BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 601.6 Td (caddy/Caddyfile             edge pro
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 589.7 Td (docker-compose.yml          the full stack) Tj ET
 BT /F3 8.5 Tf 0.15 0.15 0.2 rg 60 577.8 Td (scheduler/docs/               roadmap, security, this guide) Tj ET
 0.8 0.8 0.8 RG 0.5 w 54 547.8 m 558 547.8 l S
-BT /F1 11 Tf 0 0 0 rg 54 520.9 Td (*SOCIALISTIC ? you own the code, the data, and the customer relationship.*) Tj ET
+BT /F1 11 Tf 0 0 0 rg 54 520.9 Td (*Scheduleistic ? you own the code, the data, and the customer relationship.*) Tj ET
 BT /F1 11 Tf 0 0 0 rg 54 506.0 Td (*Built to be operated by one person from a single VPS and a VS Code window.*) Tj ET
 endstream
 endobj
@@ -526,32 +527,32 @@ xref
 0000000344 00000 n 
 0000000412 00000 n 
 0000000558 00000 n 
-0000003999 00000 n 
-0000004145 00000 n 
-0000007672 00000 n 
-0000007820 00000 n 
-0000009073 00000 n 
-0000009221 00000 n 
-0000012033 00000 n 
-0000012181 00000 n 
-0000015404 00000 n 
-0000015552 00000 n 
-0000018092 00000 n 
-0000018240 00000 n 
-0000021846 00000 n 
-0000021994 00000 n 
-0000025613 00000 n 
-0000025761 00000 n 
-0000028898 00000 n 
-0000029046 00000 n 
-0000032615 00000 n 
-0000032763 00000 n 
-0000034328 00000 n 
-0000034476 00000 n 
-0000038242 00000 n 
-0000038390 00000 n 
+0000004005 00000 n 
+0000004151 00000 n 
+0000007678 00000 n 
+0000007826 00000 n 
+0000009079 00000 n 
+0000009227 00000 n 
+0000012041 00000 n 
+0000012189 00000 n 
+0000015420 00000 n 
+0000015568 00000 n 
+0000018108 00000 n 
+0000018256 00000 n 
+0000021961 00000 n 
+0000022109 00000 n 
+0000025734 00000 n 
+0000025882 00000 n 
+0000029003 00000 n 
+0000029151 00000 n 
+0000032706 00000 n 
+0000032854 00000 n 
+0000034419 00000 n 
+0000034567 00000 n 
+0000038353 00000 n 
+0000038501 00000 n 
 trailer
 << /Size 32 /Root 1 0 R >>
 startxref
-39832
+39945
 %%EOF
