@@ -13,10 +13,10 @@
 
 return [
 
-    'fake'     => env('AI_FAKE', false),
+    'fake' => env('AI_FAKE', false),
     'endpoint' => env('AI_ENDPOINT', 'https://openrouter.ai/api/v1/chat/completions'),
-    'key'      => env('AI_API_KEY'),
-    'model'    => env('AI_MODEL', 'openai/gpt-4o-mini'),
+    'key' => env('AI_API_KEY'),
+    'model' => env('AI_MODEL', 'openai/gpt-4o-mini'),
 
     // Shared brand-voice guardrails applied to every generation.
     'system' => 'You write social media copy in the Wordpressistic brand voice: confident, '
@@ -26,19 +26,41 @@ return [
 
     // Per-network shaping.
     'prompts' => [
-        'linkedin'         => 'Write a LinkedIn post (max ~1300 chars), professional and insightful, about: :topic',
+        'linkedin' => 'Write a LinkedIn post (max ~1300 chars), professional and insightful, about: :topic',
         'linkedin_company' => 'Write a LinkedIn company-page post, professional, about: :topic',
-        'facebook'         => 'Write a friendly, engaging Facebook post about: :topic',
-        'instagram'        => 'Write an Instagram caption with 3-5 relevant hashtags about: :topic',
-        'threads'          => 'Write a short, punchy Threads post about: :topic',
-        'pinterest'        => 'Write a concise, keyword-rich Pinterest pin description about: :topic',
-        'tiktok'           => 'Write a short hooky TikTok caption with 2-3 hashtags about: :topic',
-        'youtube'          => 'Write a YouTube video title and short description about: :topic',
-        'mastodon'         => 'Write a concise Mastodon post about: :topic',
-        'bluesky'          => 'Write a concise Bluesky post (max 300 chars) about: :topic',
-        'medium'           => 'Write a short Medium intro paragraph about: :topic',
-        'wordpress'        => 'Write a blog excerpt about: :topic',
-        'default'          => 'Write a social media post about: :topic',
+        'facebook' => 'Write a friendly, engaging Facebook post about: :topic',
+        'instagram' => 'Write an Instagram caption with 3-5 relevant hashtags about: :topic',
+        'threads' => 'Write a short, punchy Threads post about: :topic',
+        'pinterest' => 'Write a concise, keyword-rich Pinterest pin description about: :topic',
+        'tiktok' => 'Write a short hooky TikTok caption with 2-3 hashtags about: :topic',
+        'youtube' => 'Write a YouTube video title and short description about: :topic',
+        'mastodon' => 'Write a concise Mastodon post about: :topic',
+        'bluesky' => 'Write a concise Bluesky post (max 300 chars) about: :topic',
+        'medium' => 'Write a short Medium intro paragraph about: :topic',
+        'wordpress' => 'Write a blog excerpt about: :topic',
+        'default' => 'Write a social media post about: :topic',
+    ],
+
+    /*
+    |----------------------------------------------------------------------
+    | Brain gateway (wpistic-ai-gateway)
+    |----------------------------------------------------------------------
+    |
+    | Optional cross-product "Brain API" (POST /v1/brain/search, POST
+    | /v1/brain/ingest) grounding AI output in a team's own shared brand
+    | knowledge instead of a generic prompt — the same gateway the Postistic
+    | WordPress plugin consumes via its Postistic_Brain_Client. See
+    | WordPressistic-Core-System-Developments/cloudflare/wpistic-ai-gateway
+    | and its docs/BRAIN-API.md. Disabled by default: grounding is best-effort
+    | and every AI feature keeps working ungrounded when this isn't set up.
+    |
+    */
+
+    'brain_gateway' => [
+        'enabled' => env('BRAIN_GATEWAY_ENABLED', false),
+        'url' => env('BRAIN_GATEWAY_URL'),
+        'secret' => env('BRAIN_GATEWAY_SECRET'),
+        'fake' => env('BRAIN_GATEWAY_FAKE', false),
     ],
 
 ];

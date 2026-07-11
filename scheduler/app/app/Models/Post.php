@@ -12,13 +12,19 @@ class Post extends Model
 {
     use HasFactory;
 
-    public const STATUS_DRAFT             = 'draft';
-    public const STATUS_PENDING_APPROVAL  = 'pending_approval';
-    public const STATUS_SCHEDULED         = 'scheduled';
-    public const STATUS_PUBLISHING        = 'publishing';
-    public const STATUS_PUBLISHED         = 'published';
-    public const STATUS_PARTIALLY_FAILED  = 'partially_failed';
-    public const STATUS_FAILED            = 'failed';
+    public const STATUS_DRAFT = 'draft';
+
+    public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
+    public const STATUS_SCHEDULED = 'scheduled';
+
+    public const STATUS_PUBLISHING = 'publishing';
+
+    public const STATUS_PUBLISHED = 'published';
+
+    public const STATUS_PARTIALLY_FAILED = 'partially_failed';
+
+    public const STATUS_FAILED = 'failed';
 
     protected $fillable = [
         'group_id',
@@ -34,14 +40,18 @@ class Post extends Model
         'parent_post_id',
         'approval_state',
         'published_at',
+        'hashtags',
+        'ai_quality_report',
     ];
 
     protected function casts(): array
     {
         return [
-            'media'        => 'array',
+            'media' => 'array',
             'scheduled_at' => 'datetime',
             'published_at' => 'datetime',
+            'hashtags' => 'array',
+            'ai_quality_report' => 'array',
         ];
     }
 
@@ -103,10 +113,10 @@ class Post extends Model
 
         $this->status = match (true) {
             $statuses->every(fn ($s) => $s === PostTarget::STATUS_PUBLISHED) => self::STATUS_PUBLISHED,
-            $statuses->every(fn ($s) => $s === PostTarget::STATUS_FAILED)    => self::STATUS_FAILED,
+            $statuses->every(fn ($s) => $s === PostTarget::STATUS_FAILED) => self::STATUS_FAILED,
             $statuses->contains(PostTarget::STATUS_PUBLISHED)
-                && $statuses->contains(PostTarget::STATUS_FAILED)           => self::STATUS_PARTIALLY_FAILED,
-            default                                                          => self::STATUS_PUBLISHING,
+                && $statuses->contains(PostTarget::STATUS_FAILED) => self::STATUS_PARTIALLY_FAILED,
+            default => self::STATUS_PUBLISHING,
         };
 
         if ($this->status === self::STATUS_PUBLISHED && ! $this->published_at) {
