@@ -88,6 +88,44 @@ class BrainGatewayClient
         return is_array($data) && ! empty($data['ok']);
     }
 
+    /**
+     * Self-report a completion this team's own AI call already made, so the
+     * gateway's Brain Home Dashboard can show real cost/token figures for
+     * this brain instead of reading zero — /v1/brain/search and /v1/brain/ingest
+     * never call an LLM themselves, so without this call the gateway has no
+     * visibility at all into what our own AiAssistant/PostAiAgents spent.
+     * Best-effort like every other call here: never blocks or fails the
+     * caption/agent run it's reporting on.
+     */
+    public function reportUsage(
+        Team $team,
+        string $provider,
+        string $model,
+        int $inputTokens,
+        int $outputTokens,
+        bool $refused = false,
+        ?string $agent = null,
+    ): bool {
+        if ($this->isFake()) {
+            return false;
+        }
+
+        $body = [
+            'provider' => $provider,
+            'model' => $model,
+            'inputTokens' => max(0, $inputTokens),
+            'outputTokens' => max(0, $outputTokens),
+            'refused' => $refused,
+        ];
+        if ($agent) {
+            $body['agent'] = $agent;
+        }
+
+        $data = $this->request($team, '/v1/brain/usage', $body);
+
+        return is_array($data) && ! empty($data['ok']);
+    }
+
     /** Shared request plumbing: sign + POST + decode. Swallows all failures to null. */
     private function request(Team $team, string $path, array $body): ?array
     {

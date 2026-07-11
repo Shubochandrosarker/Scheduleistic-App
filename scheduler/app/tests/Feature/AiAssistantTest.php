@@ -60,13 +60,17 @@ class AiAssistantTest extends TestCase
 
         Http::fakeSequence()
             ->push(['chunks' => [['id' => 'c1', 'text' => 'We always mention our fast turnaround.', 'source' => 'past-post', 'score' => 0.8, 'tier' => 'product']], 'confidence' => 0.8])
-            ->push(['choices' => [['message' => ['content' => 'Generated post copy.']]]]);
+            ->push(['choices' => [['message' => ['content' => 'Generated post copy.']]]])
+            ->push(['ok' => true]); // /v1/brain/usage self-report after the completion
 
         $team = User::factory()->withPersonalTeam()->create()->currentTeam;
         $caption = app(AiAssistant::class)->caption('a topic', 'linkedin', $team);
 
         $this->assertSame('Generated post copy.', $caption);
         Http::assertSent(fn ($req) => str_contains($req->body(), 'fast turnaround'));
+        Http::assertSent(fn ($req) => $req->url() === 'https://gateway.test/v1/brain/usage'
+            && $req['model'] === config('ai.model')
+            && $req['refused'] === false);
     }
 
     public function test_grounding_is_skipped_when_the_gateway_is_not_configured(): void
