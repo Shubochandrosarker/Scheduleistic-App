@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Workspace;
+use App\Services\PlanService;
 use App\Services\UsageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -70,8 +71,8 @@ class PlanLimitsTest extends TestCase
         $this->actingAs($user)
             ->post(route('posts.store'), [
                 'workspace_id' => $workspace->id,
-                'content'      => 'two',
-                'channel_ids'  => [$channel->id],
+                'content' => 'two',
+                'channel_ids' => [$channel->id],
             ])
             ->assertSessionHasErrors('plan');
     }
@@ -91,5 +92,18 @@ class PlanLimitsTest extends TestCase
         $team->update(['plan' => 'scale']);
         $this->assertTrue($usage->allows($team, 'workspaces', 50));
         $this->assertFalse($usage->allows($team, 'workspaces', 51));
+    }
+
+    public function test_plan_service_feature_helper_reads_boolean_flags(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $team = $user->currentTeam;
+        $plans = app(PlanService::class);
+
+        $this->assertFalse($plans->feature($team, 'ai_agents'));
+
+        $team->update(['plan' => 'pro']);
+        $this->assertTrue($plans->feature($team, 'ai_agents'));
+        $this->assertFalse($plans->feature($team, 'not_a_real_flag'));
     }
 }

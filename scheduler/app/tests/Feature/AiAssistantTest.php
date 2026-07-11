@@ -47,4 +47,40 @@ class AiAssistantTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['captions' => ['linkedin']]);
     }
+
+    public function test_captions_are_grounded_in_the_teams_shared_brain_when_configured(): void
+    {
+        config([
+            'ai.fake' => false,
+            'ai.key' => 'test-key',
+            'ai.brain_gateway.enabled' => true,
+            'ai.brain_gateway.url' => 'https://gateway.test',
+            'ai.brain_gateway.secret' => 'shh',
+        ]);
+
+        Http::fakeSequence()
+            ->push(['chunks' => [['id' => 'c1', 'text' => 'We always mention our fast turnaround.', 'source' => 'past-post', 'score' => 0.8, 'tier' => 'product']], 'confidence' => 0.8])
+            ->push(['choices' => [['message' => ['content' => 'Generated post copy.']]]]);
+
+        $team = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $caption = app(AiAssistant::class)->caption('a topic', 'linkedin', $team);
+
+        $this->assertSame('Generated post copy.', $caption);
+        Http::assertSent(fn ($req) => str_contains($req->body(), 'fast turnaround'));
+    }
+
+    public function test_grounding_is_skipped_when_the_gateway_is_not_configured(): void
+    {
+        config(['ai.fake' => false, 'ai.key' => 'test-key']);
+
+        Http::fake([
+            '*' => Http::response(['choices' => [['message' => ['content' => 'Generated post copy.']]]]),
+        ]);
+
+        $team = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $caption = app(AiAssistant::class)->caption('a topic', 'linkedin', $team);
+
+        $this->assertSame('Generated post copy.', $caption);
+        Http::assertSentCount(1); // no brain search call made
+    }
 }

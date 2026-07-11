@@ -34,4 +34,16 @@ class PlanService
     {
         return $this->limit($team, $key) === self::UNLIMITED;
     }
+
+    /** @return array<string, mixed> */
+    public function features(Team $team): array
+    {
+        return $this->plan($team)['features'] ?? [];
+    }
+
+    /** Whether the team's plan grants a boolean feature flag (e.g. 'ai_captions', 'ai_agents'). */
+    public function feature(Team $team, string $key): bool
+    {
+        return (bool) ($this->features($team)[$key] ?? false);
+    }
 }
