@@ -51,6 +51,9 @@ class HandleInertiaRequests extends Middleware
                 ],
             'isPlatformAdmin'  => (bool) $request->user()?->is_platform_admin,
             'isImpersonating'  => $request->session()->has('impersonator_id'),
+            // A short status code set by controllers via back()->with('status', ...),
+            // e.g. "feed-added", "imported-3-skipped-1" — rendered as a banner in AppLayout.
+            'status' => fn () => $request->session()->get('status'),
         ];
     }
 }
