@@ -73,17 +73,24 @@
         <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <ul class="nav-links" id="nav-links">
-        <li><a href="/features.html">Features</a></li>
-        <li><a href="/scheduler.html">Scheduler</a></li>
+        <li class="nav-item-dropdown">
+          <button type="button" class="nav-dropdown-toggle" aria-haspopup="true" aria-expanded="false" aria-controls="product-menu">
+            Product
+            <svg class="chevron" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <ul class="nav-dropdown-menu" id="product-menu" role="menu">
+            <li role="none"><a role="menuitem" href="/features.html">Features</a></li>
+            <li role="none"><a role="menuitem" href="/scheduler.html">Social Media Scheduler</a></li>
+            <li role="none"><a role="menuitem" href="/client-approval.html">Client Approval</a></li>
+          </ul>
+        </li>
         <li><a href="/agencies.html">Agencies</a></li>
-        <li><a href="/client-approval.html">Client Approval</a></li>
         <li><a href="/pricing.html">Pricing</a></li>
         <li><a href="/resources.html">Resources</a></li>
         <li><a href="/contact.html">Contact</a></li>
         <li><a href="https://app.scheduleistic.com/login">Login</a></li>
       </ul>
       <div class="nav-actions">
-        <a class="btn btn-outline" href="/pricing.html">View Pricing</a>
         <a class="btn btn-cta" href="https://app.scheduleistic.com/register">Start Free Trial</a>
       </div>
     </div>
@@ -94,25 +101,32 @@
     <!-- Hero -->
     <section class="hero">
       <div class="container">
-        <h1>Schedule posts. Manage clients. Publish with confidence.</h1>
-        <p class="subhead">Scheduleistic helps agencies, creators, and growing businesses plan, approve, and publish social content from one clean workspace.</p>
+        <span class="hero-eyebrow"><span class="dot" aria-hidden="true"></span>Agency-grade · Multi-tenant · White-label</span>
+        <h1>The social operations platform for agencies who answer to <span class="grad-text">clients, not spreadsheets.</span></h1>
+        <p class="subhead">Scheduleistic is not just a scheduler. It's an isolated workspace per client, an approval chain before anything goes live, and a publishing engine that reports what actually happened — all from one account you can put your own brand on.</p>
         <div class="hero-actions">
           <a class="btn btn-cta btn-lg" href="https://app.scheduleistic.com/register">Start Free Trial</a>
           <a class="btn btn-outline btn-lg" href="/pricing.html">View Pricing</a>
         </div>
         <p class="hero-note">No credit card required to start. Self-hosted or managed cloud.</p>
+        <div class="hero-facts">
+          <span class="hero-fact"><strong>13</strong>&nbsp;native networks</span>
+          <span class="hero-fact">Isolated&nbsp;<strong>client workspaces</strong></span>
+          <span class="hero-fact"><strong>White-label</strong>&nbsp;custom domains</span>
+          <span class="hero-fact">Self-hosted&nbsp;<strong>or</strong>&nbsp;managed</span>
+        </div>
       </div>
     </section>
 
     <!-- Problem -->
     <section class="section-surface">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">The problem</span>
           <h2>Scattered tools make social media chaotic</h2>
           <p>Spreadsheets for planning, DMs for approvals, and a different login for every client. Things slip, posts go out late, and approvals get lost in email threads.</p>
         </div>
-        <div class="grid grid-3">
+        <div class="grid grid-3 reveal">
           <div class="card"><h3>Lost approvals</h3><p>Feedback buried in chat and email means the wrong version ships, or nothing ships at all.</p></div>
           <div class="card"><h3>Channel sprawl</h3><p>Managing many brands across many networks without one place to see the whole calendar.</p></div>
           <div class="card"><h3>Missed publishing</h3><p>Manual posting and unreliable queues lead to gaps, duplicates, and last-minute scrambles.</p></div>
@@ -123,7 +137,7 @@
     <!-- Solution -->
     <section>
       <div class="container">
-        <div class="split">
+        <div class="split reveal">
           <div>
             <span class="eyebrow">The solution</span>
             <h2>One clean workspace for organized publishing</h2>
@@ -165,11 +179,11 @@
     <!-- How it works -->
     <section class="section-surface">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">How it works</span>
           <h2>From idea to published in four steps</h2>
         </div>
-        <div class="grid grid-4 steps">
+        <div class="grid grid-4 steps reveal">
           <div class="card"><div class="step-num">1</div><h3>Connect channels</h3><p>Link the networks for each workspace and check channel health at a glance.</p></div>
           <div class="card"><div class="step-num">2</div><h3>Plan &amp; draft</h3><p>Build posts on a calendar, attach media, and organize by client or campaign.</p></div>
           <div class="card"><div class="step-num">3</div><h3>Get approval</h3><p>Send posts to clients or managers for review and approval before publishing.</p></div>
@@ -181,12 +195,12 @@
     <!-- Features grid -->
     <section>
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">Features</span>
           <h2>Everything you need to publish with confidence</h2>
           <p>A focused toolset for social media scheduling, client approvals, and team collaboration.</p>
         </div>
-        <div class="grid grid-4">
+        <div class="grid grid-4 reveal">
           <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></span><h3>Calendar view</h3><p>See every scheduled post by day, week, or month per workspace.</p></div>
           <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><h3>Multi-workspace scheduling</h3><p>Keep each client or brand separate with its own channels and calendar.</p></div>
           <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></span><h3>Client approval workflows</h3><p>Collect reviews and approvals before any post goes live.</p></div>
@@ -203,7 +217,7 @@
     <!-- Agency workflow -->
     <section class="section-surface">
       <div class="container">
-        <div class="split">
+        <div class="split reveal">
           <div class="mock" aria-hidden="true">
             <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-title">Agency workspaces</span></div>
             <div class="mock-side" style="gap:.6rem">
@@ -232,12 +246,12 @@
     <!-- Supported channels -->
     <section>
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">Channels</span>
           <h2>Publish to the networks that matter</h2>
           <p>Connect the platforms your clients care about and schedule them all from one calendar.</p>
         </div>
-        <div class="channels">
+        <div class="channels reveal">
           <span class="channel">LinkedIn</span>
           <span class="channel">Facebook Pages</span>
           <span class="channel">Instagram</span>
@@ -256,7 +270,7 @@
     <!-- Approval workflow -->
     <section class="section-surface">
       <div class="container">
-        <div class="split">
+        <div class="split reveal">
           <div>
             <span class="eyebrow">Approvals</span>
             <h2>Client approval, built in</h2>
@@ -285,12 +299,12 @@
     <!-- Dashboard preview -->
     <section>
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">Dashboard</span>
           <h2>A clear view of everything in flight</h2>
           <p>See scheduled posts, approvals, and channel health at a glance for every workspace.</p>
         </div>
-        <div class="mock" aria-hidden="true">
+        <div class="mock reveal" aria-hidden="true">
           <div class="mock-bar"><span class="mock-dot r"></span><span class="mock-dot y"></span><span class="mock-dot g"></span><span class="mock-title">Scheduleistic dashboard</span></div>
           <div class="mock-body">
             <div class="mock-side">
@@ -321,12 +335,12 @@
     <!-- Pricing preview -->
     <section class="section-surface">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">Pricing</span>
           <h2>Simple, usage-based plans</h2>
           <p>Start free, then scale up as you add workspaces, channels, and volume.</p>
         </div>
-        <div class="pricing-grid">
+        <div class="pricing-grid reveal">
           <div class="plan">
             <h3>Free Trial</h3>
             <div class="price">$0</div>
@@ -387,11 +401,11 @@
     <!-- FAQ -->
     <section>
       <div class="container">
-        <div class="section-head">
+        <div class="section-head reveal">
           <span class="eyebrow">FAQ</span>
           <h2>Frequently asked questions</h2>
         </div>
-        <div class="faq">
+        <div class="faq reveal">
           <div class="faq-item">
             <button aria-expanded="false">What is Scheduleistic?</button>
             <div class="faq-answer"><p>Scheduleistic is social media scheduling software that helps agencies, creators, and small businesses plan, approve, and publish content across multiple channels from one clean workspace.</p></div>
@@ -444,35 +458,13 @@
           </a>
           <p class="mt-1">A clean, reliable social scheduling platform for agencies, creators, and small businesses.</p>
         </div>
-        <div>
-          <h4>Product</h4>
-          <ul>
-            <li><a href="/features.html">Features</a></li>
-            <li><a href="/scheduler.html">Social Media Scheduler</a></li>
-            <li><a href="/pricing.html">Pricing</a></li>
-            <li><a href="/client-approval.html">Client Approval</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Company</h4>
-          <ul>
-            <li><a href="/agencies.html">For Agencies</a></li>
-            <li><a href="/resources.html">Resources</a></li>
-            <li><a href="/contact.html">Contact</a></li>
-            <li><a href="https://app.scheduleistic.com/login">Login</a></li>
-          </ul>
-        </div>
-        <div>
-          <h4>Legal</h4>
-          <ul>
-            <li><a href="/privacy.html">Privacy Policy</a></li>
-            <li><a href="/terms.html">Terms of Service</a></li>
-          </ul>
-        </div>
+        <div><h4>Product</h4><ul><li><a href="/features.html">Features</a></li><li><a href="/scheduler.html">Social Media Scheduler</a></li><li><a href="/pricing.html">Pricing</a></li><li><a href="/client-approval.html">Client Approval</a></li></ul></div>
+        <div><h4>Company</h4><ul><li><a href="/agencies.html">For Agencies</a></li><li><a href="/resources.html">Resources</a></li><li><a href="/contact.html">Contact</a></li></ul></div>
+        <div><h4>Legal</h4><ul><li><a href="/privacy.html">Privacy Policy</a></li><li><a href="/terms.html">Terms of Service</a></li></ul></div>
       </div>
       <div class="footer-bottom">
         <p class="mb-0">&copy; <span id="year">2026</span> Scheduleistic. All rights reserved.</p>
-        <p class="mb-0"><a href="https://app.scheduleistic.com/register">Start Free Trial</a></p>
+        <p class="mb-0"><a href="https://app.scheduleistic.com/login">Login</a> &middot; <a href="https://app.scheduleistic.com/register">Start Free Trial</a></p>
       </div>
     </div>
   </footer>
