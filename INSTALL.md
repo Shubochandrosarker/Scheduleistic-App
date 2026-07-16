@@ -200,7 +200,7 @@ directly in the app UI with no developer app or `.env` entry required.
 php artisan test
 ```
 
-The full suite (161 tests) should pass, with 7 intentionally skipped — those are Jetstream's own
+The full suite (169 tests) should pass, with 7 intentionally skipped — those are Jetstream's own
 conditional tests for features this app disables (API tokens, self-service account deletion), and
 skipping them is expected, not a failure.
 

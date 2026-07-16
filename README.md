@@ -13,6 +13,26 @@ domains, Stripe billing, and an AI assistant grounded in each team's own brand v
 
 ---
 
+## Status
+
+All 7 build phases — auth/tenancy, the publishing engine, agency/approvals, billing/white-label,
+AI/analytics, security hardening, and custom-domain TLS — are shipped and covered by the test
+suite (see [`scheduler/docs/02-roadmap.md`](scheduler/docs/02-roadmap.md) for the phase-by-phase
+delivery history). What's left is operational — real OAuth/Stripe credentials and a go-live
+deploy — not application code.
+
+Last verified locally (PHP 8.4.19, Node 22, Composer 2.8.12):
+
+| Check | Result |
+| --- | --- |
+| `composer install` | clean |
+| `npm ci && npm run build` | clean |
+| `php artisan test` | **162/169 passing**, 7 skipped by design, 0 failing |
+| `composer audit` | 0 known vulnerabilities |
+| `npm audit` | 0 known vulnerabilities |
+
+---
+
 ## Why it's not "just a scheduler"
 
 | | |
