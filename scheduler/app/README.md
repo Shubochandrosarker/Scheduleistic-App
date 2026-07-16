@@ -25,7 +25,7 @@ for the delivery history and what's still genuinely open.
   with encrypted-at-rest OAuth tokens
 - Branding config (`config/scheduleistic.php`) + white-label env switches
 - Docker stack: `app`, `worker` (queue), `scheduler` (cron), `mysql`, `redis`
-- CI (`../../.github/workflows/ci.yml`) running the test suite on every push/PR — **154 of 161
+- CI (`../../.github/workflows/ci.yml`) running the test suite on every push/PR — **162 of 169
   tests passing** (7 skipped by design for Jetstream features this app disables, e.g. API tokens
   and account self-deletion; 0 failing)
 
