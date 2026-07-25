@@ -178,12 +178,15 @@ body {
 /* ── Component layer ──────────────────────────────────────────────────────── */
 
 @layer components {
-    /* Surfaces */
+    /* Surfaces.
+       `min-w-0` matters: cards usually sit in a grid or flex track, whose items
+       default to min-width:auto and would otherwise refuse to shrink below a
+       long unbreakable line — pushing the whole page wider than the viewport. */
     .sc-card {
         background: var(--card-bg);
         border: 1px solid var(--card-line);
         box-shadow: var(--card-shadow);
-        @apply rounded-2xl;
+        @apply min-w-0 rounded-2xl;
     }
 
     .sc-card-solid {
@@ -195,13 +198,13 @@ body {
     .sc-panel {
         background: var(--panel-bg);
         border: 1px solid var(--card-line);
-        @apply rounded-2xl;
+        @apply min-w-0 rounded-2xl;
     }
 
     .sc-inset {
         background: var(--s1);
         border: 1px solid var(--line);
-        @apply rounded-xl;
+        @apply min-w-0 rounded-xl;
     }
 
     /* Typography helpers */

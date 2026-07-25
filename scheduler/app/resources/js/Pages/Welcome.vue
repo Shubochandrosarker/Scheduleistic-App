@@ -55,13 +55,13 @@ const features = [
     <Head :title="`${appName} — Social media scheduling`" />
 
     <div class="min-h-screen" style="background: var(--bg)">
-        <header class="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-            <div class="flex items-center gap-2.5">
+        <header class="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-6 sm:px-6">
+            <div class="flex min-w-0 items-center gap-2.5">
                 <BrandMark :size="34" />
-                <span class="text-[18px] font-extrabold tracking-[-0.02em] text-t1">{{ appName }}</span>
+                <span class="truncate text-[18px] font-extrabold tracking-[-0.02em] text-t1">{{ appName }}</span>
             </div>
 
-            <nav v-if="canLogin" class="flex items-center gap-3">
+            <nav v-if="canLogin" class="flex shrink-0 items-center gap-2 sm:gap-3">
                 <Link :href="route('login')" class="sc-btn sc-btn-sm sc-btn-ghost">Log in</Link>
                 <Link v-if="canRegister" :href="route('register')" class="sc-btn sc-btn-sm sc-btn-primary">
                     Get started →

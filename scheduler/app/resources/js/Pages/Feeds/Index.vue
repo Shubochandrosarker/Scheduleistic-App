@@ -29,9 +29,11 @@ const destroy = (id) => {
     }
 };
 
-const when = (value) => (value
-    ? new Date(value).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-    : 'not checked yet');
+const lastChecked = (value) => (value
+    ? `Last checked ${new Date(value).toLocaleString([], {
+        day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    })}`
+    : 'Never checked — the poller picks it up on its next run');
 </script>
 
 <template>
@@ -88,7 +90,7 @@ const when = (value) => (value
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-[13.5px] font-bold text-t1">{{ feed.name || feed.url }}</p>
                             <p class="truncate text-[12px] text-t3">{{ feed.url }}</p>
-                            <p class="mt-1 text-[11.5px] text-t4">Last checked {{ when(feed.last_polled_at) }}</p>
+                            <p class="mt-1 text-[11.5px] text-t4">{{ lastChecked(feed.last_polled_at) }}</p>
                         </div>
 
                         <div class="flex shrink-0 items-center gap-2.5">

@@ -131,16 +131,24 @@ const slotTime = (iso) => (iso
                 </EmptyState>
 
                 <ul v-else>
-                    <li v-for="p in upcoming" :key="p.id" class="sc-row flex items-start gap-4 px-5 py-3.5">
-                        <div class="w-24 shrink-0">
+                    <!-- Narrow screens stack the timestamp above the copy; from `sm` up
+                         it becomes the left gutter the design uses. -->
+                    <li
+                        v-for="p in upcoming"
+                        :key="p.id"
+                        class="sc-row flex flex-col gap-1.5 px-5 py-3.5 sm:flex-row sm:items-start sm:gap-4"
+                    >
+                        <div class="flex shrink-0 items-baseline gap-2 sm:w-24 sm:flex-col sm:gap-0">
                             <p class="text-[12.5px] font-extrabold leading-snug text-t1">{{ slotDay(p.scheduled_at) }}</p>
                             <p class="text-[11.5px] text-t3">{{ slotTime(p.scheduled_at) }}</p>
                         </div>
+
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-[13.5px] text-t2">{{ p.content || '(no content)' }}</p>
                             <p class="mt-0.5 text-[11.5px] text-t4">{{ p.workspace }}</p>
                         </div>
-                        <SBadge tone="ok">Scheduled</SBadge>
+
+                        <SBadge class="self-start" tone="ok">Scheduled</SBadge>
                     </li>
                 </ul>
             </SCard>
