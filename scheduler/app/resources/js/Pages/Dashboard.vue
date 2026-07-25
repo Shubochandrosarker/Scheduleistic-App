@@ -1,109 +1,182 @@
 <script setup>
+import { computed } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/UI/PageHeader.vue';
+import SCard from '@/Components/UI/SCard.vue';
+import SButton from '@/Components/UI/SButton.vue';
+import SBadge from '@/Components/UI/SBadge.vue';
+import StatCard from '@/Components/UI/StatCard.vue';
+import MeterBar from '@/Components/UI/MeterBar.vue';
+import EmptyState from '@/Components/UI/EmptyState.vue';
 
-defineProps({
+const props = defineProps({
     stats: Object,
     plan: String,
     usage: Object,
     upcoming: Array,
 });
 
-const branding = usePage().props.branding ?? {};
-const label = (v) => (v === -1 ? '∞' : v);
+const page = usePage();
+const branding = computed(() => page.props.branding ?? {});
 
-const cards = [
-    { key: 'workspaces', label: 'Workspaces' },
-    { key: 'channels', label: 'Connected channels' },
-    { key: 'scheduled', label: 'Scheduled posts' },
-    { key: 'published_month', label: 'Published this month' },
-];
+// The four headline numbers, ordered the way an operator reads the day:
+// what's queued, what shipped, who it's for, what it publishes through.
+const kpis = computed(() => [
+    {
+        label: 'Scheduled posts',
+        value: props.stats?.scheduled ?? 0,
+        delta: 'Queued and waiting on the dispatcher',
+        tone: 'accent',
+        icon: '↑',
+    },
+    {
+        label: 'Published this month',
+        value: props.stats?.published_month ?? 0,
+        delta: 'Delivered by the publishing engine',
+        tone: 'ok',
+        icon: '✓',
+    },
+    {
+        label: 'Client workspaces',
+        value: props.stats?.workspaces ?? 0,
+        delta: 'Each one sealed off from the others',
+        tone: 'alt',
+        icon: '◆',
+    },
+    {
+        label: 'Connected channels',
+        value: props.stats?.channels ?? 0,
+        delta: 'Across every workspace',
+        tone: 'neutral',
+        icon: '◌',
+    },
+]);
 
-const actions = [
-    { label: 'Compose a post', route: 'posts.create', color: 'bg-indigo-600 hover:bg-indigo-700' },
-    { label: 'Workspaces', route: 'workspaces.index', color: 'bg-gray-700 hover:bg-gray-800' },
-    { label: 'Analytics', route: 'analytics.index', color: 'bg-gray-700 hover:bg-gray-800' },
-    { label: 'Billing', route: 'billing.index', color: 'bg-gray-700 hover:bg-gray-800' },
-];
+// A headline that reacts to the actual state of the account rather than
+// greeting everyone identically.
+const headline = computed(() => {
+    const scheduled = props.stats?.scheduled ?? 0;
+    const channels = props.stats?.channels ?? 0;
+
+    if (channels === 0) return 'Connect a channel and the engine takes it from there.';
+    if (scheduled === 0) return 'Nothing queued. The calendar is yours to fill.';
+
+    return `${scheduled} post${scheduled === 1 ? '' : 's'} teed up and ready to ship.`;
+});
+
+const today = new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+});
+
+const meterTones = { monthly_posts: 'accent', workspaces: 'alt', channels: 'cyan', members: 'ok' };
+
+const planLabel = computed(
+    () => (props.plan ? props.plan.charAt(0).toUpperCase() + props.plan.slice(1) : 'Current'),
+);
+
+// "Sun 26 Jul" over "10:30" — two short lines beat one wrapping timestamp.
+const slotDay = (iso) => (iso
+    ? new Date(iso).toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+    : '—');
+
+const slotTime = (iso) => (iso
+    ? new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    : '');
 </script>
 
 <template>
     <AppLayout title="Dashboard">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Dashboard</h2>
-        </template>
+        <PageHeader :eyebrow="today">
+            <template #title>{{ headline }}</template>
+            <template #subtitle>
+                Everything queued for {{ branding.name || 'Scheduleistic' }} — plus what needs a decision.
+            </template>
+            <template #actions>
+                <SButton :href="route('posts.index')">Open calendar</SButton>
+                <SButton variant="primary" :href="route('posts.create')">Compose a post →</SButton>
+            </template>
+        </PageHeader>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <!-- Welcome + plan -->
-                <div class="bg-white shadow sm:rounded-lg p-6 flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-900">
-                            Welcome to {{ branding.name || 'Scheduleistic' }}
-                        </h3>
-                        <p class="text-sm text-gray-500">{{ branding.tagline || 'Schedule and publish across every network.' }}</p>
-                    </div>
-                    <span class="text-xs uppercase tracking-wide px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">
-                        {{ plan }} plan
-                    </span>
-                </div>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <StatCard
+                v-for="k in kpis"
+                :key="k.label"
+                :label="k.label"
+                :value="k.value"
+                :delta="k.delta"
+                :tone="k.tone"
+                :icon="k.icon"
+            />
+        </div>
 
-                <!-- Stat cards -->
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <div v-for="c in cards" :key="c.key" class="bg-white shadow sm:rounded-lg p-6">
-                        <p class="text-xs uppercase text-gray-400">{{ c.label }}</p>
-                        <p class="text-3xl font-semibold text-gray-900 mt-1">{{ stats[c.key] }}</p>
-                    </div>
-                </div>
-
-                <!-- Quick actions -->
-                <div class="flex flex-wrap gap-3">
-                    <Link v-for="a in actions" :key="a.route" :href="route(a.route)"
-                        :class="`inline-flex items-center px-4 py-2 text-white text-sm rounded-md ${a.color}`">
-                        {{ a.label }}
+        <div class="mt-4 grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+            <!-- Going out next -->
+            <SCard flush title="Going out next" subtitle="The next five posts the dispatcher will claim.">
+                <template #actions>
+                    <Link :href="route('posts.index')" class="text-[12.5px] font-bold" style="color: var(--sc-accent-text)">
+                        Week view →
                     </Link>
+                </template>
+
+                <EmptyState
+                    v-if="!upcoming || upcoming.length === 0"
+                    icon="◷"
+                    title="Nothing scheduled yet"
+                    description="Compose a post and either pick an exact time or drop it in the queue."
+                >
+                    <SButton variant="primary" :href="route('posts.create')">Compose one →</SButton>
+                </EmptyState>
+
+                <ul v-else>
+                    <!-- Narrow screens stack the timestamp above the copy; from `sm` up
+                         it becomes the left gutter the design uses. -->
+                    <li
+                        v-for="p in upcoming"
+                        :key="p.id"
+                        class="sc-row flex flex-col gap-1.5 px-5 py-3.5 sm:flex-row sm:items-start sm:gap-4"
+                    >
+                        <div class="flex shrink-0 items-baseline gap-2 sm:w-24 sm:flex-col sm:gap-0">
+                            <p class="text-[12.5px] font-extrabold leading-snug text-t1">{{ slotDay(p.scheduled_at) }}</p>
+                            <p class="text-[11.5px] text-t3">{{ slotTime(p.scheduled_at) }}</p>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-[13.5px] text-t2">{{ p.content || '(no content)' }}</p>
+                            <p class="mt-0.5 text-[11.5px] text-t4">{{ p.workspace }}</p>
+                        </div>
+
+                        <SBadge class="self-start" tone="ok">Scheduled</SBadge>
+                    </li>
+                </ul>
+            </SCard>
+
+            <!-- Plan usage -->
+            <SCard title="Plan usage" :subtitle="`${planLabel} plan, this cycle.`">
+                <template #actions>
+                    <Link :href="route('billing.index')" class="text-[12.5px] font-bold" style="color: var(--sc-accent-text)">
+                        Manage →
+                    </Link>
+                </template>
+
+                <div class="space-y-4">
+                    <MeterBar
+                        v-for="(meter, key) in usage"
+                        :key="key"
+                        :label="String(key).replace(/_/g, ' ')"
+                        :usage="meter.usage"
+                        :limit="meter.limit"
+                        :tone="meterTones[key] || 'accent'"
+                    />
                 </div>
 
-                <div class="grid gap-6 lg:grid-cols-2">
-                    <!-- Upcoming posts -->
-                    <div class="bg-white shadow sm:rounded-lg">
-                        <div class="px-6 py-4 border-b">
-                            <h3 class="font-medium text-gray-900">Upcoming posts</h3>
-                        </div>
-                        <div class="divide-y">
-                            <div v-if="!upcoming || upcoming.length === 0" class="p-6 text-sm text-gray-500">
-                                Nothing scheduled yet.
-                                <Link :href="route('posts.create')" class="text-indigo-600 hover:underline">Compose one →</Link>
-                            </div>
-                            <div v-for="p in upcoming" :key="p.id" class="px-6 py-3">
-                                <p class="text-sm text-gray-900">{{ p.content }}</p>
-                                <p class="text-xs text-gray-400">{{ p.workspace }} · {{ p.scheduled_at }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Usage vs plan -->
-                    <div class="bg-white shadow sm:rounded-lg">
-                        <div class="px-6 py-4 border-b flex items-center justify-between">
-                            <h3 class="font-medium text-gray-900">Plan usage</h3>
-                            <Link :href="route('billing.index')" class="text-xs text-indigo-600 hover:underline">Manage →</Link>
-                        </div>
-                        <div class="p-6 space-y-3">
-                            <div v-for="(v, key) in usage" :key="key">
-                                <div class="flex justify-between text-sm">
-                                    <span class="capitalize text-gray-600">{{ key.replace('_', ' ') }}</span>
-                                    <span class="text-gray-400">{{ v.usage }} / {{ label(v.limit) }}</span>
-                                </div>
-                                <div class="h-1.5 bg-gray-100 rounded mt-1">
-                                    <div class="h-1.5 bg-indigo-500 rounded"
-                                        :style="{ width: v.limit === -1 ? '8%' : Math.min(100, (v.usage / Math.max(v.limit, 1)) * 100) + '%' }">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="mt-6 grid grid-cols-2 gap-2.5">
+                    <SButton size="sm" :href="route('workspaces.index')">Clients</SButton>
+                    <SButton size="sm" :href="route('analytics.index')">Analytics</SButton>
                 </div>
-            </div>
+            </SCard>
         </div>
     </AppLayout>
 </template>

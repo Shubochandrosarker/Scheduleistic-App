@@ -1,12 +1,9 @@
 <script setup>
 import { nextTick, ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import AuthenticationCard from '@/Components/AuthenticationCard.vue';
-import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import SButton from '@/Components/UI/SButton.vue';
 
 const recovery = ref(false);
 
@@ -19,7 +16,7 @@ const recoveryCodeInput = ref(null);
 const codeInput = ref(null);
 
 const toggleRecovery = async () => {
-    recovery.value ^= true;
+    recovery.value = !recovery.value;
 
     await nextTick();
 
@@ -32,73 +29,60 @@ const toggleRecovery = async () => {
     }
 };
 
-const submit = () => {
-    form.post(route('two-factor.login'));
-};
+const submit = () => form.post(route('two-factor.login'));
 </script>
 
 <template>
-    <Head title="Two-factor Confirmation" />
+    <Head title="Two-factor confirmation" />
 
-    <AuthenticationCard>
-        <template #logo>
-            <AuthenticationCardLogo />
-        </template>
-
-        <div class="mb-4 text-sm text-gray-600">
-            <template v-if="! recovery">
-                Please confirm access to your account by entering the authentication code provided by your authenticator application.
-            </template>
-
-            <template v-else>
-                Please confirm access to your account by entering one of your emergency recovery codes.
-            </template>
-        </div>
-
-        <form @submit.prevent="submit">
-            <div v-if="! recovery">
-                <InputLabel for="code" value="Code" />
-                <TextInput
+    <AuthLayout
+        title="One more step."
+        :subtitle="recovery
+            ? 'Enter one of your emergency recovery codes.'
+            : 'Enter the code from your authenticator app.'"
+    >
+        <form class="space-y-4" @submit.prevent="submit">
+            <div v-if="!recovery">
+                <label class="sc-label" for="code">Authentication code</label>
+                <input
                     id="code"
                     ref="codeInput"
                     v-model="form.code"
                     type="text"
                     inputmode="numeric"
-                    class="mt-1 block w-full"
-                    autofocus
                     autocomplete="one-time-code"
+                    class="sc-input text-center !text-[22px] !font-extrabold tracking-[0.4em]"
+                    placeholder="000000"
+                    autofocus
                 />
-                <InputError class="mt-2" :message="form.errors.code" />
+                <InputError class="mt-1.5" :message="form.errors.code" />
             </div>
 
             <div v-else>
-                <InputLabel for="recovery_code" value="Recovery Code" />
-                <TextInput
+                <label class="sc-label" for="recovery_code">Recovery code</label>
+                <input
                     id="recovery_code"
                     ref="recoveryCodeInput"
                     v-model="form.recovery_code"
                     type="text"
-                    class="mt-1 block w-full"
                     autocomplete="one-time-code"
+                    class="sc-input font-mono"
                 />
-                <InputError class="mt-2" :message="form.errors.recovery_code" />
+                <InputError class="mt-1.5" :message="form.errors.recovery_code" />
             </div>
 
-            <div class="flex items-center justify-end mt-4">
-                <button type="button" class="text-sm text-gray-600 hover:text-gray-900 underline cursor-pointer" @click.prevent="toggleRecovery">
-                    <template v-if="! recovery">
-                        Use a recovery code
-                    </template>
-
-                    <template v-else>
-                        Use an authentication code
-                    </template>
-                </button>
-
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
-                </PrimaryButton>
-            </div>
+            <SButton type="submit" variant="primary" class="w-full !py-3" :disabled="form.processing">
+                Verify &amp; sign in →
+            </SButton>
         </form>
-    </AuthenticationCard>
+
+        <p class="mt-6 text-center">
+            <button
+                type="button"
+                class="text-[13px] font-bold"
+                style="color: var(--sc-accent-text)"
+                @click.prevent="toggleRecovery"
+            >{{ recovery ? 'Use an authentication code' : 'Use a recovery code' }}</button>
+        </p>
+    </AuthLayout>
 </template>

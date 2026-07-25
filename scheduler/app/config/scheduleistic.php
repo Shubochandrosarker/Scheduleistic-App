@@ -30,8 +30,10 @@ return [
     'fake_publishing' => env('SOCIAL_FAKE', false),
 
     'colors' => [
-        'primary'   => env('BRAND_PRIMARY', '#4f46e5'),
-        'secondary' => env('BRAND_SECONDARY', '#0ea5e9'),
+        // The dashboard retints itself from these two values, so they are the
+        // platform's accent until a tenant sets its own in white-label settings.
+        'primary'   => env('BRAND_PRIMARY', '#4F8DFF'),
+        'secondary' => env('BRAND_SECONDARY', '#22D3EE'),
     ],
 
     'logo'    => env('BRAND_LOGO', null),

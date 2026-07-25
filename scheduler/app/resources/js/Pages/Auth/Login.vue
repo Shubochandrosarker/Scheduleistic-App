@@ -1,12 +1,9 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticationCard from '@/Components/AuthenticationCard.vue';
-import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import SButton from '@/Components/UI/SButton.vue';
 
 defineProps({
     canResetPassword: Boolean,
@@ -20,7 +17,7 @@ const form = useForm({
 });
 
 const submit = () => {
-    form.transform(data => ({
+    form.transform((data) => ({
         ...data,
         remember: form.remember ? 'on' : '',
     })).post(route('login'), {
@@ -32,59 +29,70 @@ const submit = () => {
 <template>
     <Head title="Log in" />
 
-    <AuthenticationCard>
-        <template #logo>
-            <AuthenticationCardLogo />
-        </template>
+    <AuthLayout
+        title="Welcome back."
+        subtitle="Sign in — your queue kept moving without you."
+    >
+        <div
+            v-if="status"
+            class="mb-5 rounded-xl border px-4 py-3 text-[12.5px] font-semibold"
+            style="background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); color: var(--ok)"
+        >{{ status }}</div>
 
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
+        <form class="space-y-4" @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
-                <TextInput
+                <label class="sc-label" for="email">Work email</label>
+                <input
                     id="email"
                     v-model="form.email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="sc-input"
                     required
                     autofocus
                     autocomplete="username"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1.5" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-                <TextInput
+            <div>
+                <div class="flex items-baseline justify-between gap-3">
+                    <label class="sc-label" for="password">Password</label>
+                    <Link
+                        v-if="canResetPassword"
+                        :href="route('password.request')"
+                        class="mb-1.5 text-[12px] font-bold"
+                        style="color: var(--sc-accent-text)"
+                    >Forgot?</Link>
+                </div>
+                <input
                     id="password"
                     v-model="form.password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="sc-input"
                     required
                     autocomplete="current-password"
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-1.5" :message="form.errors.password" />
             </div>
 
-            <div class="block mt-4">
-                <label class="flex items-center">
-                    <Checkbox v-model:checked="form.remember" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
-                </label>
-            </div>
+            <label class="flex cursor-pointer items-center gap-2.5">
+                <Checkbox v-model:checked="form.remember" name="remember" />
+                <span class="text-[13px] text-t2">Keep me signed in for 30 days</span>
+            </label>
 
-            <div class="flex items-center justify-end mt-4">
-                <Link v-if="canResetPassword" :href="route('password.request')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Forgot your password?
-                </Link>
-
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Log in
-                </PrimaryButton>
-            </div>
+            <SButton
+                type="submit"
+                variant="primary"
+                class="w-full !py-3"
+                :disabled="form.processing"
+            >{{ form.processing ? 'Signing in…' : 'Sign in →' }}</SButton>
         </form>
-    </AuthenticationCard>
+
+        <p class="mt-6 text-center text-[13px] text-t3">
+            New here?
+            <Link :href="route('register')" class="font-bold" style="color: var(--sc-accent-text)">
+                Create an account
+            </Link>
+        </p>
+    </AuthLayout>
 </template>

@@ -1,8 +1,12 @@
 <script setup>
-import { ref, reactive } from 'vue';
-import { Link, useForm, router } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
+import { router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import DangerButton from '@/Components/DangerButton.vue';
+import PageHeader from '@/Components/UI/PageHeader.vue';
+import SCard from '@/Components/UI/SCard.vue';
+import SButton from '@/Components/UI/SButton.vue';
+import NetworkChip from '@/Components/UI/NetworkChip.vue';
+import { network } from '@/networks';
 
 const props = defineProps({
     workspace: Object,
@@ -19,6 +23,7 @@ const toggleForm = (p) => {
         openForm.value = null;
         return;
     }
+
     openForm.value = p.key;
     p.fields.forEach((f) => (tokenForm[f.key] = ''));
 };
@@ -35,91 +40,137 @@ const disconnect = (id) => {
         useForm({}).delete(route('workspaces.channels.destroy', [props.workspace.id, id]), { preserveScroll: true });
     }
 };
+
+// One card per supported network, carrying whichever channel (if any) is
+// already connected for it — so "connected" and "available" read as one grid
+// rather than two disconnected lists.
+const cards = computed(() => props.providers.map((provider) => {
+    const connected = props.channels.filter((c) => c.provider === provider.key);
+
+    return {
+        ...provider,
+        connected,
+        // OAuth providers are only actionable once the instance has credentials.
+        blocked: provider.type === 'oauth' && !provider.configured,
+    };
+}));
+
+const connectedCount = computed(() => props.channels.length);
 </script>
 
 <template>
     <AppLayout :title="`Channels — ${workspace.name}`">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Channels — {{ workspace.name }}
-            </h2>
-        </template>
+        <PageHeader eyebrow="Connected accounts">
+            <template #title>Channels · {{ workspace.name }}</template>
+            <template #subtitle>
+                {{ providers.length }} networks behind one contract.
+                {{ connectedCount }} connected for this client.
+            </template>
+            <template #actions>
+                <SButton :href="route('workspaces.index')">← All clients</SButton>
+            </template>
+        </PageHeader>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <!-- Connect new -->
-                <div class="bg-white shadow sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Connect a social account</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <template v-for="p in providers" :key="p.key">
-                            <!-- OAuth providers: redirect to connect (disabled if no credentials configured) -->
-                            <a
-                                v-if="p.type === 'oauth' && p.configured"
-                                :href="route('workspaces.channels.connect', [workspace.id, p.key])"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700"
-                            >
-                                Connect {{ p.label }}
-                            </a>
-                            <span
-                                v-else-if="p.type === 'oauth'"
-                                class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-400 text-sm rounded-md cursor-not-allowed"
-                                title="OAuth credentials not configured on this instance"
-                            >
-                                {{ p.label }} (not configured)
-                            </span>
-                            <!-- Token providers: open a credential form -->
-                            <button
-                                v-else
-                                type="button"
-                                @click="toggleForm(p)"
-                                class="inline-flex items-center px-4 py-2 bg-emerald-600 text-white text-sm rounded-md hover:bg-emerald-700"
-                            >
-                                Connect {{ p.label }}
-                            </button>
-                        </template>
-                    </div>
+        <div class="mb-5 flex flex-wrap items-center gap-5 text-[12px] text-t3">
+            <span class="flex items-center gap-1.5">
+                <span class="size-1.5 rounded-full" style="background: var(--ok)"></span> Connected
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="size-1.5 rounded-full" style="background: var(--t4)"></span> Not connected
+            </span>
+            <span class="flex items-center gap-1.5">
+                <span class="size-1.5 rounded-full" style="background: var(--warn)"></span> Needs credentials on this instance
+            </span>
+        </div>
 
-                    <!-- Token credential forms -->
-                    <template v-for="p in providers" :key="`form-${p.key}`">
-                        <form
-                            v-if="openForm === p.key"
-                            @submit.prevent="submitToken(p)"
-                            class="mt-4 border-t pt-4 space-y-3 max-w-md"
-                        >
-                            <p class="text-sm font-medium text-gray-700">Connect {{ p.label }}</p>
-                            <div v-for="f in p.fields" :key="f.key">
-                                <label class="block text-xs text-gray-500 mb-1">{{ f.label }}</label>
-                                <input
-                                    v-model="tokenForm[f.key]"
-                                    :type="f.type === 'password' ? 'password' : 'text'"
-                                    class="block w-full border-gray-300 rounded-md shadow-sm text-sm"
-                                    required
-                                />
-                            </div>
-                            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white text-sm rounded-md hover:bg-emerald-700">
-                                Save {{ p.label }}
-                            </button>
-                        </form>
-                    </template>
-                </div>
-
-                <!-- Connected -->
-                <div class="bg-white shadow sm:rounded-lg divide-y">
-                    <div v-if="channels.length === 0" class="p-6 text-gray-500">
-                        No channels connected yet.
-                    </div>
-                    <div v-for="c in channels" :key="c.id" class="p-6 flex items-center justify-between">
-                        <div>
-                            <p class="font-medium text-gray-900">{{ c.name }}</p>
-                            <p class="text-sm text-gray-500">{{ c.provider }} · {{ c.status }}</p>
+        <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div v-for="p in cards" :key="p.key" class="sc-card flex flex-col p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <NetworkChip :provider="p.key" size="lg" />
+                        <div class="min-w-0">
+                            <p class="truncate text-[14px] font-bold text-t1">{{ p.label }}</p>
+                            <p class="truncate text-[11.5px] text-t4">
+                                {{ p.connected.length ? p.connected.map((c) => c.name).join(', ') : 'Not connected' }}
+                            </p>
                         </div>
-                        <DangerButton @click="disconnect(c.id)">Disconnect</DangerButton>
                     </div>
+
+                    <span
+                        class="mt-1.5 size-2 shrink-0 rounded-full"
+                        :style="{ background: p.connected.length ? 'var(--ok)' : (p.blocked ? 'var(--warn)' : 'var(--t4)') }"
+                    ></span>
                 </div>
 
-                <Link :href="route('workspaces.index')" class="text-indigo-600 hover:underline text-sm">
-                    ← Back to workspaces
-                </Link>
+                <div class="mt-4 flex items-center justify-between border-t pt-3 text-[11.5px] text-t3" style="border-color: var(--line)">
+                    <span>{{ p.connected.length ? 'Healthy' : '—' }}</span>
+                    <span>{{ network(p.key).limit.toLocaleString() }} char cap</span>
+                </div>
+
+                <!-- Connected accounts for this network -->
+                <ul v-if="p.connected.length" class="mt-3 space-y-1.5">
+                    <li
+                        v-for="c in p.connected"
+                        :key="c.id"
+                        class="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2"
+                        style="background: var(--s2)"
+                    >
+                        <span class="min-w-0 truncate text-[12px] text-t2">{{ c.name }}</span>
+                        <button
+                            type="button"
+                            class="shrink-0 text-[11.5px] font-bold transition-opacity hover:opacity-70"
+                            style="color: var(--bad)"
+                            @click="disconnect(c.id)"
+                        >Disconnect</button>
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <!-- OAuth, credentials present -->
+                    <SButton
+                        v-if="p.type === 'oauth' && p.configured"
+                        external
+                        :href="route('workspaces.channels.connect', [workspace.id, p.key])"
+                        :variant="p.connected.length ? 'secondary' : 'primary'"
+                        class="w-full"
+                    >{{ p.connected.length ? 'Connect another' : 'Connect →' }}</SButton>
+
+                    <!-- OAuth, no credentials on this instance. Existing channels keep
+                         working; only connecting a new one needs the app credentials. -->
+                    <SButton
+                        v-else-if="p.type === 'oauth'"
+                        variant="secondary"
+                        disabled
+                        class="w-full"
+                        title="Set this provider's OAuth credentials in the environment to connect accounts"
+                    >{{ p.connected.length ? 'Can’t add — no OAuth app' : 'Not configured' }}</SButton>
+
+                    <!-- Token providers: a credential form instead of a redirect -->
+                    <SButton
+                        v-else
+                        :variant="openForm === p.key ? 'secondary' : (p.connected.length ? 'secondary' : 'primary')"
+                        class="w-full"
+                        @click="toggleForm(p)"
+                    >{{ openForm === p.key ? 'Cancel' : (p.connected.length ? 'Add another' : 'Connect →') }}</SButton>
+                </div>
+
+                <form
+                    v-if="openForm === p.key"
+                    class="mt-4 space-y-3 border-t pt-4"
+                    style="border-color: var(--line)"
+                    @submit.prevent="submitToken(p)"
+                >
+                    <div v-for="f in p.fields" :key="f.key">
+                        <label class="sc-label">{{ f.label }}</label>
+                        <input
+                            v-model="tokenForm[f.key]"
+                            :type="f.type === 'password' ? 'password' : 'text'"
+                            class="sc-input"
+                            required
+                        />
+                    </div>
+                    <SButton type="submit" variant="primary" class="w-full">Save {{ p.label }}</SButton>
+                </form>
             </div>
         </div>
     </AppLayout>

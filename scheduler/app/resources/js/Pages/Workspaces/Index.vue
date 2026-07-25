@@ -1,24 +1,32 @@
 <script setup>
-import { Link, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { useForm } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import TextInput from '@/Components/TextInput.vue';
-import InputLabel from '@/Components/InputLabel.vue';
+import PageHeader from '@/Components/UI/PageHeader.vue';
+import SCard from '@/Components/UI/SCard.vue';
+import SButton from '@/Components/UI/SButton.vue';
+import SBadge from '@/Components/UI/SBadge.vue';
+import EmptyState from '@/Components/UI/EmptyState.vue';
+import InputError from '@/Components/InputError.vue';
 
 defineProps({
     workspaces: Array,
 });
 
+const showForm = ref(false);
+
 const form = useForm({
     name: '',
     client_name: '',
-    timezone: 'UTC',
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
 });
 
 const create = () => form.post(route('workspaces.store'), {
     preserveScroll: true,
-    onSuccess: () => form.reset(),
+    onSuccess: () => {
+        form.reset();
+        showForm.value = false;
+    },
 });
 
 const destroy = (id) => {
@@ -26,67 +34,97 @@ const destroy = (id) => {
         useForm({}).delete(route('workspaces.destroy', id), { preserveScroll: true });
     }
 };
+
+const initials = (name) => String(name ?? '?')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join('');
 </script>
 
 <template>
-    <AppLayout title="Workspaces">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">Workspaces (Clients)</h2>
-        </template>
+    <AppLayout title="Clients">
+        <PageHeader eyebrow="Multi-tenancy">
+            <template #title>Client workspaces</template>
+            <template #subtitle>
+                One workspace per client. Content, channels, and approvals stay sealed off from
+                every other client — enforced at the query layer, not by convention.
+            </template>
+            <template #actions>
+                <SButton variant="primary" @click="showForm = !showForm">
+                    {{ showForm ? 'Cancel' : '+ Add a client' }}
+                </SButton>
+            </template>
+        </PageHeader>
 
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-                <!-- New workspace -->
-                <div class="bg-white shadow sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Add a client workspace</h3>
-                    <form @submit.prevent="create" class="grid gap-4 sm:grid-cols-4 items-end">
-                        <div>
-                            <InputLabel for="name" value="Workspace name" />
-                            <TextInput id="name" v-model="form.name" type="text" class="mt-1 block w-full" required />
-                        </div>
-                        <div>
-                            <InputLabel for="client_name" value="Client name" />
-                            <TextInput id="client_name" v-model="form.client_name" type="text" class="mt-1 block w-full" />
-                        </div>
-                        <div>
-                            <InputLabel for="timezone" value="Timezone" />
-                            <TextInput id="timezone" v-model="form.timezone" type="text" class="mt-1 block w-full" />
-                        </div>
-                        <PrimaryButton :disabled="form.processing">Create</PrimaryButton>
-                    </form>
+        <SCard v-if="showForm" class="mb-4" title="New client workspace">
+            <form class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:items-end" @submit.prevent="create">
+                <div>
+                    <label class="sc-label" for="name">Workspace name</label>
+                    <input id="name" v-model="form.name" type="text" class="sc-input" required />
+                    <InputError :message="form.errors.name" class="mt-1.5" />
+                </div>
+                <div>
+                    <label class="sc-label" for="client_name">Client name</label>
+                    <input id="client_name" v-model="form.client_name" type="text" class="sc-input" />
+                    <InputError :message="form.errors.client_name" class="mt-1.5" />
+                </div>
+                <div>
+                    <label class="sc-label" for="timezone">Timezone</label>
+                    <input id="timezone" v-model="form.timezone" type="text" class="sc-input" />
+                    <InputError :message="form.errors.timezone" class="mt-1.5" />
+                </div>
+                <SButton type="submit" variant="primary" :disabled="form.processing">Create workspace</SButton>
+            </form>
+            <InputError :message="form.errors.plan" class="mt-3" />
+        </SCard>
+
+        <EmptyState
+            v-if="workspaces.length === 0"
+            class="sc-card"
+            icon="◆"
+            title="No clients yet"
+            description="Add your first workspace — it holds that client's channels, queue, and approvals."
+        >
+            <SButton variant="primary" @click="showForm = true">Add a client →</SButton>
+        </EmptyState>
+
+        <div v-else class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <article v-for="ws in workspaces" :key="ws.id" class="sc-card flex flex-col p-5">
+                <div class="flex items-start gap-3">
+                    <span
+                        class="flex size-11 shrink-0 items-center justify-center rounded-xl text-[13px] font-extrabold"
+                        style="background: linear-gradient(135deg, var(--sc-accent), var(--sc-accent-2)); color: var(--on-acc)"
+                    >{{ initials(ws.name) }}</span>
+
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-[15px] font-bold text-t1">{{ ws.name }}</p>
+                        <p class="truncate text-[12px] text-t4">
+                            {{ ws.client_name || 'No client name' }} · {{ ws.timezone }}
+                        </p>
+                    </div>
                 </div>
 
-                <!-- List -->
-                <div class="bg-white shadow sm:rounded-lg divide-y">
-                    <div v-if="workspaces.length === 0" class="p-6 text-gray-500">
-                        No workspaces yet. Add your first client above.
-                    </div>
-                    <div v-for="ws in workspaces" :key="ws.id" class="p-6 flex items-center justify-between flex-wrap gap-3">
-                        <div>
-                            <p class="font-medium text-gray-900">{{ ws.name }}</p>
-                            <p class="text-sm text-gray-500">
-                                {{ ws.client_name || '—' }} · {{ ws.timezone }} · {{ ws.channels_count }} channel(s)
-                                · {{ ws.feeds_count }} feed(s) · {{ ws.time_slots_count }} time slot(s)
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3 flex-wrap">
-                            <Link :href="route('workspaces.channels.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
-                                Manage channels
-                            </Link>
-                            <Link :href="route('workspaces.time-slots.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
-                                Time slots
-                            </Link>
-                            <Link :href="route('workspaces.feeds.index', ws.id)" class="text-indigo-600 hover:underline text-sm">
-                                Feeds
-                            </Link>
-                            <Link :href="route('workspaces.import.create', ws.id)" class="text-indigo-600 hover:underline text-sm">
-                                Import CSV
-                            </Link>
-                            <DangerButton @click="destroy(ws.id)">Delete</DangerButton>
-                        </div>
-                    </div>
+                <div class="mt-4 flex flex-wrap gap-2">
+                    <SBadge :tone="ws.channels_count ? 'accent' : 'neutral'">{{ ws.channels_count }} channels</SBadge>
+                    <SBadge tone="neutral">{{ ws.time_slots_count }} slots</SBadge>
+                    <SBadge tone="neutral">{{ ws.feeds_count }} feeds</SBadge>
                 </div>
-            </div>
+
+                <div class="mt-5 grid grid-cols-2 gap-2 border-t pt-4" style="border-color: var(--line)">
+                    <SButton size="sm" :href="route('workspaces.channels.index', ws.id)">Channels</SButton>
+                    <SButton size="sm" :href="route('workspaces.time-slots.index', ws.id)">Queue slots</SButton>
+                    <SButton size="sm" :href="route('workspaces.feeds.index', ws.id)">Feeds</SButton>
+                    <SButton size="sm" :href="route('workspaces.import.create', ws.id)">Import CSV</SButton>
+                </div>
+
+                <button
+                    type="button"
+                    class="mt-3 self-start text-[11.5px] font-bold transition-opacity hover:opacity-70"
+                    style="color: var(--bad)"
+                    @click="destroy(ws.id)"
+                >Delete workspace</button>
+            </article>
         </div>
     </AppLayout>
 </template>

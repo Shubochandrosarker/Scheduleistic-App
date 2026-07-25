@@ -1,12 +1,9 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import AuthenticationCard from '@/Components/AuthenticationCard.vue';
-import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 import Checkbox from '@/Components/Checkbox.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import SButton from '@/Components/UI/SButton.vue';
 
 const form = useForm({
     name: '',
@@ -26,87 +23,100 @@ const submit = () => {
 <template>
     <Head title="Register" />
 
-    <AuthenticationCard>
-        <template #logo>
-            <AuthenticationCardLogo />
-        </template>
-
-        <form @submit.prevent="submit">
+    <AuthLayout
+        title="Start your agency."
+        subtitle="One account holds every client workspace, channel, and approval."
+    >
+        <form class="space-y-4" @submit.prevent="submit">
             <div>
-                <InputLabel for="name" value="Name" />
-                <TextInput
+                <label class="sc-label" for="name">Your name</label>
+                <input
                     id="name"
                     v-model="form.name"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="sc-input"
                     required
                     autofocus
                     autocomplete="name"
                 />
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError class="mt-1.5" :message="form.errors.name" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="email" value="Email" />
-                <TextInput
+            <div>
+                <label class="sc-label" for="email">Work email</label>
+                <input
                     id="email"
                     v-model="form.email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="sc-input"
                     required
                     autocomplete="username"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1.5" :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Password" />
-                <TextInput
-                    id="password"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="new-password"
-                />
-                <InputError class="mt-2" :message="form.errors.password" />
+            <div class="grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="sc-label" for="password">Password</label>
+                    <input
+                        id="password"
+                        v-model="form.password"
+                        type="password"
+                        class="sc-input"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-1.5" :message="form.errors.password" />
+                </div>
+
+                <div>
+                    <label class="sc-label" for="password_confirmation">Confirm</label>
+                    <input
+                        id="password_confirmation"
+                        v-model="form.password_confirmation"
+                        type="password"
+                        class="sc-input"
+                        required
+                        autocomplete="new-password"
+                    />
+                    <InputError class="mt-1.5" :message="form.errors.password_confirmation" />
+                </div>
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password_confirmation" value="Confirm Password" />
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    required
-                    autocomplete="new-password"
-                />
-                <InputError class="mt-2" :message="form.errors.password_confirmation" />
+            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature">
+                <label class="flex cursor-pointer items-start gap-2.5">
+                    <Checkbox id="terms" v-model:checked="form.terms" name="terms" required class="mt-0.5" />
+                    <span class="text-[12.5px] leading-relaxed text-t2">
+                        I agree to the
+                        <a
+                            :href="route('terms.show')"
+                            target="_blank"
+                            class="font-bold"
+                            style="color: var(--sc-accent-text)"
+                        >Terms of Service</a>
+                        and
+                        <a
+                            :href="route('policy.show')"
+                            target="_blank"
+                            class="font-bold"
+                            style="color: var(--sc-accent-text)"
+                        >Privacy Policy</a>.
+                    </span>
+                </label>
+                <InputError class="mt-1.5" :message="form.errors.terms" />
             </div>
 
-            <div v-if="$page.props.jetstream.hasTermsAndPrivacyPolicyFeature" class="mt-4">
-                <InputLabel for="terms">
-                    <div class="flex items-center">
-                        <Checkbox id="terms" v-model:checked="form.terms" name="terms" required />
-
-                        <div class="ms-2">
-                            I agree to the <a target="_blank" :href="route('terms.show')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Terms of Service</a> and <a target="_blank" :href="route('policy.show')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Privacy Policy</a>
-                        </div>
-                    </div>
-                    <InputError class="mt-2" :message="form.errors.terms" />
-                </InputLabel>
-            </div>
-
-            <div class="flex items-center justify-end mt-4">
-                <Link :href="route('login')" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Already registered?
-                </Link>
-
-                <PrimaryButton class="ms-4" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Register
-                </PrimaryButton>
-            </div>
+            <SButton
+                type="submit"
+                variant="primary"
+                class="w-full !py-3"
+                :disabled="form.processing"
+            >{{ form.processing ? 'Creating…' : 'Create account →' }}</SButton>
         </form>
-    </AuthenticationCard>
+
+        <p class="mt-6 text-center text-[13px] text-t3">
+            Already registered?
+            <Link :href="route('login')" class="font-bold" style="color: var(--sc-accent-text)">Sign in</Link>
+        </p>
+    </AuthLayout>
 </template>

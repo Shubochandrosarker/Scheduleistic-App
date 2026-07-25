@@ -31,16 +31,16 @@ const close = () => {
         @close="close"
     >
         <div class="px-6 py-4">
-            <div class="text-lg font-medium text-gray-900">
+            <div class="text-[17px] font-bold text-t1">
                 <slot name="title" />
             </div>
 
-            <div class="mt-4 text-sm text-gray-600">
+            <div class="mt-4 text-[13.5px] leading-relaxed text-t2">
                 <slot name="content" />
             </div>
         </div>
 
-        <div class="flex flex-row justify-end px-6 py-4 bg-gray-100 text-end">
+        <div class="flex flex-row justify-end gap-2.5 border-t px-6 py-4 text-end" style="background: var(--s2); border-color: var(--line)">
             <slot name="footer" />
         </div>
     </Modal>

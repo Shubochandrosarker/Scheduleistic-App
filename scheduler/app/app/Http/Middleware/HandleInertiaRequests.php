@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Services\UsageService;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -49,6 +50,13 @@ class HandleInertiaRequests extends Middleware
                     'tagline'    => config('scheduleistic.tagline'),
                     'powered_by' => config('scheduleistic.powered_by'),
                 ],
+            // The sidebar shows the organization's plan and its posts-this-cycle
+            // meter on every screen, so both are shared rather than re-fetched
+            // per page. Lazily evaluated — guests and the marketing page skip it.
+            'planName'  => fn () => $request->user() && $team ? ucfirst((string) $team->plan) : null,
+            'planUsage' => fn () => $request->user() && $team
+                ? app(UsageService::class)->snapshot($team)
+                : null,
             'isPlatformAdmin'  => (bool) $request->user()?->is_platform_admin,
             'isImpersonating'  => $request->session()->has('impersonator_id'),
             // A short status code set by controllers via back()->with('status', ...),
