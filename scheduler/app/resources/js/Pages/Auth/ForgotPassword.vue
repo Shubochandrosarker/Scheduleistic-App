@@ -1,11 +1,8 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
-import AuthenticationCard from '@/Components/AuthenticationCard.vue';
-import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import AuthLayout from '@/Layouts/AuthLayout.vue';
 import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
+import SButton from '@/Components/UI/SButton.vue';
 
 defineProps({
     status: String,
@@ -15,47 +12,45 @@ const form = useForm({
     email: '',
 });
 
-const submit = () => {
-    form.post(route('password.email'));
-};
+const submit = () => form.post(route('password.email'));
 </script>
 
 <template>
-    <Head title="Forgot Password" />
+    <Head title="Forgot password" />
 
-    <AuthenticationCard>
-        <template #logo>
-            <AuthenticationCardLogo />
-        </template>
+    <AuthLayout
+        title="Reset your password."
+        subtitle="Tell us your email and we'll send a link to choose a new one."
+    >
+        <div
+            v-if="status"
+            class="mb-5 rounded-xl border px-4 py-3 text-[12.5px] font-semibold"
+            style="background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); color: var(--ok)"
+        >{{ status }}</div>
 
-        <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
-        </div>
-
-        <div v-if="status" class="mb-4 font-medium text-sm text-green-600">
-            {{ status }}
-        </div>
-
-        <form @submit.prevent="submit">
+        <form class="space-y-4" @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
-                <TextInput
+                <label class="sc-label" for="email">Work email</label>
+                <input
                     id="email"
                     v-model="form.email"
                     type="email"
-                    class="mt-1 block w-full"
+                    class="sc-input"
                     required
                     autofocus
                     autocomplete="username"
                 />
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-1.5" :message="form.errors.email" />
             </div>
 
-            <div class="flex items-center justify-end mt-4">
-                <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
-                </PrimaryButton>
-            </div>
+            <SButton type="submit" variant="primary" class="w-full !py-3" :disabled="form.processing">
+                {{ form.processing ? 'Sending…' : 'Email a reset link →' }}
+            </SButton>
         </form>
-    </AuthenticationCard>
+
+        <p class="mt-6 text-center text-[13px] text-t3">
+            Remembered it?
+            <Link :href="route('login')" class="font-bold" style="color: var(--sc-accent-text)">Back to sign in</Link>
+        </p>
+    </AuthLayout>
 </template>

@@ -30,7 +30,8 @@ class DashboardController extends Controller
                 'id'           => $p->id,
                 'content'      => Str::limit($p->content, 80),
                 'workspace'    => $p->workspace?->name,
-                'scheduled_at' => optional($p->scheduled_at)->toDayDateTimeString(),
+                // ISO so the dashboard can format it in the viewer's locale.
+                'scheduled_at' => optional($p->scheduled_at)->toIso8601String(),
             ]);
 
         return Inertia::render('Dashboard', [

@@ -2,6 +2,368 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================================
+   Scheduleistic design tokens.
+
+   Every surface, line, and text colour in the app resolves through one of the
+   variables below, so a theme switch (or a tenant's white-label accent) only
+   has to rewrite this layer — no component knows a hex code.
+
+   `:root` carries the dark theme; `[data-theme="light"]` overrides it. The
+   accent group (--sc-*) is written at runtime by useBrand() from the tenant's
+   branding colour, with the values here as the platform default.
+   ============================================================================ */
+
+:root {
+    color-scheme: dark;
+
+    /* Page + chrome */
+    --bg: #070b14;
+    --bg2: #0b1020;
+    --nav-bg: linear-gradient(180deg, rgba(17, 24, 39, 0.5), rgba(7, 11, 20, 0.5));
+    --head-bg: rgba(7, 11, 20, 0.86);
+    --pop-bg: rgba(11, 16, 32, 0.94);
+    --panel-bg: linear-gradient(160deg, rgba(20, 27, 45, 0.7), rgba(7, 11, 20, 0.4));
+    --code-bg: rgba(0, 0, 0, 0.3);
+
+    /* Cards */
+    --card-bg: linear-gradient(180deg, rgba(30, 41, 70, 0.55), rgba(15, 22, 42, 0.55));
+    --card-bg2: rgba(15, 22, 42, 0.55);
+    --card-solid: rgba(20, 27, 45, 0.92);
+    --card-line: rgba(255, 255, 255, 0.1);
+    --card-shadow: none;
+
+    /* Subtle fills + lines */
+    --s1: rgba(255, 255, 255, 0.02);
+    --s2: rgba(255, 255, 255, 0.03);
+    --s3: rgba(255, 255, 255, 0.045);
+    --line: rgba(255, 255, 255, 0.06);
+    --line2: rgba(255, 255, 255, 0.11);
+    --hover: rgba(255, 255, 255, 0.14);
+
+    /* Text ramp */
+    --t1: #f5f7ff;
+    --t2: #c7cee0;
+    --t3: #8b92a9;
+    --t4: #5c6378;
+    --on-acc: #070b14;
+
+    /* Semantic */
+    --ok: #34d399;
+    --warn: #f59e0b;
+    --bad: #f87171;
+    --alt: #a78bfa;
+
+    --shadow-c: rgba(0, 0, 0, 0.35);
+    --shadow-d: rgba(0, 0, 0, 0.55);
+    --grid-op: 0.5;
+    --glow-op: 0.5;
+
+    /* Accent — rewritten by useBrand() for white-label tenants. */
+    --sc-accent: #4f8dff;
+    --sc-accent-bright: #72a4ff;
+    --sc-accent-text: #72a4ff;
+    --sc-accent-2: #22d3ee;
+    --cy-text: #22d3ee;
+    --sc-soft: rgba(79, 141, 255, 0.12);
+    --sc-mid: rgba(79, 141, 255, 0.28);
+    --sc-glow: rgba(79, 141, 255, 0.4);
+}
+
+[data-theme='light'] {
+    color-scheme: light;
+
+    --bg: #f0f2ff;
+    --bg2: #f8f9ff;
+    --nav-bg: #ffffff;
+    --head-bg: rgba(248, 249, 255, 0.93);
+    --pop-bg: #ffffff;
+    --panel-bg: linear-gradient(160deg, #f3f1fe, #eaedff);
+    --code-bg: #f3f1fe;
+
+    --card-bg: #ffffff;
+    --card-bg2: #ffffff;
+    --card-solid: #ffffff;
+    --card-line: #e8eaff;
+    --card-shadow: 0 2px 12px rgba(108, 92, 231, 0.07);
+
+    --s1: #f8f9ff;
+    --s2: #f3f5ff;
+    --s3: #ffffff;
+    --line: #e8eaff;
+    --line2: #d9dbf0;
+    --hover: #e9e6fd;
+
+    --t1: #0d0f1a;
+    --t2: #2e3245;
+    --t3: #6b7280;
+    --t4: #9499ba;
+    --on-acc: #ffffff;
+
+    --ok: #009e3d;
+    --warn: #b45309;
+    --bad: #dc2626;
+    --alt: #6c5ce7;
+
+    --shadow-c: rgba(108, 92, 231, 0.12);
+    --shadow-d: rgba(108, 92, 231, 0.2);
+    --grid-op: 0;
+    --glow-op: 0.3;
+
+    --cy-text: #0e7490;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────────── */
+
+html {
+    background: var(--bg);
+}
+
+body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+}
+
 [x-cloak] {
     display: none;
+}
+
+::selection {
+    background: var(--sc-mid);
+}
+
+/* Scrollbars follow the theme instead of punching a bright hole in dark mode. */
+.sc-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--line2) transparent;
+}
+
+.sc-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.sc-scroll::-webkit-scrollbar-thumb {
+    background: var(--line2);
+    border-radius: 999px;
+}
+
+.sc-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@keyframes sc-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes sc-blink {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* ── Component layer ──────────────────────────────────────────────────────── */
+
+@layer components {
+    /* Surfaces */
+    .sc-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-line);
+        box-shadow: var(--card-shadow);
+        @apply rounded-2xl;
+    }
+
+    .sc-card-solid {
+        background: var(--card-solid);
+        border: 1px solid var(--line2);
+        @apply rounded-xl;
+    }
+
+    .sc-panel {
+        background: var(--panel-bg);
+        border: 1px solid var(--card-line);
+        @apply rounded-2xl;
+    }
+
+    .sc-inset {
+        background: var(--s1);
+        border: 1px solid var(--line);
+        @apply rounded-xl;
+    }
+
+    /* Typography helpers */
+    .sc-eyebrow {
+        color: var(--t3);
+        @apply text-[11px] font-bold uppercase tracking-[0.12em];
+    }
+
+    .sc-title {
+        color: var(--t1);
+        @apply text-[26px] font-extrabold tracking-[-0.03em] leading-tight sm:text-[32px];
+    }
+
+    .sc-sub {
+        color: var(--t3);
+        @apply text-sm leading-relaxed;
+    }
+
+    /* Buttons — a single set of shapes, four intents. */
+    .sc-btn {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5
+               text-[13px] font-bold transition-all duration-150 disabled:cursor-not-allowed
+               disabled:opacity-45;
+    }
+
+    .sc-btn-sm {
+        @apply rounded-lg px-3 py-1.5 text-[12px];
+    }
+
+    .sc-btn-primary {
+        background: linear-gradient(135deg, var(--sc-accent-bright), var(--sc-accent));
+        color: #fff;
+        border: none;
+        box-shadow: 0 8px 24px var(--sc-mid);
+    }
+
+    .sc-btn-primary:hover:not(:disabled) {
+        filter: brightness(1.08);
+    }
+
+    .sc-btn-secondary {
+        background: var(--s3);
+        border: 1px solid var(--line2);
+        color: var(--t2);
+    }
+
+    .sc-btn-secondary:hover:not(:disabled) {
+        background: var(--hover);
+        color: var(--t1);
+    }
+
+    .sc-btn-ghost {
+        background: transparent;
+        border: 1px solid transparent;
+        color: var(--t3);
+    }
+
+    .sc-btn-ghost:hover:not(:disabled) {
+        background: var(--line);
+        color: var(--t1);
+    }
+
+    .sc-btn-success {
+        background: linear-gradient(135deg, #4ed48a, var(--ok));
+        color: #04140c;
+        border: none;
+    }
+
+    .sc-btn-danger {
+        background: rgba(248, 113, 113, 0.12);
+        border: 1px solid rgba(248, 113, 113, 0.32);
+        color: var(--bad);
+    }
+
+    .sc-btn-danger:hover:not(:disabled) {
+        background: rgba(248, 113, 113, 0.2);
+    }
+
+    .sc-btn-warn {
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.32);
+        color: var(--warn);
+    }
+
+    .sc-btn-warn:hover:not(:disabled) {
+        background: rgba(245, 158, 11, 0.2);
+    }
+
+    /* Pills — the filter/tab row used on calendar, approvals, queue, composer. */
+    .sc-pill {
+        background: var(--s2);
+        border: 1px solid var(--line2);
+        color: var(--t3);
+        @apply cursor-pointer whitespace-nowrap rounded-full px-3.5 py-2 text-[12.5px] font-semibold
+               transition-colors duration-150;
+    }
+
+    .sc-pill:hover {
+        color: var(--t2);
+    }
+
+    .sc-pill-on {
+        background: var(--sc-soft);
+        border-color: var(--sc-mid);
+        color: var(--t1);
+        @apply font-bold;
+    }
+
+    /* Form controls — one look for input/select/textarea, light and dark. */
+    .sc-input {
+        background: var(--s3);
+        border: 1px solid var(--line2);
+        color: var(--t1);
+        @apply w-full rounded-xl px-3.5 py-2.5 text-sm transition-colors duration-150
+               placeholder:text-[color:var(--t4)];
+    }
+
+    .sc-input:focus {
+        border-color: var(--sc-accent);
+        box-shadow: 0 0 0 3px var(--sc-soft);
+        outline: none;
+    }
+
+    .sc-input:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+    }
+
+    .sc-label {
+        color: var(--t2);
+        @apply mb-1.5 block text-[12.5px] font-semibold;
+    }
+
+    /* A checkbox that reads correctly on a dark surface. */
+    .sc-check {
+        background: transparent;
+        border: 1px solid var(--hover);
+        @apply size-[18px] cursor-pointer rounded-[6px] transition-colors;
+    }
+
+    .sc-check:checked {
+        background-color: var(--sc-accent);
+        border-color: transparent;
+    }
+
+    .sc-check:focus {
+        box-shadow: 0 0 0 3px var(--sc-soft);
+        outline: none;
+    }
+
+    /* Table rows share one divider colour across every list view. */
+    .sc-row {
+        border-bottom: 1px solid var(--line);
+    }
+
+    .sc-row:last-child {
+        border-bottom: none;
+    }
+
+    .sc-code {
+        background: var(--code-bg);
+        color: var(--sc-accent-text);
+        @apply rounded-md px-1.5 py-0.5 font-mono text-[12px];
+    }
 }

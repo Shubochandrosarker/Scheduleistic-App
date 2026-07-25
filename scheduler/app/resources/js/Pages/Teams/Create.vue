@@ -1,18 +1,19 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/UI/PageHeader.vue';
 import CreateTeamForm from '@/Pages/Teams/Partials/CreateTeamForm.vue';
 </script>
 
 <template>
     <AppLayout title="Create Team">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Create Team
-            </h2>
-        </template>
+        <PageHeader
+            eyebrow="Organization"
+            title="New organization"
+            subtitle="A separate tenant with its own clients, billing, and branding."
+        />
 
         <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+            <div class="max-w-5xl">
                 <CreateTeamForm />
             </div>
         </div>

@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import PageHeader from '@/Components/UI/PageHeader.vue';
 import DeleteTeamForm from '@/Pages/Teams/Partials/DeleteTeamForm.vue';
 import SectionBorder from '@/Components/SectionBorder.vue';
 import TeamMemberManager from '@/Pages/Teams/Partials/TeamMemberManager.vue';
@@ -14,14 +15,14 @@ defineProps({
 
 <template>
     <AppLayout title="Team Settings">
-        <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Team Settings
-            </h2>
-        </template>
+        <PageHeader
+            eyebrow="Organization"
+            title="Organization settings"
+            subtitle="Name, members, and their roles inside this tenant."
+        />
 
         <div>
-            <div class="max-w-7xl mx-auto py-10 sm:px-6 lg:px-8">
+            <div class="max-w-5xl">
                 <UpdateTeamNameForm :team="team" :permissions="permissions" />
 
                 <TeamMemberManager
