@@ -276,7 +276,7 @@ const memberName = (post, userId) => membersFor(post).find((m) => m.id === userI
         <SCard v-else flush>
             <EmptyState
                 v-if="visiblePosts.length === 0"
-                icon="✎"
+                icon="pencil"
                 title="Nothing here yet"
                 description="Compose your first post and it will show up on the calendar."
             >

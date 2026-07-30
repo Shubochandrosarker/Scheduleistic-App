@@ -123,7 +123,7 @@ const slotTime = (iso) => (iso
 
                 <EmptyState
                     v-if="!upcoming || upcoming.length === 0"
-                    icon="◷"
+                    icon="clock"
                     title="Nothing scheduled yet"
                     description="Compose a post and either pick an exact time or drop it in the queue."
                 >

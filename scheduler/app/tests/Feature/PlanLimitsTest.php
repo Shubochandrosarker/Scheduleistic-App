@@ -83,10 +83,12 @@ class PlanLimitsTest extends TestCase
         $team = $user->currentTeam;
         $usage = app(UsageService::class);
 
-        // Agency: 15 workspaces — allowed up to the limit, blocked beyond it.
+        // Agency: 20 workspaces — allowed up to the limit, blocked beyond it.
+        // (2.0 raised this from 15; no customer loses an entitlement, and
+        // PlanService only ever raises a limit via team overrides.)
         $team->update(['plan' => 'agency']);
-        $this->assertTrue($usage->allows($team, 'workspaces', 15));
-        $this->assertFalse($usage->allows($team, 'workspaces', 16));
+        $this->assertTrue($usage->allows($team, 'workspaces', 20));
+        $this->assertFalse($usage->allows($team, 'workspaces', 21));
 
         // Scale: 50 workspaces.
         $team->update(['plan' => 'scale']);

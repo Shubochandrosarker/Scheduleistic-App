@@ -71,7 +71,7 @@ const format = (n) => n.toLocaleString();
 
         <SCard v-if="!hasData" flush>
             <EmptyState
-                icon="◫"
+                icon="chart"
                 title="No metrics yet"
                 description="Once posts publish, engagement is captured hourly and totalled here."
             >

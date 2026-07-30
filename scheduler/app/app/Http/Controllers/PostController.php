@@ -13,7 +13,14 @@ use Inertia\Response;
 
 class PostController extends Controller
 {
-    /** Calendar / list of posts across every workspace the user can see. */
+    /**
+     * The legacy collaboration list.
+     *
+     * Superseded by the 2.0 planner (`planner.index`), which windows by date
+     * and ships a narrow card projection instead of whole post records. This
+     * route stays because existing links, bookmarks and the comment/mention
+     * workflow point at it.
+     */
     public function index(Request $request): Response
     {
         $workspaceIds = $this->visibleWorkspaceIds($request);
@@ -59,17 +66,13 @@ class PostController extends Controller
     }
 
     /**
-     * Workspaces the user may see: those owned by their current organization,
-     * plus any they are individually assigned to (the client portal).
+     * Workspaces the user may see. Delegates to the model so there is exactly
+     * one definition of the tenancy boundary — the planner, the media library
+     * and every 2.0 form request resolve it the same way.
      */
     protected function visibleWorkspaceIds(Request $request): \Illuminate\Support\Collection
     {
-        $user = $request->user();
-
-        $owned    = $user->currentTeam?->workspaces()->pluck('id') ?? collect();
-        $assigned = $user->workspaces()->pluck('workspaces.id');
-
-        return $owned->merge($assigned)->unique()->values();
+        return $request->user()->visibleWorkspaceIds();
     }
 
     /** The composer. */

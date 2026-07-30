@@ -80,7 +80,7 @@ const lastChecked = (value) => (value
             <SCard flush title="Connected feeds" :subtitle="`${feeds.length} source(s) for this client.`">
                 <EmptyState
                     v-if="feeds.length === 0"
-                    icon="⌁"
+                    icon="plug"
                     title="No feeds yet"
                     description="Add one and new articles start drafting themselves into this workspace."
                 />

@@ -70,7 +70,7 @@ const initials = (name) => String(name ?? '?')
 
             <EmptyState
                 v-if="rows.length === 0"
-                icon="⌕"
+                icon="search"
                 title="No organizations match"
                 description="Clear the filter to see every tenant on the platform."
             />

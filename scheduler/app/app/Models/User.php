@@ -80,4 +80,35 @@ class User extends Authenticatable
             ->withPivot('role')
             ->withTimestamps();
     }
+
+    /** Per-event notification delivery preferences. */
+    public function notificationPreferences(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    /**
+     * Every workspace this user may see: those owned by their current
+     * organization, plus any they are individually assigned to (client portal).
+     *
+     * This is *the* tenancy boundary for workspace-scoped data. Controllers
+     * intersect request-supplied ids with this set rather than trusting them,
+     * which is why it lives on the model instead of being re-derived per
+     * controller.
+     *
+     * @return \Illuminate\Support\Collection<int, int>
+     */
+    public function visibleWorkspaceIds(): \Illuminate\Support\Collection
+    {
+        $owned    = $this->currentTeam?->workspaces()->pluck('id') ?? collect();
+        $assigned = $this->workspaces()->pluck('workspaces.id');
+
+        return $owned->merge($assigned)->unique()->values();
+    }
+
+    /** Whether the user may act on a specific workspace id. */
+    public function canAccessWorkspace(int $workspaceId): bool
+    {
+        return $this->visibleWorkspaceIds()->contains($workspaceId);
+    }
 }
