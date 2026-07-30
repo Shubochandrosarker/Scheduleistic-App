@@ -31,6 +31,9 @@ class Team extends JetstreamTeam
         'name',
         'personal_team',
         'plan',
+        'entitlements',
+        'timezone',
+        'onboarded_at',
         'branding',
         'custom_domain',
         'custom_domain_verified_at',
@@ -59,6 +62,8 @@ class Team extends JetstreamTeam
         return [
             'personal_team'             => 'boolean',
             'branding'                  => 'array',
+            'entitlements'              => 'array',
+            'onboarded_at'              => 'datetime',
             'custom_domain_verified_at' => 'datetime',
             'suspended_at'              => 'datetime',
         ];

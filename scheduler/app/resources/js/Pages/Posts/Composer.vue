@@ -230,7 +230,7 @@ const ctaLabel = computed(() => {
                 <SCard title="Client workspace" subtitle="Content and channels stay sealed inside it.">
                     <EmptyState
                         v-if="workspaces.length === 0"
-                        icon="◆"
+                        icon="layers"
                         title="No workspaces yet"
                         description="Add a client workspace before composing."
                     >
@@ -259,7 +259,7 @@ const ctaLabel = computed(() => {
                     <div class="px-5 pb-5">
                         <EmptyState
                             v-if="channels.length === 0"
-                            icon="◌"
+                            icon="inbox"
                             title="No channels connected"
                             description="Connect a social account to this workspace and it shows up here."
                         >

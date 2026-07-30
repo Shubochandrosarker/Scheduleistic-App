@@ -49,6 +49,57 @@ class Workspace extends Model
         return $this->hasMany(Feed::class);
     }
 
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function campaigns(): HasMany
+    {
+        return $this->hasMany(Campaign::class);
+    }
+
+    public function pillars(): HasMany
+    {
+        return $this->hasMany(ContentPillar::class);
+    }
+
+    public function tags(): HasMany
+    {
+        return $this->hasMany(Tag::class);
+    }
+
+    public function ideas(): HasMany
+    {
+        return $this->hasMany(Idea::class);
+    }
+
+    public function mediaAssets(): HasMany
+    {
+        return $this->hasMany(MediaAsset::class);
+    }
+
+    public function mediaFolders(): HasMany
+    {
+        return $this->hasMany(MediaFolder::class);
+    }
+
+    /**
+     * Seed the default content pillars. Called when a workspace is created so
+     * the planner has something to categorise with on day one; a workspace that
+     * already has pillars is left alone, which keeps this safe to re-run.
+     */
+    public function seedDefaultPillars(): void
+    {
+        if ($this->pillars()->exists()) {
+            return;
+        }
+
+        foreach (ContentPillar::DEFAULTS as $position => $pillar) {
+            $this->pillars()->create([...$pillar, 'position' => $position]);
+        }
+    }
+
     /** Whether a user is assigned to this workspace (any role). */
     public function hasUser(int $userId): bool
     {

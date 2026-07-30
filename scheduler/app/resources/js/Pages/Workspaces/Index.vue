@@ -82,7 +82,7 @@ const initials = (name) => String(name ?? '?')
         <EmptyState
             v-if="workspaces.length === 0"
             class="sc-card"
-            icon="◆"
+            icon="layers"
             title="No clients yet"
             description="Add your first workspace — it holds that client's channels, queue, and approvals."
         >

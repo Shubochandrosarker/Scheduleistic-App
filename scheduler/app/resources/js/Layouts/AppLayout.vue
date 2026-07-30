@@ -4,6 +4,8 @@ import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import Banner from '@/Components/Banner.vue';
 import SidebarNav from '@/Layouts/Partials/SidebarNav.vue';
 import TopBar from '@/Layouts/Partials/TopBar.vue';
+import MobileNav from '@/Layouts/Partials/MobileNav.vue';
+import SIcon from '@/Components/UI/SIcon.vue';
 import { useBrand } from '@/composables/useBrand';
 
 defineProps({
@@ -31,6 +33,29 @@ const STATUS_MESSAGES = {
     'comment-added': 'Comment added.',
     'submitted-for-approval': 'Submitted for approval.',
     'approval-decided': 'Decision recorded.',
+    'campaign-created': 'Campaign created.',
+    'campaign-updated': 'Campaign updated.',
+    'campaign-deleted': 'Campaign deleted.',
+    'pillar-created': 'Content pillar created.',
+    'pillar-deleted': 'Content pillar removed.',
+    'tag-created': 'Tag added.',
+    'tag-deleted': 'Tag removed.',
+    'idea-created': 'Idea captured.',
+    'idea-updated': 'Idea updated.',
+    'idea-deleted': 'Idea deleted.',
+    'asset-uploaded': 'Upload received — processing in the background.',
+    'asset-updated': 'Asset updated.',
+    'asset-deleted': 'Asset deleted.',
+    'folder-created': 'Folder created.',
+    'folder-deleted': 'Folder removed.',
+    'health-refreshed': 'Connection health re-checked.',
+    'preferences-saved': 'Notification preferences saved.',
+    'notifications-cleared': 'All notifications marked as read.',
+    'webhook-created': 'Webhook endpoint created.',
+    'webhook-updated': 'Webhook endpoint updated.',
+    'webhook-deleted': 'Webhook endpoint deleted.',
+    'webhook-secret-rotated': 'Signing secret rotated.',
+    'webhook-replayed': 'Delivery queued for replay.',
 };
 
 const page = usePage();
@@ -46,6 +71,19 @@ const statusMessage = computed(() => {
     // "imported-3-skipped-1" → "Imported 3, skipped 1."
     const imported = status.match(/^imported-(\d+)-skipped-(\d+)$/);
     if (imported) return `Imported ${imported[1]} post(s), skipped ${imported[2]}.`;
+
+    // "bulk-reschedule-12" -> "Rescheduled 12 posts."
+    const bulk = status.match(/^bulk-([a-z]+)-(\d+)$/);
+    if (bulk) {
+        const verbs = {
+            reschedule: 'Rescheduled', delete: 'Deleted', submit: 'Submitted for approval',
+            approve: 'Reviewed', assign: 'Reassigned', tag: 'Tagged', campaign: 'Moved',
+        };
+        return `${verbs[bulk[1]] ?? 'Updated'} ${bulk[2]} post(s).`;
+    }
+
+    const converted = status.match(/^idea-converted-(\d+)$/);
+    if (converted) return `Created ${converted[1]} draft(s) from the idea.`;
 
     return status.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) + '.';
 });
@@ -69,6 +107,9 @@ const logout = () => {
 
         <Banner />
 
+        <!-- First tab stop on every page: jump past the rail to the content. -->
+        <a href="#main-content" class="sc-skip-link">Skip to main content</a>
+
         <div class="flex min-h-screen items-start" style="background: var(--bg)">
             <!-- Rail: fixed on desktop, a slide-over on small screens. -->
             <SidebarNav class="hidden lg:flex" @logout="logout" />
@@ -81,6 +122,7 @@ const logout = () => {
             <SidebarNav
                 v-if="showingNavigationDropdown"
                 class="fixed inset-y-0 left-0 z-50 flex lg:hidden"
+                force-expanded
                 @navigate="showingNavigationDropdown = false"
                 @logout="logout"
             />
@@ -121,10 +163,13 @@ const logout = () => {
                         class="text-t3 transition-colors hover:text-t1"
                         aria-label="Dismiss"
                         @click="dismissed = true"
-                    >✕</button>
+                    >
+                        <SIcon name="close" :size="14" label="Dismiss" />
+                    </button>
                 </div>
 
-                <main class="sc-scroll min-w-0 flex-1 px-5 py-7 sm:px-7 lg:px-8">
+                <!-- pb-24 on small screens clears the fixed bottom navigation. -->
+                <main id="main-content" class="sc-scroll min-w-0 flex-1 px-5 pb-24 pt-7 sm:px-7 lg:px-8 lg:pb-8">
                     <!-- Pages that still declare a #header slot render it above their body. -->
                     <div v-if="$slots.header" class="mb-6">
                         <slot name="header" />
@@ -136,5 +181,7 @@ const logout = () => {
                 </main>
             </div>
         </div>
+
+        <MobileNav @more="showingNavigationDropdown = true" />
     </div>
 </template>

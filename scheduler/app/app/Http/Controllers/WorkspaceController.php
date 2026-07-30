@@ -40,7 +40,11 @@ class WorkspaceController extends Controller
             return back()->withErrors(['plan' => 'Your plan\'s workspace limit has been reached. Upgrade to add more.']);
         }
 
-        $team->workspaces()->create($validated);
+        $workspace = $team->workspaces()->create($validated);
+
+        // A brand with no content pillars cannot be categorised, so the
+        // planner would show an empty axis on day one. Seed the defaults.
+        $workspace->seedDefaultPillars();
 
         return back()->with('status', 'workspace-created');
     }

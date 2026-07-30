@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
@@ -29,8 +30,13 @@ class Post extends Model
     protected $fillable = [
         'group_id',
         'workspace_id',
+        'campaign_id',
+        'content_pillar_id',
         'author_id',
+        'assignee_id',
+        'idea_id',
         'status',
+        'title',
         'content',
         'media',
         'source',
@@ -90,6 +96,39 @@ class Post extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    public function campaign(): BelongsTo
+    {
+        return $this->belongsTo(Campaign::class);
+    }
+
+    public function pillar(): BelongsTo
+    {
+        return $this->belongsTo(ContentPillar::class, 'content_pillar_id');
+    }
+
+    public function assignee(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assignee_id');
+    }
+
+    public function idea(): BelongsTo
+    {
+        return $this->belongsTo(Idea::class);
+    }
+
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class, 'post_tag')->withTimestamps();
+    }
+
+    /** Library assets attached to this post (base post and per-network overrides). */
+    public function mediaAssets(): BelongsToMany
+    {
+        return $this->belongsToMany(MediaAsset::class, 'media_asset_post')
+            ->withPivot(['provider', 'position'])
+            ->withTimestamps();
     }
 
     /** Content for a given provider, falling back to the post's base content. */
