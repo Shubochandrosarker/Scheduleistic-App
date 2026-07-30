@@ -77,8 +77,7 @@ const features = [
             ></div>
 
             <div class="relative mx-auto max-w-3xl text-center">
-                <p class="sc-eyebrow mb-5 inline-flex items-center gap-2" style="color: var(--sc-accent-text)">
-                    <span class="size-1.5 rounded-full" style="background: var(--sc-accent)"></span>
+                <p class="sc-kicker mb-5">
                     13 networks · one workspace
                 </p>
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Scheduleistic mark">
+  <defs>
+    <linearGradient id="g" x1="18" y1="20" x2="78" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2878d0"/>
+      <stop offset=".58" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#4546c8"/>
+    </linearGradient>
+  </defs>
+  <rect width="96" height="96" rx="24" fill="#f7f7ff"/>
+  <path d="M67 23H38c-12 0-20 7-20 17 0 9 7 15 20 16l18 1c8 0 12 3 12 8 0 6-5 9-14 9H24" fill="none" stroke="url(#g)" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="29" cy="23" r="8" fill="url(#g)"/>
+  <circle cx="68" cy="73" r="8" fill="url(#g)"/>
+</svg>

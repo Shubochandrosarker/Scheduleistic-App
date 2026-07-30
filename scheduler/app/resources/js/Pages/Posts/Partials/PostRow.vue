@@ -103,7 +103,7 @@ const when = (value) => new Date(value).toLocaleString([], {
                 <div v-for="comment in post.comments" :key="comment.id" class="flex gap-3">
                     <span
                         class="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full text-[10px] font-extrabold"
-                        style="background: linear-gradient(135deg, var(--alt), var(--sc-accent)); color: #fff"
+                        style="background: linear-gradient(135deg, var(--sc-accent-2), var(--sc-accent)); color: #fff"
                     >{{ (comment.user?.name ?? '?').charAt(0).toUpperCase() }}</span>
 
                     <div class="min-w-0">

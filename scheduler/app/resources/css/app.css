@@ -9,108 +9,155 @@
    variables below, so a theme switch (or a tenant's white-label accent) only
    has to rewrite this layer — no component knows a hex code.
 
-   `:root` carries the dark theme; `[data-theme="light"]` overrides it. The
-   accent group (--sc-*) is written at runtime by useBrand() from the tenant's
-   branding colour, with the values here as the platform default.
+   `:root` carries the LIGHT theme and is a direct transcription of the
+   marketing site's palette (scheduleistic.com), so someone arriving from the
+   site into the product sees one continuous brand rather than two designs
+   bolted together. `[data-theme="dark"]` derives a counterpart from the same
+   navy/indigo family — it is a second expression of one palette, not a second
+   palette.
+
+   The accent group (--sc-*) is rewritten at runtime by useBrand() from the
+   tenant's white-label colour; the values here are the platform default.
    ============================================================================ */
 
 :root {
-    color-scheme: dark;
-
-    /* Page + chrome */
-    --bg: #070b14;
-    --bg2: #0b1020;
-    --nav-bg: #0a0f1c;
-    --head-bg: rgba(7, 11, 20, 0.86);
-    --pop-bg: rgba(11, 16, 32, 0.94);
-    --panel-bg: #101728;
-    --code-bg: rgba(0, 0, 0, 0.3);
-
-    /* Cards */
-    --card-bg: #111a2e;
-    --card-bg2: #0e1626;
-    --card-solid: #141c30;
-    --card-line: rgba(255, 255, 255, 0.1);
-    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-
-    /* Subtle fills + lines */
-    --s1: rgba(255, 255, 255, 0.02);
-    --s2: rgba(255, 255, 255, 0.03);
-    --s3: rgba(255, 255, 255, 0.045);
-    --line: rgba(255, 255, 255, 0.09);
-    --line2: rgba(255, 255, 255, 0.11);
-    --hover: rgba(255, 255, 255, 0.14);
-
-    /* Text ramp */
-    --t1: #f5f7ff;
-    --t2: #c7cee0;
-    --t3: #a2aac0;
-    --t4: #7d859c;
-    --on-acc: #070b14;
-
-    /* Semantic */
-    --ok: #34d399;
-    --warn: #f59e0b;
-    --bad: #f87171;
-    --alt: #a78bfa;
-
-    --shadow-c: rgba(0, 0, 0, 0.35);
-    --shadow-d: rgba(0, 0, 0, 0.55);
-    --grid-op: 0.5;
-    --glow-op: 0.5;
-
-    /* Accent — rewritten by useBrand() for white-label tenants. */
-    --sc-accent: #4f8dff;
-    --sc-accent-bright: #72a4ff;
-    --sc-accent-text: #72a4ff;
-    --sc-accent-2: #22d3ee;
-    --cy-text: #22d3ee;
-    --sc-soft: rgba(79, 141, 255, 0.12);
-    --sc-mid: rgba(79, 141, 255, 0.28);
-    --sc-glow: rgba(79, 141, 255, 0.4);
-}
-
-[data-theme='light'] {
     color-scheme: light;
 
-    --bg: #f0f2ff;
-    --bg2: #f8f9ff;
-    --nav-bg: #ffffff;
-    --head-bg: rgba(248, 249, 255, 0.93);
-    --pop-bg: #ffffff;
-    --panel-bg: linear-gradient(160deg, #f3f1fe, #eaedff);
-    --code-bg: #f3f1fe;
+    /* --- Brand ramp, straight from the marketing stylesheet --------------- */
+    --brand-50: #f7f7ff;
+    --brand-100: #ececff;
+    --brand-200: #dcdcff;
+    --brand-300: #bdbdff;
+    --brand-500: #6366f1;
+    --brand-600: #5558e8;
+    --brand-700: #4546c8;
+    --navy-950: #08092f;
+    --navy-900: #10113f;
+    --navy-800: #191a55;
+    --brand-blue: #2878d0;
 
+    /* Page + chrome */
+    --bg: #ffffff;
+    --bg2: #f8f9fd;
+    --nav-bg: #fbfbff;
+    --head-bg: rgba(255, 255, 255, 0.88);
+    --pop-bg: #ffffff;
+    --panel-bg: #f8f9fd;
+    --code-bg: #f7f7ff;
+
+    /* Cards */
     --card-bg: #ffffff;
     --card-bg2: #ffffff;
     --card-solid: #ffffff;
-    --card-line: #e8eaff;
-    --card-shadow: 0 2px 12px rgba(108, 92, 231, 0.07);
+    --card-line: #e7e9f2;
+    --card-shadow: 0 10px 30px rgba(16, 17, 63, 0.06);
+    --card-shadow-lift: 0 18px 38px rgba(16, 17, 63, 0.1);
 
-    --s1: #f8f9ff;
-    --s2: #f3f5ff;
+    /* Subtle fills + lines */
+    --s1: #fbfbff;
+    --s2: #f8f9fd;
     --s3: #ffffff;
-    --line: #e8eaff;
-    --line2: #d9dbf0;
-    --hover: #e9e6fd;
+    --line: #e7e9f2;
+    --line2: #e7e9f2;
+    --hover: #f7f7ff;
 
-    --t1: #0d0f1a;
-    --t2: #2e3245;
-    --t3: #6b7280;
-    --t4: #9499ba;
+    /* Text ramp */
+    --t1: #08092f;
+    --t2: #101126;
+    --t3: #55586c;
+    --t4: #7e8194;
     --on-acc: #ffffff;
 
-    --ok: #009e3d;
-    --warn: #b45309;
-    --bad: #dc2626;
-    --alt: #6c5ce7;
+    /* Semantic — the marketing site's status colours */
+    --ok: #16a36a;
+    --ok-soft: #eefbf5;
+    --ok-line: #ccebdd;
+    --ok-text: #08734b;
+    --warn: #d97706;
+    --warn-soft: #fff7e8;
+    --warn-text: #8a5500;
+    --bad: #dc3545;
+    --bad-soft: #fdeef0;
+    --alt: #6366f1;
 
-    --shadow-c: rgba(108, 92, 231, 0.12);
-    --shadow-d: rgba(108, 92, 231, 0.2);
+    --shadow-c: rgba(16, 17, 63, 0.12);
+    --shadow-d: rgba(16, 17, 63, 0.2);
+    --shadow-lg: 0 24px 60px rgba(16, 17, 63, 0.12);
     --grid-op: 0;
-    --glow-op: 0.3;
+    --glow-op: 0.25;
 
-    --cy-text: #0e7490;
+    /* Accent — rewritten by useBrand() for white-label tenants. */
+    --sc-accent: #6366f1;
+    --sc-accent-bright: #5558e8;
+    --sc-accent-text: #4546c8;
+    --sc-accent-2: #2878d0;
+    --cy-text: #2878d0;
+    --sc-soft: rgba(99, 102, 241, 0.1);
+    --sc-mid: rgba(99, 102, 241, 0.26);
+    --sc-glow: rgba(99, 102, 241, 0.4);
+}
+
+[data-theme='dark'] {
+    color-scheme: dark;
+
+    /* The dark theme is the same indigo on the marketing site's own navy,
+       rather than an unrelated near-black — which is what keeps the two
+       themes recognisably the same product. */
+    --bg: #08092f;
+    --bg2: #10113f;
+    --nav-bg: #0b0c36;
+    --head-bg: rgba(8, 9, 47, 0.88);
+    --pop-bg: #14154a;
+    --panel-bg: #10113f;
+    --code-bg: rgba(0, 0, 0, 0.28);
+
+    --card-bg: #10113f;
+    --card-bg2: #0e0f38;
+    --card-solid: #191a55;
+    --card-line: rgba(255, 255, 255, 0.12);
+    --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --card-shadow-lift: 0 18px 38px rgba(0, 0, 0, 0.4);
+
+    --s1: rgba(255, 255, 255, 0.025);
+    --s2: rgba(255, 255, 255, 0.045);
+    --s3: rgba(255, 255, 255, 0.06);
+    --line: rgba(255, 255, 255, 0.12);
+    --line2: rgba(255, 255, 255, 0.16);
+    --hover: rgba(255, 255, 255, 0.09);
+
+    --t1: #f7f7ff;
+    --t2: #dcdcff;
+    --t3: #b3b5d4;
+    --t4: #8e90b4;
+    --on-acc: #ffffff;
+
+    --ok: #34d399;
+    --ok-soft: rgba(22, 163, 106, 0.16);
+    --ok-line: rgba(52, 211, 153, 0.32);
+    --ok-text: #6ee7b7;
+    --warn: #fbbf24;
+    --warn-soft: rgba(217, 119, 6, 0.18);
+    --warn-text: #fcd34d;
+    --bad: #fb7185;
+    --bad-soft: rgba(220, 53, 69, 0.18);
+    --alt: #a5a7ff;
+
+    --shadow-c: rgba(0, 0, 0, 0.35);
+    --shadow-d: rgba(0, 0, 0, 0.55);
+    --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.45);
+    --grid-op: 0.5;
+    --glow-op: 0.5;
+
+    /* Indigo is too dark to read on navy, so the dark theme lifts the accent
+       text one step. useBrand() applies the same rule to tenant colours. */
+    --sc-accent: #6366f1;
+    --sc-accent-bright: #8b8dff;
+    --sc-accent-text: #b6b7ff;
+    --sc-accent-2: #4d9bee;
+    --cy-text: #7dbaf5;
+    --sc-soft: rgba(99, 102, 241, 0.2);
+    --sc-mid: rgba(99, 102, 241, 0.38);
+    --sc-glow: rgba(99, 102, 241, 0.5);
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
@@ -182,143 +229,197 @@ body {
        `min-w-0` matters: cards usually sit in a grid or flex track, whose items
        default to min-width:auto and would otherwise refuse to shrink below a
        long unbreakable line — pushing the whole page wider than the viewport. */
+    /* The marketing site's card: 18px radius, 1px border, soft lifted shadow,
+       and a 2px rise on hover. Matched exactly so a feature card on the site
+       and a stat card in the product read as the same object. */
     .sc-card {
         background: var(--card-bg);
         border: 1px solid var(--card-line);
         box-shadow: var(--card-shadow);
-        @apply min-w-0 rounded-2xl;
+        border-radius: 18px;
+        transition: transform 0.2s, box-shadow 0.2s;
+        @apply min-w-0;
+    }
+
+    .sc-card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--card-shadow-lift);
     }
 
     .sc-card-solid {
         background: var(--card-solid);
         border: 1px solid var(--line2);
-        @apply rounded-xl;
+        box-shadow: var(--card-shadow);
+        border-radius: 14px;
     }
 
+    /* The site's large framed surface (24px) — the hero dashboard shell. */
     .sc-panel {
         background: var(--panel-bg);
         border: 1px solid var(--card-line);
-        @apply min-w-0 rounded-2xl;
+        box-shadow: var(--shadow-lg);
+        border-radius: 24px;
+        @apply min-w-0;
     }
 
     .sc-inset {
-        background: var(--s1);
+        background: var(--s2);
         border: 1px solid var(--line);
-        @apply min-w-0 rounded-xl;
+        border-radius: 12px;
+        @apply min-w-0;
     }
 
     /* Typography helpers */
+    /* A small label. Deliberately dot-free and neutral, because this class is
+       used for table headers and inline field labels as well as section
+       captions — see .sc-kicker for the marketing hero treatment.
+       No longer uppercase: the 2.0 audit flagged that as over-used. */
     .sc-eyebrow {
         color: var(--t3);
-        @apply text-[11px] font-bold uppercase tracking-[0.12em];
+        @apply text-[12.5px] font-extrabold;
+    }
+
+    /* The marketing site's eyebrow: brand-coloured, preceded by a gradient
+       dot. For page and section headings only — never for a table header. */
+    .sc-kicker {
+        color: var(--sc-accent-text);
+        @apply inline-flex items-center gap-2 text-[13px] font-extrabold;
+    }
+
+    .sc-kicker::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--sc-accent-2), var(--sc-accent));
     }
 
     .sc-title {
         color: var(--t1);
-        @apply text-[26px] font-extrabold tracking-[-0.03em] leading-tight sm:text-[32px];
+        line-height: 1.08;
+        @apply text-[27px] font-extrabold tracking-normal sm:text-[34px];
     }
 
     .sc-sub {
         color: var(--t3);
-        @apply text-sm leading-relaxed;
+        line-height: 1.65;
+        @apply text-[15px];
     }
 
     /* Buttons — a single set of shapes, four intents. */
+    /* The site's button: 12px radius, 44px minimum height (also the WCAG 2.2
+       target size), weight 800, and a 1px rise on hover. */
     .sc-btn {
-        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5
-               text-[13px] font-bold transition-all duration-150 disabled:cursor-not-allowed
-               disabled:opacity-45;
+        border: 1px solid var(--line2);
+        border-radius: 12px;
+        min-height: 44px;
+        transition: transform 0.2s, box-shadow 0.2s, background 0.2s, filter 0.2s;
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap px-[18px] py-[11px]
+               text-[14px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45;
     }
 
+    .sc-btn:hover:not(:disabled) {
+        transform: translateY(-1px);
+    }
+
+    /* The compact variant keeps the shape but drops below the 44px floor, so
+       it is only for controls that sit inside a larger hit area (a card row,
+       a table cell) — never as the sole target on a touch surface. */
     .sc-btn-sm {
-        @apply rounded-lg px-3 py-1.5 text-[12px];
+        border-radius: 10px;
+        min-height: 36px;
+        @apply px-3 py-1.5 text-[13px];
     }
 
     .sc-btn-primary {
-        background: linear-gradient(135deg, var(--sc-accent-bright), var(--sc-accent));
+        background: linear-gradient(135deg, var(--sc-accent-2), var(--sc-accent));
         color: #fff;
-        border: none;
-        box-shadow: 0 8px 24px var(--sc-mid);
+        border-color: transparent;
+        box-shadow: 0 14px 30px var(--sc-mid);
     }
 
     .sc-btn-primary:hover:not(:disabled) {
-        filter: brightness(1.08);
+        filter: brightness(1.06);
     }
 
     .sc-btn-secondary {
-        background: var(--s3);
-        border: 1px solid var(--line2);
-        color: var(--t2);
+        background: var(--surface, var(--card-bg));
+        border-color: var(--line2);
+        color: var(--t1);
     }
 
     .sc-btn-secondary:hover:not(:disabled) {
         background: var(--hover);
-        color: var(--t1);
     }
 
     .sc-btn-ghost {
         background: transparent;
-        border: 1px solid transparent;
-        color: var(--t3);
+        border-color: transparent;
+        color: var(--t2);
     }
 
     .sc-btn-ghost:hover:not(:disabled) {
-        background: var(--line);
+        background: var(--hover);
         color: var(--t1);
     }
 
     .sc-btn-success {
-        background: linear-gradient(135deg, #4ed48a, var(--ok));
-        color: #04140c;
-        border: none;
+        background: var(--ok);
+        color: #fff;
+        border-color: transparent;
     }
 
     .sc-btn-danger {
-        background: rgba(248, 113, 113, 0.12);
-        border: 1px solid rgba(248, 113, 113, 0.32);
+        background: var(--bad-soft);
+        border-color: var(--bad);
         color: var(--bad);
     }
 
     .sc-btn-danger:hover:not(:disabled) {
-        background: rgba(248, 113, 113, 0.2);
+        filter: brightness(0.98);
     }
 
     .sc-btn-warn {
-        background: rgba(245, 158, 11, 0.12);
-        border: 1px solid rgba(245, 158, 11, 0.32);
-        color: var(--warn);
+        background: var(--warn-soft);
+        border-color: var(--warn);
+        color: var(--warn-text);
     }
 
     .sc-btn-warn:hover:not(:disabled) {
-        background: rgba(245, 158, 11, 0.2);
+        filter: brightness(0.98);
     }
 
     /* Pills — the filter/tab row used on calendar, approvals, queue, composer. */
+    /* The site's tab-list pill: fully rounded, weight 800, 44px tall, and a
+       solid navy fill when selected rather than a tinted wash. */
     .sc-pill {
-        background: var(--s2);
+        background: var(--card-bg);
         border: 1px solid var(--line2);
-        color: var(--t3);
-        @apply cursor-pointer whitespace-nowrap rounded-full px-3.5 py-2 text-[12.5px] font-semibold
-               transition-colors duration-150;
+        color: var(--t2);
+        min-height: 40px;
+        @apply inline-flex cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2
+               text-[13px] font-extrabold transition-colors duration-150;
     }
 
     .sc-pill:hover {
-        color: var(--t2);
+        background: var(--hover);
+        color: var(--t1);
     }
 
     .sc-pill-on {
-        background: var(--sc-soft);
-        border-color: var(--sc-mid);
-        color: var(--t1);
-        @apply font-bold;
+        background: var(--navy-950, var(--sc-accent));
+        border-color: transparent;
+        color: #ffffff;
     }
 
     /* Form controls — one look for input/select/textarea, light and dark. */
     .sc-input {
-        background: var(--s3);
+        background: var(--card-bg);
         border: 1px solid var(--line2);
         color: var(--t1);
-        @apply w-full rounded-xl px-3.5 py-2.5 text-sm transition-colors duration-150
+        border-radius: 10px;
+        min-height: 46px;
+        @apply w-full px-3 py-2.5 text-[14px] transition-colors duration-150
                placeholder:text-[color:var(--t4)];
     }
 
@@ -335,7 +436,7 @@ body {
 
     .sc-label {
         color: var(--t2);
-        @apply mb-1.5 block text-[12.5px] font-semibold;
+        @apply mb-1.5 block text-[14px] font-extrabold;
     }
 
     /* A checkbox that reads correctly on a dark surface. */
@@ -369,31 +470,33 @@ body {
        One shape for every rail item — link, locked item, collapse toggle and
        sign-out — so the rail reads as one control group rather than a list
        with buttons bolted on. */
+    /* The site's nav link: 8px radius, 44px tall, and a brand-tinted fill on
+       hover and for the current page — no border, so the rail reads as a list
+       rather than a stack of boxes. */
     .sc-nav-item {
         color: var(--t2);
         background: transparent;
         border: 1px solid transparent;
-        @apply flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-left text-[14px]
-               font-semibold transition-colors duration-150;
-        /* 44px minimum touch target (WCAG 2.2 target size). */
+        border-radius: 8px;
         min-height: 44px;
+        @apply flex w-full items-center gap-3 px-3 py-2.5 text-left text-[14px]
+               font-semibold transition-colors duration-150;
     }
 
     .sc-nav-item:hover {
-        background: var(--line);
-        color: var(--t1);
+        background: var(--sc-soft);
+        color: var(--sc-accent-text);
     }
 
     .sc-nav-item-active {
         background: var(--sc-soft);
-        border-color: var(--sc-mid);
-        color: var(--t1);
-        @apply font-bold;
+        color: var(--sc-accent-text);
+        @apply font-extrabold;
     }
 
     .sc-badge-count {
         background: var(--sc-accent);
-        color: #fff;
+        color: #ffffff;
         @apply ml-auto shrink-0 rounded-full px-2 py-0.5 text-[12px] font-bold leading-none;
         min-width: 20px;
         text-align: center;
@@ -429,6 +532,44 @@ body {
         opacity: 0.45;
     }
 
+    /* Navy-on-navy is invisible in the dark theme, so the selected pill uses
+       the accent there instead of the flat navy the light theme uses. */
+    [data-theme='dark'] .sc-pill-on {
+        background: var(--sc-accent);
+        color: #ffffff;
+    }
+
+    /* --- Status chips, transcribed from the marketing site ---------------- */
+
+    .sc-chip {
+        border-radius: 999px;
+        @apply inline-flex w-fit items-center gap-1.5 px-2.5 py-1 text-[12px] font-extrabold;
+    }
+
+    .sc-chip-ok {
+        background: var(--ok-soft);
+        border: 1px solid var(--ok-line);
+        color: var(--ok-text);
+    }
+
+    .sc-chip-warn {
+        background: var(--warn-soft);
+        border: 1px solid var(--warn);
+        color: var(--warn-text);
+    }
+
+    .sc-chip-bad {
+        background: var(--bad-soft);
+        border: 1px solid var(--bad);
+        color: var(--bad);
+    }
+
+    .sc-chip-brand {
+        background: var(--sc-soft);
+        border: 1px solid var(--sc-mid);
+        color: var(--sc-accent-text);
+    }
+
     .sc-code {
         background: var(--code-bg);
         color: var(--sc-accent-text);
@@ -450,8 +591,10 @@ a:focus-visible,
 button:focus-visible,
 [role='button']:focus-visible,
 summary:focus-visible {
-    outline: 2px solid var(--sc-accent);
-    outline-offset: 2px;
+    /* The marketing site's ring: 3px at 45% alpha, offset 3px. Same treatment
+       either side of the sign-in boundary. */
+    outline: 3px solid var(--sc-mid);
+    outline-offset: 3px;
     border-radius: 8px;
 }
 
@@ -465,13 +608,15 @@ summary:focus-visible {
 }
 
 .sc-skip-link:focus {
-    left: 8px;
-    top: 8px;
-    background: var(--card-solid);
-    color: var(--t1);
+    left: 16px;
+    top: 12px;
+    background: var(--navy-950);
+    color: #ffffff;
+    /* The navy fill is the dark theme's own background colour, so it needs an
+       edge there to stay visible. Harmless on light. */
     border: 1px solid var(--sc-accent);
-    padding: 10px 16px;
-    border-radius: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
 }
 
 /* Respect the OS-level reduced-motion preference. Decorative movement is

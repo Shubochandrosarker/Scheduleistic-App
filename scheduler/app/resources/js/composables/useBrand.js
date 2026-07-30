@@ -2,8 +2,11 @@ import { watchEffect } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import { useTheme } from '@/composables/useTheme';
 
-const DEFAULT_ACCENT = '#4F8DFF';
-const DEFAULT_SECONDARY = '#22D3EE';
+// The platform accent, matching the marketing site's brand-500 and blue.
+// A white-label tenant's own colour still overrides both at runtime — that is
+// the whole point of this composable, and a paid capability on two plans.
+const DEFAULT_ACCENT = '#6366F1';
+const DEFAULT_SECONDARY = '#2878D0';
 
 const toRgb = (hex) => {
     const h = String(hex || DEFAULT_ACCENT).replace('#', '');
@@ -11,7 +14,7 @@ const toRgb = (hex) => {
     const n = Number.parseInt(full, 16);
 
     return Number.isNaN(n)
-        ? { r: 79, g: 141, b: 255 }
+        ? { r: 99, g: 102, b: 241 }
         : { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
 };
 
@@ -58,12 +61,14 @@ export function useBrand() {
 
         const style = document.documentElement.style;
         style.setProperty('--sc-accent', accent);
-        style.setProperty('--sc-accent-bright', lighten(accent, 0.18));
+        style.setProperty('--sc-accent-bright', isLight ? darken(accent, 0.1) : lighten(accent, 0.22));
         // On a light page the raw accent is too pale for text, so darken instead.
         style.setProperty('--sc-accent-text', isLight ? darken(accent, 0.3) : lighten(accent, 0.18));
         style.setProperty('--sc-accent-2', secondary);
-        style.setProperty('--sc-soft', rgba(accent, 0.12));
-        style.setProperty('--sc-mid', rgba(accent, 0.28));
+        // Slightly stronger tints in dark mode, where a 10% wash over navy is
+        // effectively invisible.
+        style.setProperty('--sc-soft', rgba(accent, isLight ? 0.1 : 0.2));
+        style.setProperty('--sc-mid', rgba(accent, isLight ? 0.26 : 0.38));
         style.setProperty('--sc-glow', rgba(accent, 0.4));
     });
 }
