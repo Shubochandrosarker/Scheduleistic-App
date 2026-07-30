@@ -38,6 +38,16 @@ class Channel extends Model
         'refresh_token',
     ];
 
+    /**
+     * Mirrors the column default so a freshly created model reports its health
+     * without a round trip. Reading `health_state` as null on a brand-new
+     * channel would make `canPublish()` and the health summary disagree with
+     * what the database holds.
+     */
+    protected $attributes = [
+        'health_state' => 'connected',
+    ];
+
     protected function casts(): array
     {
         return [

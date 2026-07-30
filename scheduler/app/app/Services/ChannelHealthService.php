@@ -104,7 +104,10 @@ class ChannelHealthService
             return ChannelHealthEvent::STATE_TOKEN_EXPIRED;
         }
 
-        if ($expiresAt->diffInDays(now()) <= self::EXPIRY_WARNING_DAYS) {
+        // Compared as an instant rather than a day count: Carbon's diffInDays
+        // is signed, so a token six months out reads as -181 and would slip
+        // under a `<= 7` test.
+        if ($expiresAt->isBefore(now()->addDays(self::EXPIRY_WARNING_DAYS))) {
             $this->record(
                 $channel,
                 ChannelHealthEvent::STATE_TOKEN_EXPIRING,

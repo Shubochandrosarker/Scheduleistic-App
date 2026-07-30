@@ -69,12 +69,14 @@ class PlannerQuery
 
         if ($search = trim((string) $filters->input('search', ''))) {
             // Escape the LIKE wildcards so a caption search for "50%" does not
-            // become a match-everything query.
+            // become a match-everything query. The explicit ESCAPE clause is
+            // required: MySQL assumes a backslash escape but SQLite and
+            // Postgres do not, and this app supports all three.
             $escaped = addcslashes($search, '%_\\');
 
             $query->where(function (Builder $q) use ($escaped) {
-                $q->where('posts.content', 'like', "%{$escaped}%")
-                    ->orWhere('posts.title', 'like', "%{$escaped}%");
+                $q->whereRaw('posts.content LIKE ? ESCAPE ?', ["%{$escaped}%", '\\'])
+                    ->orWhereRaw('posts.title LIKE ? ESCAPE ?', ["%{$escaped}%", '\\']);
             });
         }
 

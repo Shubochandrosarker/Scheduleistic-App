@@ -15,21 +15,31 @@ domains, Stripe billing, and an AI assistant grounded in each team's own brand v
 
 ## Status
 
-All 7 build phases — auth/tenancy, the publishing engine, agency/approvals, billing/white-label,
-AI/analytics, security hardening, and custom-domain TLS — are shipped and covered by the test
-suite (see [`scheduler/docs/02-roadmap.md`](scheduler/docs/02-roadmap.md) for the phase-by-phase
-delivery history). What's left is operational — real OAuth/Stripe credentials and a go-live
-deploy — not application code.
+The original 7 build phases — auth/tenancy, the publishing engine, agency/approvals,
+billing/white-label, AI/analytics, security hardening, and custom-domain TLS — are shipped.
 
-Last verified locally (PHP 8.4.19, Node 22, Composer 2.8.12):
+**Scheduleistic 2.0** builds on that with capability-based entitlements, a real content planner,
+a media library, campaigns/pillars/ideas, channel health, signed outbound webhooks, a
+notification centre, and a rebuilt navigation and design system. It is an incremental upgrade:
+nothing was rewritten, no table was renamed, and no existing feature was removed.
+
+2.0 does **not** deliver everything in the 2.0 brief. What landed and what did not is listed
+explicitly in
+[`scheduler/docs/SCHEDULEISTIC_2_RELEASE_NOTES.md`](scheduler/docs/SCHEDULEISTIC_2_RELEASE_NOTES.md).
+
+Last verified locally (PHP 8.4.19, Node 22.22, npm 10.9.7):
 
 | Check | Result |
 | --- | --- |
-| `composer install` | clean |
-| `npm ci && npm run build` | clean |
-| `php artisan test` | **162/169 passing**, 7 skipped by design, 0 failing |
-| `composer audit` | 0 known vulnerabilities |
-| `npm audit` | 0 known vulnerabilities |
+| `composer install` | clean (`ext-bcmath` required — see the deployment doc) |
+| `npm install && npm run build` | clean, ~1.9 s |
+| `php artisan migrate:fresh --seed` | clean |
+| `php artisan test` | **280/287 passing**, 7 skipped by design, 0 failing, 1,000 assertions |
+| `composer audit` | 4 medium (`guzzlehttp/guzzle`, transitive) |
+| `npm audit` | 2 high (`axios`, `postcss` — build-time) |
+
+Neither advisory set is introduced by 2.0; both clear with a lock refresh (`composer update
+guzzlehttp/guzzle`, `npm audit fix`) and should be cleared before a public launch.
 
 ---
 
@@ -49,7 +59,7 @@ Last verified locally (PHP 8.4.19, Node 22, Composer 2.8.12):
 | Path | What it is |
 | --- | --- |
 | [`scheduler/app/`](scheduler/app) | The Laravel 13 + Jetstream + Inertia/Vue 3 + Tailwind application — the product. |
-| [`scheduler/docs/`](scheduler/docs) | Architecture, security posture, and the full build/deploy/maintain guide (also as a PDF). |
+| [`scheduler/docs/`](scheduler/docs) | Architecture, security posture, the full build/deploy/maintain guide (also as a PDF), and the `SCHEDULEISTIC_2_*` documentation set. |
 | [`marketing/`](marketing) | The static marketing website (`scheduleistic.com`) — no build step, no framework. |
 | [`automation/`](automation) | **Legacy.** The pre-app WordPress → n8n → Postiz pipeline this product replaces. Kept for history/reference only; nothing in `scheduler/app` depends on it. |
 | [`tools/`](tools) | `md2pdf.py` — a dependency-free Markdown → PDF renderer used to produce `Scheduleistic-Guide.pdf`. |
@@ -72,8 +82,22 @@ Last verified locally (PHP 8.4.19, Node 22, Composer 2.8.12):
   image.
 - **RSS / WordPress → social** — point a feed at the app and it drafts social posts from new
   articles automatically, de-duplicated by GUID.
-- **Billing & plans** — Free, Pro, Agency, and Scale tiers (`config/plans.php`) with enforced
-  limits on workspaces, channels, members, and monthly posts — no code change needed to reprice.
+- **Content planner (2.0)** — month, week, agenda, list and Instagram-grid views over one
+  URL-persisted filter set, with drag-and-drop rescheduling, bulk actions, and a post detail
+  drawer that opens over the calendar instead of navigating away.
+- **Media library (2.0)** — tenant-isolated assets with folders, tags, alt text and a plan
+  storage quota. Uploads are validated by content type, deduplicated by checksum, and processed
+  off the request; the original is never modified.
+- **Campaigns, content pillars, tags and ideas (2.0)** — the axes the planner and reporting
+  slice content by, plus a Kanban pipeline that converts an idea straight into drafts.
+- **Channel health (2.0)** — token expiry, last publish and last sync per profile, checked
+  hourly, with the publish job refusing a dead connection up front instead of burning retries.
+- **Signed outbound webhooks (2.0)** — HMAC-SHA256 payloads, secret rotation, delivery history,
+  replay, exponential backoff, and automatic disable after repeated failures.
+- **Billing & plans** — Free, Solo, Pro, Agency, Scale and Enterprise tiers (`config/plans.php`)
+  with capability-based entitlements and enforced limits on brands, profiles, members, monthly
+  posts and storage — no code change needed to reprice, and per-account overrides that can only
+  ever raise a limit or grant a capability.
 - **White-label** — per-organization name, colors, logo, and a custom domain with Caddy-issued,
   on-demand Let's Encrypt certificates.
 - **Super-admin control plane** — list every organization, suspend/reactivate, and impersonate an
@@ -102,9 +126,24 @@ php artisan tinker
 For the full manual/Docker setup, environment reference, and troubleshooting, see
 **[`INSTALL.md`](INSTALL.md)**.
 
+### Running the tests
+
 ```bash
-php artisan test    # run the suite
-composer dev        # serve + queue + vite + logs, all in one terminal
+cd scheduler/app
+composer install          # add --ignore-platform-req=ext-bcmath if bcmath is unavailable
+npm install
+cp .env.example .env
+php artisan key:generate  # required — the suite 500s without an APP_KEY
+npm run build             # required — Inertia pages need the Vite manifest
+php artisan test
+```
+
+The `key:generate` and `npm run build` steps are genuine prerequisites, not optional: without
+them every HTTP test fails with "No application encryption key" and "Vite manifest not found".
+
+```bash
+php artisan test --filter=TenantIsolationTest   # one suite
+composer dev                                    # serve + queue + vite + logs in one terminal
 ```
 
 ## Production deployment
@@ -132,10 +171,27 @@ cd marketing && python3 -m http.server 8080
 See [`marketing/README.md`](marketing/README.md) for the current design system, content map, and
 deployment notes.
 
+## Scheduleistic 2.0 documentation
+
+| Document | Covers |
+| --- | --- |
+| [`SCHEDULEISTIC_2_AUDIT.md`](scheduler/docs/SCHEDULEISTIC_2_AUDIT.md) | The pre-flight audit: baseline metrics, findings, and what 2.0 set out to change |
+| [`SCHEDULEISTIC_2_ARCHITECTURE.md`](scheduler/docs/SCHEDULEISTIC_2_ARCHITECTURE.md) | Tenancy, entitlements, the publishing engine, the planner, and where things deliberately do not live |
+| [`SCHEDULEISTIC_2_DATABASE.md`](scheduler/docs/SCHEDULEISTIC_2_DATABASE.md) | Every migration, the reasoning behind each index, and the compatibility guarantees |
+| [`SCHEDULEISTIC_2_API.md`](scheduler/docs/SCHEDULEISTIC_2_API.md) | Routes, request shapes, and the outbound webhook contract |
+| [`SCHEDULEISTIC_2_PROVIDER_CAPABILITIES.md`](scheduler/docs/SCHEDULEISTIC_2_PROVIDER_CAPABILITIES.md) | What each network supports — and what the platform does not claim to do |
+| [`SCHEDULEISTIC_2_SECURITY.md`](scheduler/docs/SCHEDULEISTIC_2_SECURITY.md) | Tenant isolation, credentials, uploads, SSRF, idempotency, and what is not yet covered |
+| [`SCHEDULEISTIC_2_TEST_PLAN.md`](scheduler/docs/SCHEDULEISTIC_2_TEST_PLAN.md) | Every suite, what it proves, and coverage against the brief |
+| [`SCHEDULEISTIC_2_DEPLOYMENT.md`](scheduler/docs/SCHEDULEISTIC_2_DEPLOYMENT.md) | Requirements, environment variables, deploy steps, verification and rollback |
+| [`SCHEDULEISTIC_2_RELEASE_NOTES.md`](scheduler/docs/SCHEDULEISTIC_2_RELEASE_NOTES.md) | What shipped, what did not, known risks, and the recommended next release |
+| [`SCHEDULEISTIC_2_USER_GUIDE.md`](scheduler/docs/SCHEDULEISTIC_2_USER_GUIDE.md) | End-user walkthrough of the 2.0 surfaces |
+| [`SCHEDULEISTIC_2_ADMIN_GUIDE.md`](scheduler/docs/SCHEDULEISTIC_2_ADMIN_GUIDE.md) | Operating the platform: plans, entitlements, media, health, webhooks, audit |
+
 ## Security
 
 Threat model, tenant-isolation guarantees, and the hardening pass applied to the platform are in
-[`scheduler/docs/03-security.md`](scheduler/docs/03-security.md).
+[`scheduler/docs/03-security.md`](scheduler/docs/03-security.md), updated for 2.0 in
+[`scheduler/docs/SCHEDULEISTIC_2_SECURITY.md`](scheduler/docs/SCHEDULEISTIC_2_SECURITY.md).
 
 ## License
 

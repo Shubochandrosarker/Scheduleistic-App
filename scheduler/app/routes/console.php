@@ -21,3 +21,7 @@ Schedule::command('feeds:poll')->everyFifteenMinutes()->withoutOverlapping();
 
 // Verify pending tenant custom domains via DNS.
 Schedule::command('domains:verify')->everyFiveMinutes()->withoutOverlapping();
+
+// Re-evaluate connected profiles so an expiring token is flagged before it
+// breaks a scheduled publish rather than after.
+Schedule::command('channels:check-health')->hourly()->withoutOverlapping();

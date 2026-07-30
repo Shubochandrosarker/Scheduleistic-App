@@ -54,10 +54,12 @@ class MediaAssetController extends Controller
             );
 
         if ($search = trim((string) ($validated['search'] ?? ''))) {
+            // Explicit ESCAPE clause — see PlannerQuery for why it cannot be
+            // left implicit across SQLite/MySQL/Postgres.
             $escaped = addcslashes($search, '%_\\');
             $query->where(fn ($q) => $q
-                ->where('name', 'like', "%{$escaped}%")
-                ->orWhere('alt_text', 'like', "%{$escaped}%"));
+                ->whereRaw('name LIKE ? ESCAPE ?', ["%{$escaped}%", '\\'])
+                ->orWhereRaw('alt_text LIKE ? ESCAPE ?', ["%{$escaped}%", '\\']));
         }
 
         $assets = $query->latest()->paginate(48)->withQueryString();
