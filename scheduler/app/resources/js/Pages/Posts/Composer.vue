@@ -312,7 +312,7 @@ const ctaLabel = computed(() => {
                         <div class="mb-3 flex items-center gap-2.5">
                             <span
                                 class="size-8 shrink-0 rounded-full"
-                                style="background: linear-gradient(135deg, var(--sc-accent), var(--sc-accent-2))"
+                                style="background: linear-gradient(135deg, var(--sc-accent-2), var(--sc-accent))"
                             ></span>
                             <span class="min-w-0">
                                 <span class="block truncate text-[13px] font-bold text-t1">

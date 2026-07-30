@@ -49,6 +49,10 @@ class PlannerController extends Controller
             'posts'   => $posts,
             'view'    => $request->view(),
             'window'  => ['from' => $from->toIso8601String(), 'to' => $to->toIso8601String()],
+            // The month the grid is *for*. The window starts on the Monday of
+            // the week containing the 1st, which is normally in the previous
+            // month, so the client cannot infer this from the window.
+            'anchor'  => $request->anchor()->toIso8601String(),
             // Echoed back so the client can rebuild its filter state from the
             // URL alone — filters are shareable links, not hidden state.
             'filters' => $request->only([

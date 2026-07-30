@@ -32,8 +32,10 @@ return [
     'colors' => [
         // The dashboard retints itself from these two values, so they are the
         // platform's accent until a tenant sets its own in white-label settings.
-        'primary'   => env('BRAND_PRIMARY', '#4F8DFF'),
-        'secondary' => env('BRAND_SECONDARY', '#22D3EE'),
+        // These match the marketing site's brand-500 and blue, so the product
+        // and scheduleistic.com read as one brand.
+        'primary'   => env('BRAND_PRIMARY', '#6366F1'),
+        'secondary' => env('BRAND_SECONDARY', '#2878D0'),
     ],
 
     'logo'    => env('BRAND_LOGO', null),

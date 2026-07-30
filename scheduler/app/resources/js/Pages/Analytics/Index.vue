@@ -103,7 +103,7 @@ const format = (n) => n.toLocaleString();
                                 class="h-full rounded-full"
                                 :style="{
                                     width: Math.max(2, (e.value / max) * 100) + '%',
-                                    background: 'linear-gradient(90deg, var(--sc-accent), var(--sc-accent-2))',
+                                    background: 'linear-gradient(90deg, var(--sc-accent-2), var(--sc-accent))',
                                 }"
                             ></div>
                         </div>

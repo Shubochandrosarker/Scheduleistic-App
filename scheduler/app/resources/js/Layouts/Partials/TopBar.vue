@@ -145,7 +145,7 @@ const teamInitials = computed(() => initialsOf(currentTeam.value?.name));
                     v-else
                     type="button"
                     class="flex size-9 items-center justify-center rounded-full text-[12px] font-extrabold"
-                    style="background: var(--alt); color: #fff"
+                    style="background: var(--sc-accent-2); color: #fff"
                     aria-label="Account menu"
                 >{{ initials }}</button>
             </template>

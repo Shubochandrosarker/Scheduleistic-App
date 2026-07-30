@@ -67,12 +67,14 @@ const hasErrors = computed(() => (props.post.errors ?? []).length > 0);
             />
 
             <button type="button" class="min-w-0 flex-1 text-left" @click="emit('open', post.id)">
-                <div class="mb-1 flex items-center gap-1.5">
+                <!-- Wraps rather than overflowing: a month cell can be ~150px
+                     wide, which is narrower than "9:00 AM · Scheduled". -->
+                <div class="mb-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
                     <span class="text-[12px] font-bold text-t2">{{ time }}</span>
                     <!-- Status is a dot AND a word: never colour alone. -->
-                    <span class="flex items-center gap-1 text-[12px] font-semibold" :style="{ color: status.color }">
-                        <span class="size-1.5 rounded-full" :style="{ background: status.color }"></span>
-                        {{ status.label }}
+                    <span class="flex min-w-0 items-center gap-1 text-[12px] font-semibold" :style="{ color: status.color }">
+                        <span class="size-1.5 shrink-0 rounded-full" :style="{ background: status.color }"></span>
+                        <span class="truncate">{{ status.label }}</span>
                     </span>
                 </div>
 

@@ -22,6 +22,7 @@ const props = defineProps({
     posts: { type: Array, default: () => [] },
     view: { type: String, default: 'month' },
     window: { type: Object, default: () => ({}) },
+    anchor: { type: String, default: null },
     filters: { type: Object, default: () => ({}) },
     options: { type: Object, default: () => ({}) },
 });
@@ -42,7 +43,10 @@ const selected = ref([]);
 const dragging = ref(null);
 const dropTarget = ref(null);
 
-const anchor = computed(() => new Date(props.window.from ?? Date.now()));
+// The month the grid is for — NOT window.from, which is the Monday of the week
+// containing the 1st and therefore usually in the previous month. Using the
+// window here titled the period wrongly and inverted the in-month shading.
+const anchor = computed(() => new Date(props.anchor ?? props.window.from ?? Date.now()));
 
 const facets = computed(() => [
     {
@@ -107,14 +111,19 @@ const unscheduled = computed(() => props.posts.filter((post) => !post.scheduled_
 /** Six weeks of cells covering the month, Monday-first. */
 const monthCells = computed(() => {
     const start = new Date(props.window.from ?? Date.now());
+    const end = new Date(props.window.to ?? Date.now());
     const cells = [];
 
+    // Whole weeks only: the server's window already starts on a Monday and
+    // ends on a Sunday, so walking it produces a clean 5- or 6-row grid with
+    // no stray trailing cell.
     for (let i = 0; i < 42; i++) {
         const date = new Date(start);
         date.setDate(start.getDate() + i);
-        cells.push(date);
 
-        if (i >= 34 && date > new Date(props.window.to)) break;
+        if (date > end) break;
+
+        cells.push(date);
     }
 
     return cells;
@@ -147,6 +156,10 @@ const periodLabel = computed(() => {
 
     if (props.view === 'week') {
         return `${from.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${to.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    }
+
+    if (props.view === 'agenda') {
+        return `${from.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })} – ${to.toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`;
     }
 
     return anchor.value.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
@@ -263,11 +276,11 @@ const bulkShift = (minutes) => bulk('reschedule', { shift_minutes: minutes, sche
                     </button>
                 </div>
 
-                <div class="flex items-center gap-1.5">
+                <div class="flex min-w-0 flex-wrap items-center gap-1.5">
                     <button type="button" class="sc-btn sc-btn-sm sc-btn-secondary" @click="shiftPeriod(-1)">
                         <SIcon name="chevronLeft" :size="15" label="Previous period" />
                     </button>
-                    <span class="min-w-[150px] text-center text-[14px] font-bold text-t1">{{ periodLabel }}</span>
+                    <span class="min-w-[110px] text-center text-[14px] font-bold text-t1 sm:min-w-[150px]">{{ periodLabel }}</span>
                     <button type="button" class="sc-btn sc-btn-sm sc-btn-secondary" @click="shiftPeriod(1)">
                         <SIcon name="chevronRight" :size="15" label="Next period" />
                     </button>

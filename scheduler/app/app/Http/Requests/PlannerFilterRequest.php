@@ -66,6 +66,21 @@ class PlannerFilterRequest extends FormRequest
     }
 
     /**
+     * The date the view is centred on.
+     *
+     * Distinct from `window()[0]`: a month grid starts on the Monday of the
+     * week containing the 1st, which is usually in the *previous* month. The
+     * client needs the anchor to title the period and to shade in-month days,
+     * and deriving either from the window start gets both wrong.
+     */
+    public function anchor(): Carbon
+    {
+        return $this->filled('from')
+            ? Carbon::parse($this->input('from'))
+            : Carbon::now();
+    }
+
+    /**
      * The date window to load. Views that are inherently bounded (month, week)
      * derive their own window so the payload stays proportional to what is on
      * screen — the audit's P1 finding was that the old page shipped 200 posts
@@ -75,9 +90,7 @@ class PlannerFilterRequest extends FormRequest
      */
     public function window(): array
     {
-        $anchor = $this->filled('from')
-            ? Carbon::parse($this->input('from'))
-            : Carbon::now();
+        $anchor = $this->anchor();
 
         return match ($this->view()) {
             'week'   => [$anchor->copy()->startOfWeek(), $anchor->copy()->endOfWeek()],

@@ -9,10 +9,7 @@ defineProps({
 <template>
     <header class="mb-7 flex flex-wrap items-end justify-between gap-4">
         <div class="min-w-0">
-            <p v-if="eyebrow" class="mb-2 flex items-center gap-2 sc-eyebrow" style="color: var(--sc-accent-text)">
-                <span class="size-1.5 rounded-full" style="background: var(--sc-accent)"></span>
-                {{ eyebrow }}
-            </p>
+            <p v-if="eyebrow" class="sc-kicker mb-2">{{ eyebrow }}</p>
             <h1 class="sc-title">
                 <slot name="title">{{ title }}</slot>
             </h1>
@@ -21,7 +18,7 @@ defineProps({
             </p>
         </div>
 
-        <div v-if="$slots.actions" class="flex shrink-0 flex-wrap items-center gap-2.5">
+        <div v-if="$slots.actions" class="flex min-w-0 flex-wrap items-center gap-2.5">
             <slot name="actions" />
         </div>
     </header>

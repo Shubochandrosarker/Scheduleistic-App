@@ -94,7 +94,7 @@ const initials = (name) => String(name ?? '?')
                 <div class="flex items-start gap-3">
                     <span
                         class="flex size-11 shrink-0 items-center justify-center rounded-xl text-[13px] font-extrabold"
-                        style="background: linear-gradient(135deg, var(--sc-accent), var(--sc-accent-2)); color: var(--on-acc)"
+                        style="background: linear-gradient(135deg, var(--sc-accent-2), var(--sc-accent)); color: var(--on-acc)"
                     >{{ initials(ws.name) }}</span>
 
                     <div class="min-w-0 flex-1">

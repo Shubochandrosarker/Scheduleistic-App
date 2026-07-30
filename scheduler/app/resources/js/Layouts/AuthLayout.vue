@@ -48,8 +48,7 @@ const stats = [
             </Link>
 
             <div class="relative max-w-xl">
-                <p class="sc-eyebrow mb-4 flex items-center gap-2" style="color: var(--sc-accent-text)">
-                    <span class="size-1.5 rounded-full" style="background: var(--sc-accent)"></span>
+                <p class="sc-kicker mb-4">
                     13 networks · one workspace
                 </p>
                 <h2 class="text-[40px] font-extrabold leading-[1.06] tracking-[-0.035em] text-t1 xl:text-[52px]">
