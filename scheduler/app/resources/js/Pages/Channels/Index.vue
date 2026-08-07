@@ -35,6 +35,15 @@ const submitToken = (p) => {
     });
 };
 
+// A channel connects via the first page/location/board/organization the
+// account offers; every other option it could have used instead is listed
+// here so switching never needs a fresh OAuth round-trip.
+const switchAccount = (channel, accountId) => {
+    router.put(route('workspaces.channels.select-account', [props.workspace.id, channel.id]), { account_id: accountId }, {
+        preserveScroll: true,
+    });
+};
+
 const disconnect = (id) => {
     if (confirm('Disconnect this channel?')) {
         useForm({}).delete(route('workspaces.channels.destroy', [props.workspace.id, id]), { preserveScroll: true });
@@ -112,16 +121,33 @@ const connectedCount = computed(() => props.channels.length);
                     <li
                         v-for="c in p.connected"
                         :key="c.id"
-                        class="flex items-center justify-between gap-2 rounded-lg px-2.5 py-2"
+                        class="flex flex-col gap-1.5 rounded-lg px-2.5 py-2"
                         style="background: var(--s2)"
                     >
-                        <span class="min-w-0 truncate text-[12px] text-t2">{{ c.name }}</span>
-                        <button
-                            type="button"
-                            class="shrink-0 text-[11.5px] font-bold transition-opacity hover:opacity-70"
-                            style="color: var(--bad)"
-                            @click="disconnect(c.id)"
-                        >Disconnect</button>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="min-w-0 truncate text-[12px] text-t2">{{ c.name }}</span>
+                            <button
+                                type="button"
+                                class="shrink-0 text-[11.5px] font-bold transition-opacity hover:opacity-70"
+                                style="color: var(--bad)"
+                                @click="disconnect(c.id)"
+                            >Disconnect</button>
+                        </div>
+
+                        <!-- Only rendered when the connect flow found more than one
+                             page/location/board/organization to choose from. -->
+                        <label v-if="(c.meta?.available_accounts?.length ?? 0) > 1" class="text-[11px] text-t4">
+                            Posting to
+                            <select
+                                class="sc-input mt-0.5 !w-full !py-1.5 !text-[11.5px]"
+                                :value="c.selected_account_id"
+                                @change="switchAccount(c, $event.target.value)"
+                            >
+                                <option v-for="opt in c.meta.available_accounts" :key="opt.id" :value="opt.id">
+                                    {{ opt.name }}
+                                </option>
+                            </select>
+                        </label>
                     </li>
                 </ul>
 

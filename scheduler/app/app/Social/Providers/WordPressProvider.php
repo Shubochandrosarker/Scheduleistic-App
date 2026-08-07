@@ -7,6 +7,7 @@ use App\Social\Data\ConnectedAccount;
 use App\Social\Data\PublishPayload;
 use App\Social\Data\PublishResult;
 use App\Social\Exceptions\PublishException;
+use App\Support\SsrfGuard;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Http;
  */
 class WordPressProvider extends AbstractTokenProvider
 {
+    public function __construct(private readonly SsrfGuard $ssrf) {}
+
     public function key(): string
     {
         return 'wordpress';
@@ -58,11 +61,20 @@ class WordPressProvider extends AbstractTokenProvider
             throw new PublishException('WordPress site URL and username are required.', retryable: false);
         }
 
+        // The engine posts directly to a tenant-supplied URL on every
+        // publish; re-checked here (not just at connect time) because DNS
+        // can be re-pointed at a private address after the channel is
+        // saved, and this worker runs inside the network perimeter — the
+        // same guard RSS feed ingestion and outbound webhooks already use.
+        if (! $this->ssrf->isFetchable($site)) {
+            throw new PublishException('WordPress site URL resolves to a blocked address.', retryable: false);
+        }
+
         $response = Http::withBasicAuth($user, $channel->access_token)
             ->post("{$site}/wp-json/wp/v2/posts", [
-                'title'   => mb_substr(strtok($payload->content, "\n"), 0, 120),
+                'title' => mb_substr(strtok($payload->content, "\n"), 0, 120),
                 'content' => $payload->content,
-                'status'  => 'publish',
+                'status' => 'publish',
             ]);
 
         if ($response->failed()) {

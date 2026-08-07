@@ -6,9 +6,10 @@ use App\Models\Channel;
 use App\Models\Workspace;
 use App\Services\UsageService;
 use App\Social\Data\ConnectedAccount;
+use App\Social\Exceptions\PublishException;
+use App\Social\ProviderManager;
 use App\Social\Providers\AbstractOAuthProvider;
 use App\Social\Providers\AbstractTokenProvider;
-use App\Social\ProviderManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -28,16 +29,16 @@ class ChannelController extends Controller
 
         return Inertia::render('Channels/Index', [
             'workspace' => $workspace,
-            'channels'  => $workspace->channels()->latest()->get(),
+            'channels' => $workspace->channels()->latest()->get(),
             'providers' => collect($this->providers->keys())->map(function ($key) {
                 $driver = $this->providers->driver($key);
                 $isToken = $driver instanceof AbstractTokenProvider;
 
                 return [
-                    'key'        => $key,
-                    'label'      => $driver->label(),
-                    'type'       => $isToken ? 'token' : 'oauth',
-                    'fields'     => $isToken ? $driver->fields() : [],
+                    'key' => $key,
+                    'label' => $driver->label(),
+                    'type' => $isToken ? 'token' : 'oauth',
+                    'fields' => $isToken ? $driver->fields() : [],
                     // OAuth providers without credentials can't be connected on this instance.
                     'configured' => $driver instanceof AbstractOAuthProvider ? $driver->isConfigured() : true,
                 ];
@@ -90,10 +91,21 @@ class ChannelController extends Controller
         $workspace = Workspace::findOrFail($request->session()->pull('oauth.workspace'));
         $this->authorizeWorkspace($request, $workspace);
 
-        $account = $this->providers->driver($provider)->exchangeCode(
-            (string) $request->query('code'),
-            route('channels.callback', $provider),
-        );
+        try {
+            $account = $this->providers->driver($provider)->exchangeCode(
+                (string) $request->query('code'),
+                route('channels.callback', $provider),
+            );
+        } catch (PublishException $e) {
+            // Thrown by drivers that resolve a page/location/board/org
+            // during mapAccount() (Facebook, Instagram, Google Business,
+            // Pinterest, LinkedIn Company) when the account has none to
+            // offer — a real, actionable reason to show the user rather
+            // than a raw 500 or a silently half-created channel.
+            return redirect()
+                ->route('workspaces.channels.index', $workspace)
+                ->withErrors(['provider' => $e->getMessage()]);
+        }
 
         $this->storeAccount($workspace, $provider, $account);
 
@@ -133,19 +145,19 @@ class ChannelController extends Controller
     {
         Channel::updateOrCreate(
             [
-                'workspace_id'        => $workspace->id,
-                'provider'            => $provider,
+                'workspace_id' => $workspace->id,
+                'provider' => $provider,
                 'provider_account_id' => $account->providerAccountId,
             ],
             [
-                'name'             => $account->name,
-                'avatar'           => $account->avatar,
-                'access_token'     => $account->accessToken,
-                'refresh_token'    => $account->refreshToken,
+                'name' => $account->name,
+                'avatar' => $account->avatar,
+                'access_token' => $account->accessToken,
+                'refresh_token' => $account->refreshToken,
                 'token_expires_at' => $account->expiresAt,
-                'scopes'           => $account->scopes,
-                'meta'             => $account->meta,
-                'status'           => 'connected',
+                'scopes' => $account->scopes,
+                'meta' => $account->meta,
+                'status' => 'connected',
             ],
         );
     }
@@ -158,6 +170,28 @@ class ChannelController extends Controller
         $channel->delete();
 
         return back()->with('status', 'channel-disconnected');
+    }
+
+    /**
+     * Switch a channel to a different one of the pages/locations/boards/
+     * organizations resolved when it was connected — no fresh OAuth
+     * round-trip needed, since a driver that offers a choice already
+     * fetched everything a switch could need at connect time.
+     */
+    public function selectAccount(Request $request, Workspace $workspace, Channel $channel): RedirectResponse
+    {
+        $this->authorizeWorkspace($request, $workspace);
+        abort_unless($channel->workspace_id === $workspace->id, 403);
+
+        $validated = $request->validate(['account_id' => ['required', 'string', 'max:255']]);
+
+        $driver = $this->providers->driver($channel->provider);
+
+        if ($driver instanceof AbstractOAuthProvider) {
+            $driver->selectAccount($channel, $validated['account_id']);
+        }
+
+        return back()->with('status', 'channel-account-switched');
     }
 
     protected function authorizeWorkspace(Request $request, Workspace $workspace): void
