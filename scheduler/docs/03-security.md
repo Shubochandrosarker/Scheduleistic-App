@@ -42,8 +42,15 @@ the system design these controls sit on top of.
    never blocked.
 4. **AI cost-abuse mitigation** — `/ai/generate` is throttled (20/min) and now
    requires an organization context.
-5. **Impersonation hardening** — nested impersonation is rejected, and every
-   impersonation is written to the audit log (admin id, org id, owner id).
+5. **Impersonation hardening** — password confirmation required to start;
+   nested impersonation and impersonating another platform admin are
+   rejected; start/stop/expiry each write to the append-only `audit_logs`
+   table (admin id, org id, owner id); the session ID is regenerated on both
+   start and stop; a demoted or deleted admin cannot be restored on stop; and
+   a session force-ends after `ImpersonationService::MAX_MINUTES`. This
+   covers the impersonation lifecycle itself — it does not yet mean every
+   write made *during* an impersonated session is individually audited (see
+   the in-app banner wording, which is scoped to match).
 
 ## Brain Gateway integration (optional, disabled by default)
 

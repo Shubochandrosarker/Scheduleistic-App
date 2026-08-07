@@ -20,9 +20,9 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
-use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\TlsController;
+use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceMemberController;
 use Illuminate\Foundation\Application;
@@ -204,6 +204,11 @@ Route::middleware([
     Route::middleware('platform.admin')->prefix('admin')->name('admin.')->group(function () {
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
         Route::post('/organizations/{organization}/suspend', [OrganizationController::class, 'suspend'])->name('organizations.suspend');
-        Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])->name('organizations.impersonate');
+
+        // Impersonation is a loaded gun: require a fresh password confirmation
+        // in addition to platform.admin before it can start.
+        Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])
+            ->middleware('password.confirm')
+            ->name('organizations.impersonate');
     });
 });

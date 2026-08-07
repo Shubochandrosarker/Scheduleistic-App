@@ -140,7 +140,7 @@ const logout = () => {
                     class="flex flex-wrap items-center justify-between gap-3 border-b px-6 py-2.5 text-[12.5px] font-semibold"
                     style="background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.3); color: var(--warn)"
                 >
-                    <span>You are impersonating this organization. Everything you do is audit-logged.</span>
+                    <span>You are impersonating this organization. This session is audit-logged and time-limited.</span>
                     <Link
                         :href="route('admin.stop-impersonating')"
                         method="post"

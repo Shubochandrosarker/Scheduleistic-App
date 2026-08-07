@@ -27,9 +27,9 @@ class PlanService
      */
     protected const LEGACY_FEATURE_MAP = [
         'client_approval' => 'approvals',
-        'white_label'     => 'white_label',
-        'ai_captions'     => 'ai_captions',
-        'ai_agents'       => 'ai_agents',
+        'white_label' => 'white_label',
+        'ai_captions' => 'ai_captions',
+        'ai_agents' => 'ai_agents',
     ];
 
     /** @return array<string, mixed> */
@@ -51,7 +51,7 @@ class PlanService
     /** @return array<string, int> */
     public function limits(Team $team): array
     {
-        $limits    = $this->plan($team)['limits'] ?? [];
+        $limits = $this->plan($team)['limits'] ?? [];
         $overrides = $this->overrides($team)['limits'] ?? [];
 
         foreach ($overrides as $key => $value) {
@@ -96,7 +96,7 @@ class PlanService
     public function capabilities(Team $team): array
     {
         $capabilities = $this->plan($team)['capabilities'] ?? [];
-        $granted      = $this->overrides($team)['capabilities'] ?? [];
+        $granted = $this->overrides($team)['capabilities'] ?? [];
 
         foreach ($granted as $key => $value) {
             // Overrides grant, never revoke.
@@ -139,15 +139,36 @@ class PlanService
     // --- Legacy surface -------------------------------------------------
 
     /**
-     * Legacy boolean feature map. Derived from capabilities so there is one
-     * source of truth.
+     * Legacy boolean feature map for a team, including its entitlement
+     * overrides. Derived from capabilities so there is one source of truth.
      *
      * @return array<string, mixed>
      */
     public function features(Team $team): array
     {
-        $capabilities = $this->capabilities($team);
+        return $this->legacyFeatureMap($this->capabilities($team));
+    }
 
+    /**
+     * The same legacy boolean feature map, but for a plan's raw catalog
+     * definition rather than a specific team — no entitlement overrides
+     * applied. For describing what a plan offers in the abstract, e.g. a
+     * pricing/comparison table showing every plan side by side.
+     *
+     * @return array<string, mixed>
+     */
+    public function planFeatures(string $planKey): array
+    {
+        $capabilities = config("plans.{$planKey}.capabilities") ?? config('plans.free.capabilities', []);
+
+        return $this->legacyFeatureMap($capabilities);
+    }
+
+    /** @param array<string, bool> $capabilities
+     * @return array<string, mixed>
+     */
+    protected function legacyFeatureMap(array $capabilities): array
+    {
         $features = [];
 
         foreach (self::LEGACY_FEATURE_MAP as $legacy => $capability) {
@@ -156,8 +177,8 @@ class PlanService
 
         $features['analytics'] = match (true) {
             ! empty($capabilities['analytics_advanced']) => 'advanced',
-            ! empty($capabilities['analytics_basic'])    => 'basic',
-            default                                      => 'none',
+            ! empty($capabilities['analytics_basic']) => 'basic',
+            default => 'none',
         };
 
         return $features;

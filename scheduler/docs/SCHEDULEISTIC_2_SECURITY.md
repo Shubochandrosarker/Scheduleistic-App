@@ -38,8 +38,14 @@ Inherited from Jetstream/Fortify and unchanged: two-factor authentication,
 password confirmation for sensitive actions, browser-session invalidation,
 email verification, rate-limited login.
 
-**Impersonation** shows a permanent banner and is audit-logged. The stop action
-is available to the impersonated session.
+**Impersonation** requires password confirmation to start, shows a permanent
+banner, and is audit-logged: start, stop, and timeout-expiry each write an
+append-only `audit_logs` row, the session ID is regenerated on start and
+stop, a demoted/deleted admin cannot be restored on stop, and a session
+force-ends after an hour if nobody clicks "Stop impersonating." The stop
+action is available to the impersonated session. This covers the
+impersonation lifecycle itself, not every individual write made during the
+session — the banner is worded to match.
 
 ---
 

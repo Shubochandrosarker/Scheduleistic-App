@@ -126,11 +126,15 @@ plans around a feature that is not there:
 ## 7. Adding a network
 
 1. Write the driver implementing `App\Social\Contracts\SocialProvider`.
-2. Register it in `App\Social\ProviderManager::$drivers`.
+2. Register it in `App\Social\ProviderManager::$drivers` — this alone makes it
+   appear on the channel-connect screen. `config/scheduleistic.php`'s
+   `providers` array is a separate, cosmetic label list read only by
+   `MediaValidator::label()`; it does not gate the connect UI and does not
+   need to be touched for a network to work.
 3. Add a block to `config/provider_capabilities.php` — including `notes` for
    anything it cannot do.
 4. Add presentation metadata to `resources/js/networks.js`.
-5. Add it to `config/scheduleistic.php` `providers` if it should appear in the
-   connect UI.
+5. Optionally add a friendlier fallback label to `config/scheduleistic.php`
+   `providers` — cosmetic only, purely for validator messages.
 
 No composer, planner or validator change is required.

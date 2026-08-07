@@ -146,4 +146,25 @@ class PlanCapabilityTest extends TestCase
         $this->assertSame('Agency', $this->plans()->upgradePlanFor('white_label'));
         $this->assertSame('Solo', $this->plans()->upgradePlanFor('ai_captions'));
     }
+
+    /**
+     * The billing comparison table describes each plan's own catalog
+     * definition, not the viewing team's entitlement overrides — this is
+     * what `planFeatures()` exists for, as distinct from `features(Team)`.
+     */
+    public function test_plan_features_reflects_the_plans_own_capabilities_not_a_teams_overrides(): void
+    {
+        $this->assertFalse($this->plans()->planFeatures('free')['ai_captions']);
+        $this->assertTrue($this->plans()->planFeatures('solo')['ai_captions']);
+        $this->assertTrue($this->plans()->planFeatures('agency')['white_label']);
+        $this->assertSame('advanced', $this->plans()->planFeatures('scale')['analytics']);
+    }
+
+    public function test_plan_features_falls_back_to_free_for_an_unknown_plan(): void
+    {
+        $this->assertSame(
+            $this->plans()->planFeatures('free'),
+            $this->plans()->planFeatures('a-plan-that-was-deleted'),
+        );
+    }
 }
