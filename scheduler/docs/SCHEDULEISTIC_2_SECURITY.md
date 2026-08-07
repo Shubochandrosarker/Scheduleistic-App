@@ -47,6 +47,18 @@ action is available to the impersonated session. This covers the
 impersonation lifecycle itself, not every individual write made during the
 session — the banner is worded to match.
 
+On top of the lifecycle controls, a fixed set of high-risk actions is
+blocked outright for the duration of an impersonated session: billing
+checkout/portal, password/profile/2FA/passkey changes, revoking other
+devices' sessions, and deleting the account, the organization, or a
+workspace. Ordinary content management (campaigns, ideas, media, channels)
+stays available — blocking that too would defeat the point of impersonating
+someone to fix their account. A break-glass escape hatch exists for the
+tenant-explicitly-asked-for-it case: supplying `break_glass_reason` lets the
+action through, but writes its own `impersonation.break_glass` audit row
+(admin, impersonated user, route, and reason), so the override is
+exceptional and traceable rather than silent.
+
 ---
 
 ## 3. Authorization

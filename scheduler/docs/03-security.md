@@ -51,6 +51,19 @@ the system design these controls sit on top of.
    covers the impersonation lifecycle itself — it does not yet mean every
    write made *during* an impersonated session is individually audited (see
    the in-app banner wording, which is scoped to match).
+6. **High-risk action blocking during impersonation** —
+   `BlockHighRiskActionsDuringImpersonation` (registered globally, since
+   several blocked routes are Fortify/Jetstream vendor routes) denies billing
+   checkout/portal, password/profile/2FA/passkey changes, other-device
+   session revocation, and account/organization/workspace deletion outright
+   while a session carries an impersonation marker — ordinary content
+   management (campaigns, ideas, media, channels) is left untouched, since
+   that is the entire point of impersonating someone to fix their account. A
+   break-glass override exists for the rare legitimate case: submitting
+   `break_glass_reason` lets the request through but writes an
+   `impersonation.break_glass` audit row naming the admin, the impersonated
+   user, the route, and the stated reason — the override is exceptional and
+   traceable, never silent.
 
 ## Brain Gateway integration (optional, disabled by default)
 

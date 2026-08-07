@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\BlockHighRiskActionsDuringImpersonation;
 use App\Http\Middleware\EnforceImpersonationLifetime;
 use App\Http\Middleware\EnsureCapability;
 use App\Http\Middleware\EnsureOrganizationActive;
@@ -30,6 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 // Must run before Inertia shares `isImpersonating` — an expired
                 // session should never render a page still claiming to be one.
                 EnforceImpersonationLifetime::class,
+                // Runs after the lifetime check so a just-auto-stopped session
+                // is never mistakenly treated as still impersonating here.
+                BlockHighRiskActionsDuringImpersonation::class,
                 HandleInertiaRequests::class,
                 AddLinkHeadersForPreloadedAssets::class,
             ],
