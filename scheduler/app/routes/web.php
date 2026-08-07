@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\OrganizationDetailController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\MediaAssetController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostHistoryController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\TlsController;
@@ -88,6 +90,13 @@ Route::middleware([
         Route::patch('/planner/posts/{post}/schedule', [PlannerController::class, 'reschedule'])->name('planner.posts.reschedule');
         Route::post('/planner/bulk', [PlannerController::class, 'bulk'])->name('planner.bulk');
 
+        // ── History ──────────────────────────────────────────────────────
+        // The permanent, unbounded record of every past publish attempt —
+        // complementary to the planner, which only ever shows what's upcoming
+        // or a recent window, never the whole log.
+        Route::get('/history', [PostHistoryController::class, 'index'])->name('history.index');
+        Route::get('/history/export', [PostHistoryController::class, 'export'])->name('history.export');
+
         // ── Campaigns, pillars, tags ─────────────────────────────────────
         Route::middleware('capability:campaigns')->group(function () {
             Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
@@ -128,6 +137,7 @@ Route::middleware([
         // ── Channel health ───────────────────────────────────────────────
         Route::get('/social-profiles/health', [ChannelHealthController::class, 'index'])->name('channels.health');
         Route::post('/social-profiles/health/refresh', [ChannelHealthController::class, 'refresh'])->name('channels.health.refresh');
+        Route::get('/social-profiles/health/{channel}/history', [ChannelHealthController::class, 'history'])->name('channels.health.history');
 
         // Approval workflow.
         Route::post('/posts/{post}/submit', [ApprovalController::class, 'submit'])->name('posts.submit');
@@ -246,5 +256,8 @@ Route::middleware([
         Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
         Route::post('/users/{user}/reset-link', [AdminUserController::class, 'sendResetLink'])->name('users.reset-link');
         Route::post('/users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->name('users.revoke-sessions');
+
+        // Read-only — no update or delete route exists for the append-only audit log.
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 });

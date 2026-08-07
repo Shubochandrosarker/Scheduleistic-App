@@ -29,6 +29,7 @@ export const NAV_GROUPS = [
         label: 'Plan',
         items: [
             { label: 'Calendar', route: 'planner.index', match: 'planner.*', icon: 'calendar' },
+            { label: 'History', route: 'history.index', match: 'history.*', icon: 'clock' },
             { label: 'Campaigns', route: 'campaigns.index', match: 'campaigns.*', icon: 'megaphone', capability: 'campaigns' },
             { label: 'Ideas', route: 'ideas.index', match: 'ideas.*', icon: 'lightbulb', capability: 'ideas' },
         ],
@@ -81,6 +82,7 @@ export const NAV_GROUPS = [
             { label: 'Overview', route: 'admin.overview', match: 'admin.overview', icon: 'home', admin: true },
             { label: 'Organizations', route: 'admin.organizations.index', match: 'admin.organizations.*', icon: 'building', admin: true },
             { label: 'Users', route: 'admin.users.index', match: 'admin.users.*', icon: 'users', admin: true },
+            { label: 'Audit log', route: 'admin.audit-logs.index', match: 'admin.audit-logs.*', icon: 'shield', admin: true },
         ],
     },
 ];

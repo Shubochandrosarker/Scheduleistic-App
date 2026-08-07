@@ -97,6 +97,7 @@ const refresh = () => router.post(route('channels.health.refresh'), {}, { preser
                             :href="route('workspaces.channels.index', channel.workspace.id)"
                             class="sc-btn sc-btn-sm sc-btn-primary"
                         >Reconnect</a>
+                        <a :href="route('channels.health.history', channel.id)" class="sc-btn sc-btn-sm sc-btn-secondary">History</a>
                     </div>
                 </article>
             </div>
