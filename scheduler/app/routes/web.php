@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\OrganizationDetailController;
 use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiController;
@@ -217,6 +218,7 @@ Route::middleware([
         Route::get('/', [AdminOverviewController::class, 'index'])->name('overview');
 
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+        Route::get('/organizations/{organization}', [OrganizationDetailController::class, 'show'])->name('organizations.show');
         Route::post('/organizations/{organization}/suspend', [OrganizationController::class, 'suspend'])->name('organizations.suspend');
 
         // Impersonation is a loaded gun: require a fresh password confirmation
@@ -224,6 +226,21 @@ Route::middleware([
         Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])
             ->middleware('password.confirm')
             ->name('organizations.impersonate');
+
+        // Plan overrides bypass Stripe entirely, so they get the same
+        // password-confirmation bar as impersonation.
+        Route::middleware('password.confirm')->group(function () {
+            Route::post('/organizations/{organization}/plan-override', [OrganizationDetailController::class, 'updatePlanOverride'])
+                ->name('organizations.plan-override.update');
+            Route::delete('/organizations/{organization}/plan-override', [OrganizationDetailController::class, 'removePlanOverride'])
+                ->name('organizations.plan-override.destroy');
+        });
+        Route::post('/organizations/{organization}/resync-plan', [OrganizationDetailController::class, 'resyncPlan'])
+            ->name('organizations.resync-plan');
+        Route::post('/organizations/{organization}/entitlements', [OrganizationDetailController::class, 'grantEntitlement'])
+            ->name('organizations.entitlements.grant');
+        Route::delete('/organizations/{organization}/entitlements', [OrganizationDetailController::class, 'clearEntitlement'])
+            ->name('organizations.entitlements.clear');
 
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
