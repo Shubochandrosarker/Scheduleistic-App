@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ApprovalController;
@@ -212,6 +214,8 @@ Route::middleware([
 
     // Super-admin control plane.
     Route::middleware('platform.admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminOverviewController::class, 'index'])->name('overview');
+
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
         Route::post('/organizations/{organization}/suspend', [OrganizationController::class, 'suspend'])->name('organizations.suspend');
 
@@ -220,5 +224,10 @@ Route::middleware([
         Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])
             ->middleware('password.confirm')
             ->name('organizations.impersonate');
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
+        Route::post('/users/{user}/reset-link', [AdminUserController::class, 'sendResetLink'])->name('users.reset-link');
+        Route::post('/users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->name('users.revoke-sessions');
     });
 });

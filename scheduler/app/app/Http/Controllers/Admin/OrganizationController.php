@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\OrganizationIndexRequest;
 use App\Models\AuditLog;
 use App\Models\Team;
+use App\Services\Admin\AdminOrganizationQuery;
 use App\Services\ImpersonationService;
+use App\Services\PlanService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,29 +19,35 @@ use Inertia\Response;
  */
 class OrganizationController extends Controller
 {
-    public function __construct(private readonly ImpersonationService $impersonation) {}
+    public function __construct(
+        private readonly ImpersonationService $impersonation,
+        private readonly AdminOrganizationQuery $query,
+        private readonly PlanService $plans,
+    ) {}
 
-    public function index(Request $request): Response
+    public function index(OrganizationIndexRequest $request): Response
     {
+        $organizations = $this->query->paginate($request);
+
         return Inertia::render('Admin/Organizations', [
-            'organizations' => Team::query()
-                ->withCount('workspaces')
-                ->with('owner:id,name,email')
-                ->latest()
-                ->limit(500)
-                ->get()
-                ->map(fn (Team $t) => [
-                    'id' => $t->id,
-                    'name' => $t->name,
-                    'plan' => $t->plan,
-                    'owner' => $t->owner?->only('name', 'email'),
-                    'workspaces' => $t->workspaces_count,
-                    'suspended' => $t->isSuspended(),
-                    'subscribed' => $t->subscribed('default'),
-                ]),
+            'organizations' => $organizations->through(fn (Team $t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'base_plan' => $this->plans->basePlanKey($t),
+                'effective_plan' => $this->plans->planKey($t),
+                'has_override' => $this->plans->hasActiveOverride($t),
+                'owner' => $t->owner?->only(['id', 'name', 'email']),
+                'workspaces' => $t->workspaces_count,
+                'suspended' => $t->isSuspended(),
+                'subscribed' => $t->subscribed('default'),
+                'created_at' => $t->created_at,
+            ]),
+            'filters' => $request->validated(),
+            'planOptions' => collect(config('plans'))->map(fn ($p, $key) => ['key' => $key, 'name' => $p['name']])->values(),
             'stats' => [
                 'organizations' => Team::count(),
                 'subscribed' => Team::whereHas('subscriptions', fn ($q) => $q->where('stripe_status', 'active'))->count(),
+                'suspended' => Team::whereNotNull('suspended_at')->count(),
             ],
         ]);
     }

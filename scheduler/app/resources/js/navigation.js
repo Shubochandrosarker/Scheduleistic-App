@@ -78,7 +78,9 @@ export const NAV_GROUPS = [
         label: 'Platform admin',
         admin: true,
         items: [
-            { label: 'Organizations', route: 'admin.organizations.index', match: 'admin.*', icon: 'building', admin: true },
+            { label: 'Overview', route: 'admin.overview', match: 'admin.overview', icon: 'home', admin: true },
+            { label: 'Organizations', route: 'admin.organizations.index', match: 'admin.organizations.*', icon: 'building', admin: true },
+            { label: 'Users', route: 'admin.users.index', match: 'admin.users.*', icon: 'users', admin: true },
         ],
     },
 ];
