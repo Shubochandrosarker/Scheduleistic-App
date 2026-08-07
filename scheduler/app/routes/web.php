@@ -24,6 +24,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostHistoryController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\TlsController;
@@ -184,6 +185,12 @@ Route::middleware([
         Route::delete('/workspaces/{workspace}/feeds/{feed}', [FeedController::class, 'destroy'])->name('workspaces.feeds.destroy');
 
     }); // end org.active group
+
+    // Settings hub — one landing page linking every settings destination
+    // below, instead of each only existing as a scattered sidebar entry.
+    // Deliberately outside org.active, matching billing/notifications: a
+    // suspended organization must still be able to find its way to billing.
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
 
     // Billing (Stripe / Cashier) — per organization.
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');

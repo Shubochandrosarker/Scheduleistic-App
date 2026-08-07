@@ -27,6 +27,8 @@ class BrainGatewayClient
     /** This product's identity on the gateway (principal.productId). */
     private const PRODUCT = 'scheduleistic';
 
+    public function __construct(private readonly PlanService $plans) {}
+
     public function isFake(): bool
     {
         return (bool) config('ai.brain_gateway.fake')
@@ -183,10 +185,16 @@ class BrainGatewayClient
         ];
     }
 
-    /** Maps Scheduleistic's plan keys onto the gateway's tier vocabulary (free/starter/pro/agency). */
+    /**
+     * Maps Scheduleistic's plan keys onto the gateway's tier vocabulary
+     * (free/starter/pro/agency). Uses the *effective* plan — a
+     * platform-admin override must raise (or lower) what the gateway grants
+     * too, or the override would be silently inert for anything routed
+     * through this integration.
+     */
     private function tierFor(Team $team): string
     {
-        return match ($team->plan) {
+        return match ($this->plans->planKey($team)) {
             'free' => 'free',
             'pro' => 'pro',
             'agency', 'scale' => 'agency',

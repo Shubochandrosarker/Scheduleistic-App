@@ -140,6 +140,28 @@ class BrainGatewayClientTest extends TestCase
         });
     }
 
+    public function test_tier_reflects_an_active_plan_override_not_the_base_plan(): void
+    {
+        $this->configureGateway();
+
+        Http::fake(['*' => Http::response(['chunks' => [], 'confidence' => 0])]);
+
+        $team = User::factory()->withPersonalTeam()->create()->currentTeam;
+        $team->update([
+            'plan' => 'free',
+            'plan_override' => 'agency',
+            'plan_override_expires_at' => now()->addWeek(),
+        ]);
+
+        app(BrainGatewayClient::class)->searchForTeam($team, 'topic');
+
+        Http::assertSent(function ($request) {
+            $principal = json_decode($this->b64UrlDecode($request->header('X-WPistic-Principal')[0]), true);
+
+            return $principal['tier'] === 'agency';
+        });
+    }
+
     private function b64UrlDecode(string $s): string
     {
         $s = strtr($s, '-_', '+/');

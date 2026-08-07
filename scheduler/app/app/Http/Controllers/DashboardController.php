@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Channel;
 use App\Models\Post;
+use App\Services\PlanService;
 use App\Services\UsageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,11 +13,14 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly UsageService $usage) {}
+    public function __construct(
+        private readonly UsageService $usage,
+        private readonly PlanService $plans,
+    ) {}
 
     public function index(Request $request): Response
     {
-        $team         = $request->user()->currentTeam;
+        $team = $request->user()->currentTeam;
         $workspaceIds = $team->workspaces()->pluck('id');
 
         $upcoming = Post::whereIn('workspace_id', $workspaceIds)
@@ -27,25 +31,29 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->map(fn (Post $p) => [
-                'id'           => $p->id,
-                'content'      => Str::limit($p->content, 80),
-                'workspace'    => $p->workspace?->name,
+                'id' => $p->id,
+                'content' => Str::limit($p->content, 80),
+                'workspace' => $p->workspace?->name,
                 // ISO so the dashboard can format it in the viewer's locale.
                 'scheduled_at' => optional($p->scheduled_at)->toIso8601String(),
             ]);
 
         return Inertia::render('Dashboard', [
             'stats' => [
-                'workspaces'      => $workspaceIds->count(),
-                'channels'        => Channel::whereIn('workspace_id', $workspaceIds)->count(),
-                'scheduled'       => Post::whereIn('workspace_id', $workspaceIds)
+                'workspaces' => $workspaceIds->count(),
+                'channels' => Channel::whereIn('workspace_id', $workspaceIds)->count(),
+                'scheduled' => Post::whereIn('workspace_id', $workspaceIds)
                     ->where('status', Post::STATUS_SCHEDULED)->count(),
                 'published_month' => Post::whereIn('workspace_id', $workspaceIds)
                     ->where('status', Post::STATUS_PUBLISHED)
                     ->where('updated_at', '>=', now()->startOfMonth())->count(),
             ],
-            'plan'     => $team->plan,
-            'usage'    => $this->usage->snapshot($team),
+            // Effective plan, not the raw Stripe-synced column — a
+            // platform-admin override must show here too, not just on the
+            // billing page, since this is the screen every owner sees first.
+            'plan' => $this->plans->planKey($team),
+            'hasActiveOverride' => $this->plans->hasActiveOverride($team),
+            'usage' => $this->usage->snapshot($team),
             'upcoming' => $upcoming,
         ]);
     }

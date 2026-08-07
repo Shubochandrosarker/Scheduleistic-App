@@ -62,4 +62,53 @@ class BillingTest extends TestCase
             ->post(route('billing.checkout', 'pro'))
             ->assertForbidden();
     }
+
+    public function test_the_current_plan_reflects_an_active_override_not_the_base_plan(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $user->currentTeam->update([
+            'plan' => 'free',
+            'plan_override' => 'agency',
+            'plan_override_expires_at' => now()->addMonth(),
+            'plan_override_reason' => 'Compensation for an incident.',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('billing.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('currentPlan', 'agency')
+                ->where('basePlan', 'free')
+                ->where('hasActiveOverride', true)
+                ->where('override.reason', 'Compensation for an incident.'));
+    }
+
+    public function test_the_current_plan_matches_the_base_plan_without_an_override(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $user->currentTeam->update(['plan' => 'pro']);
+
+        $this->actingAs($user)
+            ->get(route('billing.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('currentPlan', 'pro')
+                ->where('basePlan', 'pro')
+                ->where('hasActiveOverride', false)
+                ->where('override', null));
+    }
+
+    public function test_an_expired_override_no_longer_affects_the_displayed_plan(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $user->currentTeam->update([
+            'plan' => 'free',
+            'plan_override' => 'agency',
+            'plan_override_expires_at' => now()->subDay(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('billing.index'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('currentPlan', 'free')
+                ->where('hasActiveOverride', false));
+    }
 }

@@ -68,11 +68,14 @@ export const NAV_GROUPS = [
     {
         label: 'Account',
         items: [
+            // The hub linking every destination below in one place, so none
+            // of them has to be found by knowing it lives in this sidebar.
+            { label: 'Settings', route: 'settings.index', match: 'settings.*', icon: 'settings' },
             { label: 'Branding', route: 'branding.edit', match: 'branding.*', icon: 'palette' },
             { label: 'Billing', route: 'billing.index', match: 'billing.*', icon: 'card' },
             { label: 'API tokens', route: 'api-tokens.index', match: 'api-tokens.*', icon: 'code' },
             { label: 'Webhooks', route: 'webhooks.index', match: 'webhooks.*', icon: 'bolt', capability: 'webhooks' },
-            { label: 'Settings', route: 'profile.show', match: 'profile.*', icon: 'settings' },
+            { label: 'Profile & security', route: 'profile.show', match: 'profile.*', icon: 'lock' },
         ],
     },
     {

@@ -10,6 +10,9 @@ import MeterBar from '@/Components/UI/MeterBar.vue';
 
 const props = defineProps({
     currentPlan: String,
+    basePlan: String,
+    hasActiveOverride: Boolean,
+    override: Object,
     plans: Array,
     usage: Object,
     subscribed: Boolean,
@@ -48,9 +51,14 @@ const cards = computed(() => props.plans.map((p, i) => {
 
 const meterTones = { monthly_posts: 'accent', workspaces: 'alt', channels: 'cyan', members: 'ok' };
 
-const planLabel = computed(
-    () => (props.currentPlan ? props.currentPlan.charAt(0).toUpperCase() + props.currentPlan.slice(1) : '—'),
-);
+const titleCase = (v) => (v ? v.charAt(0).toUpperCase() + v.slice(1) : '—');
+
+const planLabel = computed(() => titleCase(props.currentPlan));
+const basePlanLabel = computed(() => titleCase(props.basePlan));
+
+const overrideExpiry = computed(() => (props.override?.expires_at
+    ? new Date(props.override.expires_at).toLocaleDateString(undefined, { dateStyle: 'medium' })
+    : null));
 </script>
 
 <template>
@@ -66,6 +74,22 @@ const planLabel = computed(
                 <SButton v-if="subscribed" @click="portal">Manage subscription</SButton>
             </template>
         </PageHeader>
+
+        <!-- A platform-admin override always shows alongside the base plan,
+             so a temporary adjustment never reads as a silent Stripe change. -->
+        <div
+            v-if="hasActiveOverride"
+            class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border px-4 py-3 text-[12.5px] font-semibold"
+            style="background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.3); color: var(--alt)"
+        >
+            <span>
+                Your plan has been adjusted to <strong>{{ planLabel }}</strong> by the platform
+                (your billed plan is <strong>{{ basePlanLabel }}</strong>).
+                <template v-if="override?.reason">Reason: {{ override.reason }}.</template>
+                <template v-if="overrideExpiry">Expires {{ overrideExpiry }}.</template>
+                <template v-else>No expiration set.</template>
+            </span>
+        </div>
 
         <div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <article

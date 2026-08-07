@@ -32,4 +32,24 @@ class DashboardTest extends TestCase
         $this->get('/')->assertOk()
             ->assertInertia(fn (AssertableInertia $page) => $page->component('Welcome'));
     }
+
+    public function test_the_dashboard_and_shared_sidebar_prop_both_show_the_effective_plan(): void
+    {
+        $user = User::factory()->withPersonalTeam()->create();
+        $user->currentTeam->update([
+            // Base plan stays 'free'; an active override should be what both
+            // the dashboard's own prop and the globally-shared sidebar prop
+            // report — a platform-admin override must be visible everywhere,
+            // not just on the billing page.
+            'plan_override' => 'scale',
+            'plan_override_expires_at' => now()->addWeek(),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('dashboard'))
+            ->assertInertia(fn (AssertableInertia $page) => $page
+                ->where('plan', 'scale')
+                ->where('hasActiveOverride', true)
+                ->where('planName', 'Scale'));
+    }
 }

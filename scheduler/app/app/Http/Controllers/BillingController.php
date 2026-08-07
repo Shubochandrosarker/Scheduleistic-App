@@ -26,8 +26,23 @@ class BillingController extends Controller
             $team->syncPlanFromSubscription();
         }
 
+        // The comparison table and "current plan" badge must reflect what the
+        // organization is actually entitled to right now — the effective
+        // plan — not the raw Stripe-synced base plan, which a platform-admin
+        // override can temporarily supersede. Base and effective are both
+        // sent so the page can be explicit when a platform admin has changed
+        // what the tenant sees, rather than letting it look like a silent
+        // Stripe change.
+        $hasOverride = $this->plans->hasActiveOverride($team);
+
         return Inertia::render('Billing/Index', [
-            'currentPlan' => $team->plan,
+            'currentPlan' => $this->plans->planKey($team),
+            'basePlan' => $this->plans->basePlanKey($team),
+            'hasActiveOverride' => $hasOverride,
+            'override' => $hasOverride ? [
+                'expires_at' => $team->plan_override_expires_at,
+                'reason' => $team->plan_override_reason,
+            ] : null,
             'plans' => collect(config('plans'))->map(fn ($p, $key) => [
                 'key' => $key,
                 'name' => $p['name'],

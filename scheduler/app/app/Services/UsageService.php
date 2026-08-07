@@ -19,13 +19,17 @@ class UsageService
         $workspaceIds = $team->workspaces()->pluck('id');
 
         return match ($key) {
-            'workspaces'    => $workspaceIds->count(),
-            'channels'      => Channel::whereIn('workspace_id', $workspaceIds)->count(),
-            'members'       => $team->allUsers()->count(),
+            'workspaces' => $workspaceIds->count(),
+            'channels' => Channel::whereIn('workspace_id', $workspaceIds)->count(),
+            // A pending invitation reserves a seat just as much as an
+            // accepted one — otherwise an organization could send unlimited
+            // invitations and blow past its limit the moment they're all
+            // accepted at once.
+            'members' => $team->allUsers()->count() + $team->teamInvitations()->count(),
             'monthly_posts' => Post::whereIn('workspace_id', $workspaceIds)
                 ->where('created_at', '>=', now()->startOfMonth())
                 ->count(),
-            default         => 0,
+            default => 0,
         };
     }
 

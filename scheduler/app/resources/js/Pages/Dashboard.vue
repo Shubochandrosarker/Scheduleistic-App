@@ -13,6 +13,7 @@ import EmptyState from '@/Components/UI/EmptyState.vue';
 const props = defineProps({
     stats: Object,
     plan: String,
+    hasActiveOverride: Boolean,
     usage: Object,
     upcoming: Array,
 });
@@ -156,6 +157,7 @@ const slotTime = (iso) => (iso
             <!-- Plan usage -->
             <SCard title="Plan usage" :subtitle="`${planLabel} plan, this cycle.`">
                 <template #actions>
+                    <SBadge v-if="hasActiveOverride" tone="alt">Admin-adjusted</SBadge>
                     <Link :href="route('billing.index')" class="text-[12.5px] font-bold" style="color: var(--sc-accent-text)">
                         Manage →
                     </Link>
