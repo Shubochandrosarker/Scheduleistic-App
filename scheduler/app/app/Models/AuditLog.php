@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\AuditContextRedactor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -48,13 +49,13 @@ class AuditLog extends Model
         $user = auth()->user();
 
         return static::create([
-            'team_id'      => $teamId ?? $user?->currentTeam?->id,
-            'user_id'      => $userId ?? $user?->id,
-            'action'       => $action,
+            'team_id' => $teamId ?? $user?->currentTeam?->id,
+            'user_id' => $userId ?? $user?->id,
+            'action' => $action,
             'subject_type' => $subject ? $subject::class : null,
-            'subject_id'   => $subject?->getKey(),
-            'context'      => $context ?: null,
-            'ip'           => request()?->ip(),
+            'subject_id' => $subject?->getKey(),
+            'context' => $context ? app(AuditContextRedactor::class)->redact($context) : null,
+            'ip' => request()?->ip(),
         ]);
     }
 }

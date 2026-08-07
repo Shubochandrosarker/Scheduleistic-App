@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Laravel\Cashier\Billable;
 use Laravel\Jetstream\Events\TeamCreated;
@@ -18,9 +19,10 @@ use Laravel\Jetstream\Team as JetstreamTeam;
  */
 class Team extends JetstreamTeam
 {
+    use Billable;
+
     /** @use HasFactory<TeamFactory> */
     use HasFactory;
-    use Billable;
 
     /**
      * The attributes that are mass assignable.
@@ -39,6 +41,10 @@ class Team extends JetstreamTeam
         'custom_domain_verified_at',
         'custom_domain_token',
         'suspended_at',
+        'plan_override',
+        'plan_override_expires_at',
+        'plan_override_reason',
+        'plan_override_set_by',
     ];
 
     /**
@@ -60,12 +66,13 @@ class Team extends JetstreamTeam
     protected function casts(): array
     {
         return [
-            'personal_team'             => 'boolean',
-            'branding'                  => 'array',
-            'entitlements'              => 'array',
-            'onboarded_at'              => 'datetime',
+            'personal_team' => 'boolean',
+            'branding' => 'array',
+            'entitlements' => 'array',
+            'onboarded_at' => 'datetime',
             'custom_domain_verified_at' => 'datetime',
-            'suspended_at'              => 'datetime',
+            'suspended_at' => 'datetime',
+            'plan_override_expires_at' => 'datetime',
         ];
     }
 
@@ -73,6 +80,12 @@ class Team extends JetstreamTeam
     public function workspaces(): HasMany
     {
         return $this->hasMany(Workspace::class);
+    }
+
+    /** The platform admin who granted the current plan override, if any. */
+    public function planOverrideSetBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'plan_override_set_by');
     }
 
     public function isSuspended(): bool
@@ -124,12 +137,12 @@ class Team extends JetstreamTeam
     public function brandingConfig(): array
     {
         $defaults = [
-            'name'       => config('scheduleistic.name'),
-            'tagline'    => config('scheduleistic.tagline'),
+            'name' => config('scheduleistic.name'),
+            'tagline' => config('scheduleistic.tagline'),
             'powered_by' => config('scheduleistic.powered_by'),
-            'primary'    => config('scheduleistic.colors.primary'),
-            'secondary'  => config('scheduleistic.colors.secondary'),
-            'logo'       => config('scheduleistic.logo'),
+            'primary' => config('scheduleistic.colors.primary'),
+            'secondary' => config('scheduleistic.colors.secondary'),
+            'logo' => config('scheduleistic.logo'),
         ];
 
         return array_merge($defaults, array_filter($this->branding ?? []));

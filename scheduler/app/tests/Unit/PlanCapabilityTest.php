@@ -167,4 +167,71 @@ class PlanCapabilityTest extends TestCase
             $this->plans()->planFeatures('a-plan-that-was-deleted'),
         );
     }
+
+    // --- Effective plan (admin override layer) -----------------------------
+
+    public function test_a_valid_non_expired_override_wins_over_the_base_plan(): void
+    {
+        $team = $this->team('free');
+        $team->plan_override = 'scale';
+
+        $this->assertTrue($this->plans()->hasActiveOverride($team));
+        $this->assertSame('scale', $this->plans()->planKey($team));
+        $this->assertSame('free', $this->plans()->basePlanKey($team));
+        $this->assertTrue($this->plans()->can($team, 'competitor_tracking'));
+    }
+
+    public function test_an_expired_override_no_longer_affects_access(): void
+    {
+        $team = $this->team('free');
+        $team->plan_override = 'scale';
+        $team->plan_override_expires_at = now()->subDay();
+
+        $this->assertFalse($this->plans()->hasActiveOverride($team));
+        $this->assertSame('free', $this->plans()->planKey($team));
+        $this->assertFalse($this->plans()->can($team, 'competitor_tracking'));
+    }
+
+    public function test_a_permanent_override_has_no_expiry_to_check(): void
+    {
+        $team = $this->team('free');
+        $team->plan_override = 'agency';
+        $team->plan_override_expires_at = null;
+
+        $this->assertTrue($this->plans()->hasActiveOverride($team));
+        $this->assertSame('agency', $this->plans()->planKey($team));
+    }
+
+    public function test_an_override_pointing_at_an_unknown_plan_is_rejected(): void
+    {
+        $team = $this->team('free');
+        $team->plan_override = 'a-plan-that-was-deleted';
+
+        $this->assertFalse($this->plans()->hasActiveOverride($team));
+        $this->assertSame('free', $this->plans()->planKey($team));
+    }
+
+    public function test_removing_the_override_restores_the_base_plan(): void
+    {
+        $team = $this->team('pro');
+        $team->plan_override = 'scale';
+        $this->assertSame('scale', $this->plans()->planKey($team));
+
+        $team->plan_override = null;
+
+        $this->assertFalse($this->plans()->hasActiveOverride($team));
+        $this->assertSame('pro', $this->plans()->planKey($team));
+    }
+
+    public function test_capability_and_limit_resolution_go_through_the_effective_plan(): void
+    {
+        $team = $this->team('free');
+        $team->plan_override = 'agency';
+
+        // capabilities()/limits()/can() all resolve through plan()/planKey()
+        // internally, so the override applies everywhere without a separate
+        // check at each call site.
+        $this->assertTrue($this->plans()->can($team, 'white_label'));
+        $this->assertSame(config('plans.agency.limits.workspaces'), $this->plans()->limit($team, 'workspaces'));
+    }
 }

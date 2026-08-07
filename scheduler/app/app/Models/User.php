@@ -5,8 +5,12 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
@@ -29,6 +33,10 @@ class User extends Authenticatable
      *
      * Note: `is_platform_admin` is deliberately NOT mass-assignable — it is a
      * privilege flag set only via seeders/console to prevent escalation.
+     * Suspension fields are fillable (matching `teams.suspended_at`'s
+     * precedent) because the risk there is authorization, not escalation —
+     * every write goes through the `platform.admin`-gated admin service with
+     * an explicit array, never raw request input.
      *
      * @var array<int, string>
      */
@@ -36,6 +44,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'suspended_at',
+        'suspension_reason',
+        'suspended_by',
     ];
 
     /**
@@ -70,11 +81,23 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_platform_admin' => 'boolean',
+            'suspended_at' => 'datetime',
         ];
     }
 
+    /** The platform admin who suspended this account, if any. */
+    public function suspendedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'suspended_by');
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
+    }
+
     /** Workspaces this user is individually assigned to (incl. client portal). */
-    public function workspaces(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function workspaces(): BelongsToMany
     {
         return $this->belongsToMany(Workspace::class, 'workspace_user')
             ->withPivot('role')
@@ -82,7 +105,7 @@ class User extends Authenticatable
     }
 
     /** Per-event notification delivery preferences. */
-    public function notificationPreferences(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function notificationPreferences(): HasMany
     {
         return $this->hasMany(NotificationPreference::class);
     }
@@ -96,11 +119,11 @@ class User extends Authenticatable
      * which is why it lives on the model instead of being re-derived per
      * controller.
      *
-     * @return \Illuminate\Support\Collection<int, int>
+     * @return Collection<int, int>
      */
-    public function visibleWorkspaceIds(): \Illuminate\Support\Collection
+    public function visibleWorkspaceIds(): Collection
     {
-        $owned    = $this->currentTeam?->workspaces()->pluck('id') ?? collect();
+        $owned = $this->currentTeam?->workspaces()->pluck('id') ?? collect();
         $assigned = $this->workspaces()->pluck('workspaces.id');
 
         return $owned->merge($assigned)->unique()->values();

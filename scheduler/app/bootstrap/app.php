@@ -4,6 +4,7 @@ use App\Http\Middleware\EnforceImpersonationLifetime;
 use App\Http\Middleware\EnsureCapability;
 use App\Http\Middleware\EnsureOrganizationActive;
 use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureUserActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\ResolveTenantDomain;
 use Illuminate\Foundation\Application;
@@ -40,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'platform.admin' => EnsurePlatformAdmin::class,
             'org.active' => EnsureOrganizationActive::class,
+            'user.active' => EnsureUserActive::class,
             'capability' => EnsureCapability::class,
         ]);
     })

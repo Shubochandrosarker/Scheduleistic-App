@@ -7,14 +7,24 @@ use App\Models\Team;
 /**
  * Resolves what an organization is entitled to.
  *
- * Entitlements come from three layers, applied in order:
+ * Entitlements come from these layers, applied in order:
  *
- *  1. The plan definition in config/plans.php (limits + capabilities).
- *  2. Per-organization overrides stored on `teams.entitlements` — used to
- *     grandfather legacy customers and to configure Enterprise accounts.
- *     Overrides only ever *raise* a limit or *grant* a capability, so a plan
- *     change can never silently strip something a customer already had.
- *  3. Nothing else. No caller compares plan names; everything asks can().
+ *  1. The *base* plan — `teams.plan`, synchronized from the live Cashier
+ *     subscription by `Team::syncPlanFromSubscription()`. This is Stripe's
+ *     truth and nothing here ever writes to it.
+ *  2. A platform-admin *plan override* (`teams.plan_override` +
+ *     `plan_override_expires_at`) layered on top: a valid, non-expired
+ *     override wins over the base plan entirely. This is the one and only
+ *     place that decides the *effective* plan — `plan()`/`planKey()` — so no
+ *     other call site ever needs to know an override exists. An expired or
+ *     unknown override stops affecting access automatically, the moment
+ *     something asks; nothing depends on a scheduled cleanup job.
+ *  3. Per-organization entitlement overrides stored on `teams.entitlements`
+ *     — used to grandfather legacy customers and to configure Enterprise
+ *     accounts. These only ever *raise* a limit or *grant* a capability, so
+ *     a plan change can never silently strip something a customer already
+ *     had.
+ *  4. Nothing else. No caller compares plan names; everything asks can().
  */
 class PlanService
 {
@@ -32,18 +42,44 @@ class PlanService
         'ai_agents' => 'ai_agents',
     ];
 
-    /** @return array<string, mixed> */
+    // --- Effective plan ---------------------------------------------------
+
+    /** The organization's effective plan definition — override if active, else base. */
     public function plan(Team $team): array
     {
-        $plans = config('plans');
-
-        return $plans[$team->plan] ?? $plans['free'];
+        return config('plans')[$this->planKey($team)];
     }
 
-    /** The plan key the organization is on, falling back to free. */
+    /** The effective plan key: a valid, non-expired override wins over the base plan. */
     public function planKey(Team $team): string
     {
+        if ($this->hasActiveOverride($team)) {
+            return (string) $team->plan_override;
+        }
+
+        return $this->basePlanKey($team);
+    }
+
+    /** The Stripe-synchronized base plan key, ignoring any admin override. */
+    public function basePlanKey(Team $team): string
+    {
         return isset(config('plans')[$team->plan]) ? (string) $team->plan : 'free';
+    }
+
+    /**
+     * Whether the organization currently has a live plan override — set,
+     * pointing at a plan that still exists, and not expired. An override
+     * whose plan was later removed from the catalog, or whose expiry has
+     * passed, is simply inert: it is never deleted for you, it just stops
+     * being effective the instant this is asked.
+     */
+    public function hasActiveOverride(Team $team): bool
+    {
+        if (! $team->plan_override || ! isset(config('plans')[$team->plan_override])) {
+            return false;
+        }
+
+        return ! $team->plan_override_expires_at || $team->plan_override_expires_at->isFuture();
     }
 
     // --- Limits ---------------------------------------------------------

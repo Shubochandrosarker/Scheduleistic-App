@@ -46,6 +46,10 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
+    // A suspended individual account (distinct from a suspended
+    // organization) loses the whole authenticated app; only logout, which
+    // Fortify registers outside this group, stays reachable.
+    'user.active',
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -197,8 +201,14 @@ Route::middleware([
         Route::delete('/webhooks/{endpoint}', [WebhookEndpointController::class, 'destroy'])->name('webhooks.destroy');
     });
 
-    // Stop impersonating (available to the impersonated session).
-    Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
+    // Stop impersonating (available to the impersonated session). Exempt from
+    // user.active: if the impersonated account is suspended mid-session (by
+    // another admin, or the same one), the admin must still be able to get
+    // back to their own account rather than being locked out by the very
+    // suspension they may have just applied.
+    Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])
+        ->withoutMiddleware('user.active')
+        ->name('admin.stop-impersonating');
 
     // Super-admin control plane.
     Route::middleware('platform.admin')->prefix('admin')->name('admin.')->group(function () {
