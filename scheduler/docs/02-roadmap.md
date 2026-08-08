@@ -100,14 +100,49 @@ own brand knowledge, and report real usage back to a shared dashboard.
 
 ---
 
+## Phase 8 — Platform admin control plane, schedule history & platform activation ✅
+**Delivered:** the operator-facing control plane the product never had, a real "schedule
+history" feature, and the code-level fixes blocking every social network from actually working.
+Full writeup, including architecture decisions, the route/authorization inventory, and known
+follow-ups: [`CONTROL_PLANE_ACTIVATION_AUDIT.md`](CONTROL_PLANE_ACTIVATION_AUDIT.md) (the audit
+and plan) and [`CONTROL_PLANE_DELIVERY_REPORT.md`](CONTROL_PLANE_DELIVERY_REPORT.md) (the report).
+
+- Impersonation hardening: password confirmation, real audit-log rows (start/stop/expiry/
+  break-glass), session regeneration, a maximum lifetime, and a fixed set of billing/credential/
+  destructive actions blocked outright while impersonating
+- Platform admin surface: an overview dashboard, paginated/filterable user and organization
+  management, an organization detail page (plan overrides, entitlement grants, subscription and
+  branding summary), and a read-only audit-log viewer — all additive to `users`/`teams` via two
+  new migrations, nothing renamed or restructured
+- Schedule history, all three forms: the admin audit-log viewer above, a user-facing paginated
+  post/publish history with CSV export and per-campaign/tag breakdowns, and a channel
+  health timeline showing resolved (not just open) connection problems
+- Owner-side gaps closed: a settings hub linking every settings destination, the base-vs-
+  effective plan bug fixed everywhere it was silently wrong (sidebar, dashboard, an external AI
+  integration), and server-side seat-limit enforcement at invite time
+- All 13 social provider drivers fixed at the code level: TikTok's OAuth parameter bug, token
+  auto-renewal wired into the hourly health check, Meta's long-lived-token exchange for
+  Facebook/Instagram/Threads, real page/location/board/organization resolution for five
+  networks that previously picked blindly or never resolved one at all, media wiring for three
+  of the eight text-only drivers, an SSRF guard on WordPress publishing, and new test coverage
+  for the three networks (Facebook, Instagram, Threads) that had none
+
 ## What's next (genuinely open)
 
 Nothing on this list blocks running the product; it's the difference between "feature-complete"
 and "polished for scale":
 
-- **Go-live operational work** — real OAuth app credentials per network, a live Stripe account,
-  and a production deploy. See [`04-build-deploy-maintain-guide.md`](04-build-deploy-maintain-guide.md)
+- **Go-live operational work** — real OAuth app credentials and the underlying platform
+  approvals per network (Meta App Review + Business Verification, Google OAuth verification,
+  a TikTok content-posting audit — see `04-build-deploy-maintain-guide.md` §5.1 for real
+  timelines), a live Stripe account, and a production deploy. The code-level blockers are
+  resolved as of Phase 8 above; what remains is external and cannot be sped up by more code.
+  See [`04-build-deploy-maintain-guide.md`](04-build-deploy-maintain-guide.md)
   and [`../app/DEPLOYMENT_HOSTINGER.md`](../app/DEPLOYMENT_HOSTINGER.md).
+- **Follow-up platform-activation work** (Phase B, deliberately deferred as feature-sized, not
+  bug-sized): a real YouTube resumable video upload, Instagram carousel/video support, media
+  wiring for the remaining five text-only drivers, and a reconnect-free account switcher for
+  Facebook/Instagram (Google Business, Pinterest, and LinkedIn Company already have one).
 - **GDPR data export/delete** — noted as an open follow-up in `03-security.md` for organizations
   operating in the EU.
 - **Edge-level rate limiting (WAF)** — app-level throttles exist; nothing sits in front of them

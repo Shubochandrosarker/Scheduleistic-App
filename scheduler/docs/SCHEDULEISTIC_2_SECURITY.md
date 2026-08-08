@@ -38,8 +38,26 @@ Inherited from Jetstream/Fortify and unchanged: two-factor authentication,
 password confirmation for sensitive actions, browser-session invalidation,
 email verification, rate-limited login.
 
-**Impersonation** shows a permanent banner and is audit-logged. The stop action
-is available to the impersonated session.
+**Impersonation** requires password confirmation to start, shows a permanent
+banner, and is audit-logged: start, stop, and timeout-expiry each write an
+append-only `audit_logs` row, the session ID is regenerated on start and
+stop, a demoted/deleted admin cannot be restored on stop, and a session
+force-ends after an hour if nobody clicks "Stop impersonating." The stop
+action is available to the impersonated session. This covers the
+impersonation lifecycle itself, not every individual write made during the
+session — the banner is worded to match.
+
+On top of the lifecycle controls, a fixed set of high-risk actions is
+blocked outright for the duration of an impersonated session: billing
+checkout/portal, password/profile/2FA/passkey changes, revoking other
+devices' sessions, and deleting the account, the organization, or a
+workspace. Ordinary content management (campaigns, ideas, media, channels)
+stays available — blocking that too would defeat the point of impersonating
+someone to fix their account. A break-glass escape hatch exists for the
+tenant-explicitly-asked-for-it case: supplying `break_glass_reason` lets the
+action through, but writes its own `impersonation.break_glass` audit row
+(admin, impersonated user, route, and reason), so the override is
+exceptional and traceable rather than silent.
 
 ---
 

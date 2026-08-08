@@ -21,7 +21,6 @@ export const NETWORKS = {
     mastodon: { label: 'Mastodon', short: 'Ma', color: '#A78BFA', limit: 500, ratio: '1 / 1', crop: '1080×1080' },
     medium: { label: 'Medium', short: 'Md', color: '#F5F7FF', limit: 9000, ratio: '2 / 1', crop: '1400×700' },
     wordpress: { label: 'WordPress', short: 'W', color: '#8E78F2', limit: 9000, ratio: '16 / 9', crop: '1200×675' },
-    website: { label: 'Website feed', short: 'Web', color: '#8B92A9', limit: 9000, ratio: '16 / 9', crop: '1200×675' },
     fake: { label: 'Demo channel', short: 'Dm', color: '#8B92A9', limit: 5000, ratio: '1 / 1', crop: '1080×1080' },
 };
 

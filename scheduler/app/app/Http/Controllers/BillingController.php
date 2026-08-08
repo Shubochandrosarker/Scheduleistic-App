@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PlanService;
 use App\Services\UsageService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -9,7 +10,10 @@ use Inertia\Response;
 
 class BillingController extends Controller
 {
-    public function __construct(private readonly UsageService $usage) {}
+    public function __construct(
+        private readonly UsageService $usage,
+        private readonly PlanService $plans,
+    ) {}
 
     /** Plan overview: current plan, usage snapshot, and upgrade options. */
     public function index(Request $request): Response
@@ -22,17 +26,35 @@ class BillingController extends Controller
             $team->syncPlanFromSubscription();
         }
 
+        // The comparison table and "current plan" badge must reflect what the
+        // organization is actually entitled to right now — the effective
+        // plan — not the raw Stripe-synced base plan, which a platform-admin
+        // override can temporarily supersede. Base and effective are both
+        // sent so the page can be explicit when a platform admin has changed
+        // what the tenant sees, rather than letting it look like a silent
+        // Stripe change.
+        $hasOverride = $this->plans->hasActiveOverride($team);
+
         return Inertia::render('Billing/Index', [
-            'currentPlan' => $team->plan,
-            'plans'       => collect(config('plans'))->map(fn ($p, $key) => [
-                'key'      => $key,
-                'name'     => $p['name'],
-                'price'    => $p['price'] ?? 0,
-                'limits'   => $p['limits'],
-                'features' => $p['features'] ?? [],
+            'currentPlan' => $this->plans->planKey($team),
+            'basePlan' => $this->plans->basePlanKey($team),
+            'hasActiveOverride' => $hasOverride,
+            'override' => $hasOverride ? [
+                'expires_at' => $team->plan_override_expires_at,
+                'reason' => $team->plan_override_reason,
+            ] : null,
+            'plans' => collect(config('plans'))->map(fn ($p, $key) => [
+                'key' => $key,
+                'name' => $p['name'],
+                'price' => $p['price'] ?? 0,
+                'limits' => $p['limits'],
+                // Each plan's own capabilities, not this team's — a comparison
+                // table describes what every tier offers, not what entitlement
+                // overrides happen to apply to the team viewing it.
+                'features' => $this->plans->planFeatures($key),
             ])->values(),
-            'usage'        => $this->usage->snapshot($team),
-            'subscribed'   => $team->subscribed('default'),
+            'usage' => $this->usage->snapshot($team),
+            'subscribed' => $team->subscribed('default'),
         ]);
     }
 
@@ -46,11 +68,19 @@ class BillingController extends Controller
 
         $team = $request->user()->currentTeam;
 
+        // Cashier's newSubscription() would otherwise create a second
+        // "default" subscription for a team that already has one active.
+        if ($team->subscribed('default')) {
+            return back()->withErrors([
+                'plan' => 'Your organization already has an active subscription. Manage it from the billing portal instead.',
+            ]);
+        }
+
         return $team
             ->newSubscription('default', $priceId)
             ->checkout([
                 'success_url' => route('billing.index').'?checkout=success',
-                'cancel_url'  => route('billing.index').'?checkout=cancelled',
+                'cancel_url' => route('billing.index').'?checkout=cancelled',
             ]);
     }
 

@@ -1,8 +1,17 @@
 <?php
 
+use App\Http\Middleware\BlockHighRiskActionsDuringImpersonation;
+use App\Http\Middleware\EnforceImpersonationLifetime;
+use App\Http\Middleware\EnsureCapability;
+use App\Http\Middleware\EnsureOrganizationActive;
+use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureUserActive;
+use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\ResolveTenantDomain;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,11 +25,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(
             prepend: [
                 // Resolve white-label tenant by custom domain before sharing branding.
-                \App\Http\Middleware\ResolveTenantDomain::class,
+                ResolveTenantDomain::class,
             ],
             append: [
-                \App\Http\Middleware\HandleInertiaRequests::class,
-                \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+                // Must run before Inertia shares `isImpersonating` — an expired
+                // session should never render a page still claiming to be one.
+                EnforceImpersonationLifetime::class,
+                // Runs after the lifetime check so a just-auto-stopped session
+                // is never mistakenly treated as still impersonating here.
+                BlockHighRiskActionsDuringImpersonation::class,
+                HandleInertiaRequests::class,
+                AddLinkHeadersForPreloadedAssets::class,
             ],
         );
 
@@ -28,9 +43,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->alias([
-            'platform.admin' => \App\Http\Middleware\EnsurePlatformAdmin::class,
-            'org.active'     => \App\Http\Middleware\EnsureOrganizationActive::class,
-            'capability'     => \App\Http\Middleware\EnsureCapability::class,
+            'platform.admin' => EnsurePlatformAdmin::class,
+            'org.active' => EnsureOrganizationActive::class,
+            'user.active' => EnsureUserActive::class,
+            'capability' => EnsureCapability::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

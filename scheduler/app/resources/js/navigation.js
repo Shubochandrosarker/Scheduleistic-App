@@ -29,6 +29,7 @@ export const NAV_GROUPS = [
         label: 'Plan',
         items: [
             { label: 'Calendar', route: 'planner.index', match: 'planner.*', icon: 'calendar' },
+            { label: 'History', route: 'history.index', match: 'history.*', icon: 'clock' },
             { label: 'Campaigns', route: 'campaigns.index', match: 'campaigns.*', icon: 'megaphone', capability: 'campaigns' },
             { label: 'Ideas', route: 'ideas.index', match: 'ideas.*', icon: 'lightbulb', capability: 'ideas' },
         ],
@@ -67,18 +68,24 @@ export const NAV_GROUPS = [
     {
         label: 'Account',
         items: [
+            // The hub linking every destination below in one place, so none
+            // of them has to be found by knowing it lives in this sidebar.
+            { label: 'Settings', route: 'settings.index', match: 'settings.*', icon: 'settings' },
             { label: 'Branding', route: 'branding.edit', match: 'branding.*', icon: 'palette' },
             { label: 'Billing', route: 'billing.index', match: 'billing.*', icon: 'card' },
             { label: 'API tokens', route: 'api-tokens.index', match: 'api-tokens.*', icon: 'code' },
             { label: 'Webhooks', route: 'webhooks.index', match: 'webhooks.*', icon: 'bolt', capability: 'webhooks' },
-            { label: 'Settings', route: 'profile.show', match: 'profile.*', icon: 'settings' },
+            { label: 'Profile & security', route: 'profile.show', match: 'profile.*', icon: 'lock' },
         ],
     },
     {
         label: 'Platform admin',
         admin: true,
         items: [
-            { label: 'Organizations', route: 'admin.organizations.index', match: 'admin.*', icon: 'building', admin: true },
+            { label: 'Overview', route: 'admin.overview', match: 'admin.overview', icon: 'home', admin: true },
+            { label: 'Organizations', route: 'admin.organizations.index', match: 'admin.organizations.*', icon: 'building', admin: true },
+            { label: 'Users', route: 'admin.users.index', match: 'admin.users.*', icon: 'users', admin: true },
+            { label: 'Audit log', route: 'admin.audit-logs.index', match: 'admin.audit-logs.*', icon: 'shield', admin: true },
         ],
     },
 ];

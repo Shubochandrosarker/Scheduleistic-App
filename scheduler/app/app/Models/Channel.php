@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Channel extends Model
 {
     use HasFactory;
+
+    protected $appends = ['selected_account_id'];
 
     protected $fillable = [
         'workspace_id',
@@ -51,12 +54,12 @@ class Channel extends Model
     protected function casts(): array
     {
         return [
-            'access_token'     => 'encrypted',
-            'refresh_token'    => 'encrypted',
+            'access_token' => 'encrypted',
+            'refresh_token' => 'encrypted',
             'token_expires_at' => 'datetime',
-            'scopes'               => 'array',
-            'meta'                 => 'array',
-            'last_published_at'    => 'datetime',
+            'scopes' => 'array',
+            'meta' => 'array',
+            'last_published_at' => 'datetime',
             'last_metrics_sync_at' => 'datetime',
             'last_health_check_at' => 'datetime',
         ];
@@ -82,5 +85,23 @@ class Channel extends Model
     public function canPublish(): bool
     {
         return ! in_array($this->health_state, ChannelHealthEvent::BLOCKING_STATES, true);
+    }
+
+    /**
+     * Which id in `meta['available_accounts']` is the active selection, so
+     * the channel-settings switcher can pre-select it. `provider_account_id`
+     * isn't always the right key: Google Business and Pinterest deliberately
+     * keep it a stable per-connection identity across a location/board
+     * switch (so reconnecting the same account never creates a duplicate
+     * channel row), leaving the *selected resource* in its own meta key.
+     */
+    protected function selectedAccountId(): Attribute
+    {
+        return Attribute::get(fn () => match ($this->provider) {
+            'google_business' => $this->meta['location_name'] ?? null,
+            'pinterest' => $this->meta['board_id'] ?? null,
+            'linkedin_company' => $this->meta['organization_id'] ?? null,
+            default => $this->provider_account_id,
+        });
     }
 }

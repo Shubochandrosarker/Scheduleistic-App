@@ -1,6 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\OrganizationController;
+use App\Http\Controllers\Admin\OrganizationDetailController;
+use App\Http\Controllers\Admin\OverviewController as AdminOverviewController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\ApprovalController;
@@ -19,10 +23,12 @@ use App\Http\Controllers\MediaAssetController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlannerController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostHistoryController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\TagController;
-use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\TlsController;
+use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\WorkspaceController;
 use App\Http\Controllers\WorkspaceMemberController;
 use Illuminate\Foundation\Application;
@@ -46,6 +52,10 @@ Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
+    // A suspended individual account (distinct from a suspended
+    // organization) loses the whole authenticated app; only logout, which
+    // Fortify registers outside this group, stays reachable.
+    'user.active',
 ])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
@@ -62,6 +72,7 @@ Route::middleware([
         Route::get('/workspaces/{workspace}/channels', [ChannelController::class, 'index'])->name('workspaces.channels.index');
         Route::get('/workspaces/{workspace}/channels/connect/{provider}', [ChannelController::class, 'connect'])->name('workspaces.channels.connect');
         Route::post('/workspaces/{workspace}/channels/token/{provider}', [ChannelController::class, 'storeToken'])->name('workspaces.channels.token');
+        Route::put('/workspaces/{workspace}/channels/{channel}/select-account', [ChannelController::class, 'selectAccount'])->name('workspaces.channels.select-account');
         Route::delete('/workspaces/{workspace}/channels/{channel}', [ChannelController::class, 'destroy'])->name('workspaces.channels.destroy');
 
         // OAuth callback (provider redirects here).
@@ -80,6 +91,13 @@ Route::middleware([
         Route::get('/planner/posts/{post}', [PlannerController::class, 'show'])->name('planner.posts.show');
         Route::patch('/planner/posts/{post}/schedule', [PlannerController::class, 'reschedule'])->name('planner.posts.reschedule');
         Route::post('/planner/bulk', [PlannerController::class, 'bulk'])->name('planner.bulk');
+
+        // ── History ──────────────────────────────────────────────────────
+        // The permanent, unbounded record of every past publish attempt —
+        // complementary to the planner, which only ever shows what's upcoming
+        // or a recent window, never the whole log.
+        Route::get('/history', [PostHistoryController::class, 'index'])->name('history.index');
+        Route::get('/history/export', [PostHistoryController::class, 'export'])->name('history.export');
 
         // ── Campaigns, pillars, tags ─────────────────────────────────────
         Route::middleware('capability:campaigns')->group(function () {
@@ -121,6 +139,7 @@ Route::middleware([
         // ── Channel health ───────────────────────────────────────────────
         Route::get('/social-profiles/health', [ChannelHealthController::class, 'index'])->name('channels.health');
         Route::post('/social-profiles/health/refresh', [ChannelHealthController::class, 'refresh'])->name('channels.health.refresh');
+        Route::get('/social-profiles/health/{channel}/history', [ChannelHealthController::class, 'history'])->name('channels.health.history');
 
         // Approval workflow.
         Route::post('/posts/{post}/submit', [ApprovalController::class, 'submit'])->name('posts.submit');
@@ -168,6 +187,12 @@ Route::middleware([
 
     }); // end org.active group
 
+    // Settings hub — one landing page linking every settings destination
+    // below, instead of each only existing as a scattered sidebar entry.
+    // Deliberately outside org.active, matching billing/notifications: a
+    // suspended organization must still be able to find its way to billing.
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+
     // Billing (Stripe / Cashier) — per organization.
     Route::get('/billing', [BillingController::class, 'index'])->name('billing.index');
     Route::post('/billing/checkout/{plan}', [BillingController::class, 'checkout'])->name('billing.checkout');
@@ -197,13 +222,50 @@ Route::middleware([
         Route::delete('/webhooks/{endpoint}', [WebhookEndpointController::class, 'destroy'])->name('webhooks.destroy');
     });
 
-    // Stop impersonating (available to the impersonated session).
-    Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])->name('admin.stop-impersonating');
+    // Stop impersonating (available to the impersonated session). Exempt from
+    // user.active: if the impersonated account is suspended mid-session (by
+    // another admin, or the same one), the admin must still be able to get
+    // back to their own account rather than being locked out by the very
+    // suspension they may have just applied.
+    Route::post('/admin/stop-impersonating', [OrganizationController::class, 'stopImpersonating'])
+        ->withoutMiddleware('user.active')
+        ->name('admin.stop-impersonating');
 
     // Super-admin control plane.
     Route::middleware('platform.admin')->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/', [AdminOverviewController::class, 'index'])->name('overview');
+
         Route::get('/organizations', [OrganizationController::class, 'index'])->name('organizations.index');
+        Route::get('/organizations/{organization}', [OrganizationDetailController::class, 'show'])->name('organizations.show');
         Route::post('/organizations/{organization}/suspend', [OrganizationController::class, 'suspend'])->name('organizations.suspend');
-        Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])->name('organizations.impersonate');
+
+        // Impersonation is a loaded gun: require a fresh password confirmation
+        // in addition to platform.admin before it can start.
+        Route::post('/organizations/{organization}/impersonate', [OrganizationController::class, 'impersonate'])
+            ->middleware('password.confirm')
+            ->name('organizations.impersonate');
+
+        // Plan overrides bypass Stripe entirely, so they get the same
+        // password-confirmation bar as impersonation.
+        Route::middleware('password.confirm')->group(function () {
+            Route::post('/organizations/{organization}/plan-override', [OrganizationDetailController::class, 'updatePlanOverride'])
+                ->name('organizations.plan-override.update');
+            Route::delete('/organizations/{organization}/plan-override', [OrganizationDetailController::class, 'removePlanOverride'])
+                ->name('organizations.plan-override.destroy');
+        });
+        Route::post('/organizations/{organization}/resync-plan', [OrganizationDetailController::class, 'resyncPlan'])
+            ->name('organizations.resync-plan');
+        Route::post('/organizations/{organization}/entitlements', [OrganizationDetailController::class, 'grantEntitlement'])
+            ->name('organizations.entitlements.grant');
+        Route::delete('/organizations/{organization}/entitlements', [OrganizationDetailController::class, 'clearEntitlement'])
+            ->name('organizations.entitlements.clear');
+
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::post('/users/{user}/suspend', [AdminUserController::class, 'suspend'])->name('users.suspend');
+        Route::post('/users/{user}/reset-link', [AdminUserController::class, 'sendResetLink'])->name('users.reset-link');
+        Route::post('/users/{user}/revoke-sessions', [AdminUserController::class, 'revokeSessions'])->name('users.revoke-sessions');
+
+        // Read-only — no update or delete route exists for the append-only audit log.
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     });
 });

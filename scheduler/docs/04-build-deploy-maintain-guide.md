@@ -276,28 +276,65 @@ https://app.yourbrand.com/channels/callback/{provider}
 
 ### 5.1 Per-network credentials (start these early — approvals take time)
 
+**The timelines below are real, not a same-day signup for every network.** An
+earlier version of this guide understated this; plan the launch date around
+the slowest network you actually need, not the fastest.
+
 - **LinkedIn** — developer.linkedin.com → create app → Products: "Share on
   LinkedIn" + "Sign In". Copy Client ID/Secret to `LINKEDIN_CLIENT_ID/SECRET`.
+  No app review required for these scopes at normal volume — the fastest of
+  the group, typically same-day.
 - **Meta (Facebook, Instagram, Threads)** — developers.facebook.com → create a
   Business app → add Facebook Login, Instagram Graph, Threads API. One app
-  covers all three. Set `FACEBOOK_*` (and Threads uses the same Meta app).
+  covers all three (`config/services.php` shares one client id/secret across
+  them by default). **This is the slowest network to get production-ready:**
+  publishing to Pages requires **Meta App Review** for `pages_manage_posts`,
+  `business_management`, and (for Instagram/Threads) `instagram_content_publish`
+  — a submission with screencasts of the real use case, reviewed over days to
+  weeks, often with a rejection-and-resubmit cycle. Instagram and Threads
+  content publishing *also* require **Meta Business Verification** (documents
+  proving the business is real), a separate, similarly multi-week process.
+  Budget several weeks end-to-end, not a launch-week task.
 - **Google (YouTube, Business Profile)** — console.cloud.google.com → OAuth
-  consent screen + credentials → enable YouTube Data API / Business Profile API.
-- **TikTok** — developers.tiktok.com → app with Content Posting API.
-- **Pinterest** — developers.pinterest.com → app with `pins:write`.
-- **Mastodon / Bluesky / Medium / WordPress** — token/app-password based; users
-  paste credentials in the connect UI (no platform app needed from you).
+  consent screen + credentials → enable YouTube Data API / Business Profile
+  API. Business Profile API access additionally requires a separate Google
+  approval/allow-listing request beyond just enabling the API — Google does
+  not grant it to every project automatically. An **unverified** OAuth
+  consent screen caps at 100 test users and shows real customers an
+  "unverified app" warning; going to production needs Google's own OAuth
+  verification process, which is more involved for sensitive scopes like
+  `business.manage` and `youtube.upload` (expect a review, not instant
+  approval).
+- **TikTok** — developers.tiktok.com → app with the Content Posting API. Note
+  the API access request and the ability to post *publicly* are two separate
+  approvals: an unaudited app is restricted to private/self-only posting
+  (`TikTokProvider` hard-codes `SELF_ONLY` for exactly this reason) until a
+  further content-posting audit is approved.
+- **Pinterest** — developers.pinterest.com → app with `pins:write`, then a
+  standard API access tier approval request.
+- **Mastodon / Bluesky / WordPress** — token/app-password based; users paste
+  their own instance URL/handle/app password in the connect UI. Nothing for
+  you to register — these are the only networks with zero external approval
+  step.
+- **Medium** — token-based like the three above, but verify independently
+  before promising it to customers: Medium is reported to have closed public
+  registration for new integration tokens, which would make it a dead end
+  for *new* customers regardless of what's coded here.
 
 > You don't need every network on day one. Connect the ones your customers want;
-> the rest simply won't appear as connectable until credentials exist.
+> the rest simply won't appear as connectable until credentials exist. But do
+> start the Meta and Google approval processes early if you need those
+> networks — they gate on Meta's/Google's review queue, not on anything you
+> can speed up by working faster.
 
 ### 5.2 Stripe billing
 
 1. Create a Stripe account → Developers → API keys. Put the **secret** key in
    `STRIPE_SECRET` and publishable key in `STRIPE_KEY`.
-2. Create three **Products** with recurring **Prices** (Pro, Agency, Scale — Free has no Stripe
-   price). Copy the price IDs into `STRIPE_PRICE_PRO`, `STRIPE_PRICE_AGENCY`, and
-   `STRIPE_PRICE_SCALE`.
+2. Create five **Products** with recurring **Prices** — Solo, Pro, Agency, Scale,
+   and Enterprise (Free has no Stripe price). Copy the price IDs into
+   `STRIPE_PRICE_SOLO`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_AGENCY`,
+   `STRIPE_PRICE_SCALE`, and `STRIPE_PRICE_ENTERPRISE`.
 3. Add a webhook endpoint → URL `https://app.yourbrand.com/stripe/webhook`,
    events: `customer.subscription.*`, `invoice.*`. Copy the signing secret to
    `STRIPE_WEBHOOK_SECRET`.

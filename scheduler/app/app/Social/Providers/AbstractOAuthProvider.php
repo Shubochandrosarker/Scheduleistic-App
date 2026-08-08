@@ -46,6 +46,21 @@ abstract class AbstractOAuthProvider implements SocialProvider
         return [];
     }
 
+    /**
+     * Switch a channel to a different one of its `meta['available_accounts']`
+     * options (a page, location, board, or organization) without a fresh
+     * OAuth round-trip. A pure local update by design: every driver that
+     * offers a choice already fetched everything a switch could need at
+     * connect time, specifically so this never needs a second credential.
+     *
+     * The default here is a no-op — most providers never offer more than
+     * one account to choose from, so there is nothing to switch between.
+     */
+    public function selectAccount(Channel $channel, string $accountId): void
+    {
+        //
+    }
+
     /** OAuth client credentials, pulled from config/services.php. */
     protected function clientId(): ?string
     {
@@ -67,20 +82,20 @@ abstract class AbstractOAuthProvider implements SocialProvider
     {
         return $this->authorizeEndpoint().'?'.http_build_query([
             'response_type' => 'code',
-            'client_id'     => $this->clientId(),
-            'redirect_uri'  => $redirectUri,
-            'state'         => $state,
-            'scope'         => implode(' ', $this->scopes()),
+            'client_id' => $this->clientId(),
+            'redirect_uri' => $redirectUri,
+            'state' => $state,
+            'scope' => implode(' ', $this->scopes()),
         ]);
     }
 
     public function exchangeCode(string $code, string $redirectUri): ConnectedAccount
     {
         $response = Http::asForm()->post($this->tokenEndpoint(), [
-            'grant_type'    => 'authorization_code',
-            'code'          => $code,
-            'redirect_uri'  => $redirectUri,
-            'client_id'     => $this->clientId(),
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+            'redirect_uri' => $redirectUri,
+            'client_id' => $this->clientId(),
             'client_secret' => $this->clientSecret(),
         ]);
 
@@ -101,9 +116,9 @@ abstract class AbstractOAuthProvider implements SocialProvider
         }
 
         $response = Http::asForm()->post($this->tokenEndpoint(), [
-            'grant_type'    => 'refresh_token',
+            'grant_type' => 'refresh_token',
             'refresh_token' => $channel->refresh_token,
-            'client_id'     => $this->clientId(),
+            'client_id' => $this->clientId(),
             'client_secret' => $this->clientSecret(),
         ]);
 
@@ -116,12 +131,12 @@ abstract class AbstractOAuthProvider implements SocialProvider
         $data = $response->json();
 
         $channel->update([
-            'access_token'     => Arr::get($data, 'access_token', $channel->access_token),
-            'refresh_token'    => Arr::get($data, 'refresh_token', $channel->refresh_token),
+            'access_token' => Arr::get($data, 'access_token', $channel->access_token),
+            'refresh_token' => Arr::get($data, 'refresh_token', $channel->refresh_token),
             'token_expires_at' => isset($data['expires_in'])
                 ? Carbon::now()->addSeconds((int) $data['expires_in'])
                 : $channel->token_expires_at,
-            'status'           => 'connected',
+            'status' => 'connected',
         ]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Actions\Jetstream;
 
 use App\Models\Team;
 use App\Models\User;
+use App\Services\UsageService;
 use Closure;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -18,6 +19,8 @@ use Laravel\Jetstream\Rules\Role;
 
 class InviteTeamMember implements InvitesTeamMembers
 {
+    public function __construct(private readonly UsageService $usage) {}
+
     /**
      * Invite a new team member to the given team.
      */
@@ -49,6 +52,8 @@ class InviteTeamMember implements InvitesTeamMembers
             'email.unique' => __('This user has already been invited to the team.'),
         ])->after(
             $this->ensureUserIsNotAlreadyOnTeam($team, $email)
+        )->after(
+            $this->ensureSeatIsAvailable($team)
         )->validateWithBag('addTeamMember');
     }
 
@@ -82,6 +87,24 @@ class InviteTeamMember implements InvitesTeamMembers
                 $team->hasUserWithEmail($email),
                 'email',
                 __('This user already belongs to the team.')
+            );
+        };
+    }
+
+    /**
+     * Server-side member-limit enforcement — not just a disabled button in
+     * the UI. A pending invitation counts against the limit too (see
+     * UsageService::usage()), so this also catches the case where earlier
+     * invitations were sent while under the limit but have since pushed the
+     * organization to capacity.
+     */
+    protected function ensureSeatIsAvailable(Team $team): Closure
+    {
+        return function ($validator) use ($team) {
+            $validator->errors()->addIf(
+                ! $this->usage->allows($team, 'members'),
+                'email',
+                __("Your plan's member limit has been reached (pending invitations count as seats). Upgrade to invite more teammates."),
             );
         };
     }
